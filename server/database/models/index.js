@@ -1,6 +1,6 @@
 /**
  * 数据模型统一导出
- * 定义模型间的关联关系并统一导出
+ * 不定义外键关联关系，避免外键约束导致的删除问题
  */
 const NodeType = require('./NodeType');
 const SystemLevelDesignTreeNode = require('./SystemLevelDesignTreeNode');
@@ -14,8 +14,20 @@ const Permission = require('./Permission');
 const RolePermission = require('./RolePermission');
 const UserSession = require('./UserSession');
 const FrontendLog = require('./FrontendLog');
-
-// 不定义外键关联关系，避免外键约束导致的删除问题
+const Requirement = require('./Requirement');
+const Task = require('./Task');
+const Defect = require('./Defect');
+const Project = require('./Project');
+const ProjectTeam = require('./ProjectTeam');
+const Workflow = require('./Workflow');
+const WorkflowNode = require('./WorkflowNode');
+const WorkflowInstance = require('./WorkflowInstance');
+const WorkflowExecution = require('./WorkflowExecution');
+const Tag = require('./Tag');
+const RequirementTag = require('./RequirementTag');
+const Comment = require('./Comment');
+const OperationRecord = require('./OperationRecord');
+const Notification = require('./Notification');
 
 module.exports = {
   NodeType,
@@ -29,5 +41,19 @@ module.exports = {
   Permission,
   RolePermission,
   UserSession,
-  FrontendLog
+  FrontendLog,
+  Requirement,
+  Task,
+  Defect,
+  Project,
+  ProjectTeam,
+  Workflow,
+  WorkflowNode,
+  WorkflowInstance,
+  WorkflowExecution,
+  Tag,
+  RequirementTag,
+  Comment,
+  OperationRecord,
+  Notification
 };
