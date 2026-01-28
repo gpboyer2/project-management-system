@@ -1,0 +1,93 @@
+
+{
+    "name": "EdgeCaseTelemetryProtocol",  //协议名称 (必填)
+    "description": "边界情况测试协议，侧重于字节序混合、内存对齐、贪婪读取模式及特殊保留字段。", //描述 (可选)
+    "version": "2.0", //协议版本 (可选)
+    "defaultByteOrder": "little",  //默认字节序 (可选)
+    "structAlignment": 1, //结构体字节对齐 (可选)
+    "fields": [ //字段定义 (必填)
+        {
+            "type": "Struct", //类型
+            "fieldName": "meta", //字段名称 (必填)
+            "description": "元数据头部", //描述 (可选)
+            "fields": [ //子字段 (必填)
+                {
+                    "type": "UnsignedInt", //类型
+                    "fieldName": "syncWord", //字段名称 (必填)
+                    "description": "大端序同步字 (0x12345678)，测试局部字节序覆写", //描述 (可选)
+                    "byteLength": 4, //按字节定义长度 (必填)
+                    "defaultValue": 305419896, //默认值 (可选)
+                    "defaultByteOrder": "big" //默认字节序 (可选)
+                },
+                {
+                    "type": "UnsignedInt", //类型
+                    "fieldName": "packetSize", //字段名称 (必填)
+                    "description": "包总长度，用于贪婪读取计算", //描述 (可选)
+                    "byteLength": 2 //按字节定义长度 (必填)
+                }
+            ]
+        },
+        {
+            "type": "Array", //类型
+            "fieldName": "calibMatrix", //字段名称 (必填)
+            "description": "3x3 校准矩阵，测试固定长度数组", //描述 (可选)
+            "count": 9, //固定元素个数 (Static Count)
+            "element": { //元素定义 (必填)
+                "type": "Float", //类型
+                "fieldName": "val", //字段名称 (必填)
+                "precision": "float", //数据精度 (必填)
+                "defaultValue": 1.0 //默认值 (可选)
+            }
+        },
+        {
+            "type": "Bitfield", //类型
+            "fieldName": "compStatus", //字段名称 (必填)
+            "description": "紧凑位域测试", //描述 (可选)
+            "byteLength": 1, //字节长度 (必填)
+            "subFields": [ //子字段 (必填)
+                { "name": "errA", "startBit": 0, "endBit": 0 }, //位字段名称 (必填), 起始位 (必填), 结束位 (必填)
+                { "name": "errB", "startBit": 1, "endBit": 2 }, //位字段名称 (必填), 起始位 (必填), 结束位 (必填)
+                { "name": "mode", "startBit": 3, "endBit": 6 }, //位字段名称 (必填), 起始位 (必填), 结束位 (必填)
+                { "name": "flag", "startBit": 7, "endBit": 7 } //位字段名称 (必填), 起始位 (必填), 结束位 (必填)
+            ]
+        },
+        {
+            "type": "Reserved", //类型
+            "fieldName": "rsvd", //字段名称 (可选)
+            "description": "保留字段填充测试", //描述 (可选)
+            "byteLength": 3, //字节长度
+            "fillValue": "FF" //填充值 (可选)
+        },
+        {
+            "type": "Array", //类型
+            "fieldName": "rawData", //字段名称 (必填)
+            "description": "贪婪读取数组：读取直到剩下2个字节（CRC）", //描述 (可选)
+            "bytesInTrailer": 2, //贪婪读取模式 (Greedy Read with Trailer)
+            "element": { //元素定义 (必填)
+                "type": "UnsignedInt", //类型
+                "fieldName": "byte", //字段名称 (必填)
+                "byteLength": 1 //按字节定义长度 (必填)
+            }
+        },
+        {
+            "type": "Checksum", //类型
+            "fieldName": "crc", //字段名称 (必填)
+            "description": "CRC16，测试小端序校验和", //描述 (可选)
+            "algorithm": "crc16-modbus", //校验算法 (必填)
+            "byteLength": 2, //字节长度 (必填)
+            "rangeStartRef": "meta", //校验范围起始引用 (必填)
+            "rangeEndRef": "rawData", //校验范围结束引用 (必填)
+            "parameters": { //算法参数 (可选)
+                "byteOrder": "little" //字节序
+            }
+        }
+    ]
+}
+
+
+
+
+
+
+
+

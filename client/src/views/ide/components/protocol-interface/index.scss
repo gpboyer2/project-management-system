@@ -1,0 +1,334 @@
+@use '@/views/packet-config/components/packet-protocol-content/index.scss' as *;
+@use '../icd-packet-editor/index.scss' as *;
+
+.ide-add-field-menu-popper {
+  padding: 0;
+  width: 420px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 24px);
+  overflow: hidden;
+}
+
+.ide-add-field-menu-popper .add-field-menu {
+  max-height: calc(100vh - 24px);
+}
+
+.ide-interface-editor {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  flex-wrap: nowrap;
+  background-color: var(--color-bg-container);
+}
+
+/* 右侧内容区 */
+.ide-interface-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* 顶部控制栏 */
+.ide-interface-content-toolbox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--color-border-secondary);
+  background-color: var(--color-bg-container);
+  flex-shrink: 0;
+}
+
+.ide-interface-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.ide-interface-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background-color: var(--color-primary-50);
+  margin-right: 10px;
+}
+
+.ide-interface-icon {
+  color: var(--color-primary-500);
+  font-size: 16px;
+}
+
+.ide-interface-title-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.ide-interface-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+.ide-interface-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.ide-interface-msg-id {
+  color: var(--color-text-tertiary);
+}
+
+/* 头部操作按钮区：左右分区布局 */
+.ide-interface-header-actions {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-left: 36px;
+}
+
+/* 右侧操作按钮容器 */
+.ide-interface-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ide-interface-action-buttons .el-button {
+  margin-left: 0;
+}
+
+.ide-interface-action-buttons .el-button i {
+  margin-right: 4px;
+}
+
+.toolbar-status {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-right: 8px;
+}
+
+.toolbar-status--outdated {
+  color: var(--color-warning);
+  background-color: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+}
+
+.toolbar-status--no-change {
+  color: var(--color-warning);
+  background-color: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+}
+
+.ide-interface-btn-wrapper {
+  display: inline-block;
+}
+
+/* 底部内容区（左右布局） */
+.ide-interface-content-main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* 左侧信息区 */
+.ide-interface-cm-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--color-bg-container);
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.ide-interface-cm-info .editor-panel {
+  border: 1px solid var(--color-border-secondary);
+}
+
+.ide-interface-cm-info--readonly .form-control {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--color-text-primary);
+  cursor: default;
+}
+
+.ide-interface-cm-info--readonly .form-control:focus {
+  outline: none;
+}
+
+.ide-interface-cm-info--readonly .form-control-textarea {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--color-text-primary);
+  cursor: default;
+  resize: none;
+}
+
+.ide-interface-cm-info--readonly .form-control-textarea:focus {
+  outline: none;
+}
+
+.ide-interface-cm-info--readonly .el-input.is-disabled .el-input__wrapper {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.ide-interface-cm-info--readonly .el-input.is-disabled .el-input__inner {
+  color: var(--color-text-primary);
+}
+
+.ide-interface-cm-info--readonly .el-select .el-input__suffix {
+  display: none;
+}
+
+.ide-interface-cm-info .protocol-content-list .list-item {
+  display: grid;
+  grid-template-columns: 50px 1fr 1fr 1fr 80px;
+  padding: 0;
+  align-items: center;
+}
+
+.ide-interface-cm-info .protocol-content-list .list-cell {
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid var(--color-border-secondary);
+}
+
+.ide-interface-cm-info .protocol-content-list .list-cell:last-child {
+  border-right: none;
+}
+
+.ide-interface-cm-info .protocol-content-list .drag-handle-cell {
+  width: 50px;
+  min-width: 50px;
+}
+
+.ide-interface-cm-info .protocol-content-list .action-cell {
+  width: 80px;
+  min-width: 80px;
+}
+
+/* 右侧属性面板 */
+.ide-interface-cm-attr {
+  width: 400px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--color-border-secondary);
+  background-color: var(--color-bg-secondary);
+  display: flex;
+  flex-direction: column;
+}
+
+.ide-interface-cm-attr .ide-toolbox-header {
+  border-bottom: 1px solid var(--color-border-secondary);
+  background-color: var(--color-bg-container);
+  flex-shrink: 0;
+}
+
+.ide-interface-cm-attr .ide-toolbox-header-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* Tab 切换 */
+.ide-toolbox-tabs {
+  display: flex;
+  width: 100%;
+}
+
+.ide-toolbox-tab {
+  flex: 1;
+  text-align: center;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.ide-toolbox-tab:hover {
+  color: var(--color-primary-500);
+  background-color: var(--color-bg-page);
+}
+
+.ide-toolbox-tab--active {
+  color: var(--color-primary-500);
+  border-bottom-color: var(--color-primary-500);
+}
+
+.ide-interface-cm-attr .ide-toolbox-content {
+  flex: 1;
+  padding: 0;
+  overflow-y: auto;
+}
+
+.ide-interface-cm-attr .ide-toolbox-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-tertiary);
+}
+
+.ide-interface-cm-attr .ide-toolbox-empty p {
+  margin: 8px 0 0 0;
+  font-size: 13px;
+}
+
+.ide-interface-cm-attr .ide-toolbox-empty .ide-toolbox-empty-icon {
+  font-size: 32px;
+}
+
+/* 空状态 */
+.ide-interface-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+}
+
+.ide-interface-empty p {
+  font-size: 14px;
+  margin: 12px 0 0 0;
+}
+
+/* 属性面板 EditorAside 样式覆盖 */
+.ide-interface-cm-attr .editor-aside-wrapper {
+  height: 100%;
+  border: none;
+  background-color: transparent;
+}
+
+.ide-interface-cm-attr .editor-aside-detail {
+  height: 100%;
+}
+
+.ide-interface-cm-attr .editor-aside-detail .panel-header {
+  display: none;
+}
+
+.ide-interface-cm-attr .editor-aside-detail .panel-content {
+  padding: 12px;
+  overflow-y: auto;
+}

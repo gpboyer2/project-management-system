@@ -1,0 +1,52 @@
+// 主容器
+.import-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// 策略选择区域
+.import-dialog-strategy {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.import-dialog-label {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-gray-700);
+}
+
+// 预览区域
+.import-dialog-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background-color: var(--color-bg-tertiary);
+  border-radius: 4px;
+}
+
+.import-dialog-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-gray-700);
+}
+
+.import-dialog-preview-header i {
+  font-size: 16px;
+  color: var(--color-primary-400);
+}
+
+.import-dialog-preview-item {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--color-gray-500);
+  background-color: var(--color-bg-container);
+  border-radius: 4px;
+}

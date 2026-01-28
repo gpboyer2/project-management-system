@@ -1,0 +1,227 @@
+.vis-network-container {
+  position: relative;
+  width: v-bind(width);
+  height: v-bind(height);
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.vis-network-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.vis-network-loading,
+.vis-network-error {
+  pointer-events: none;
+}
+
+.vis-network-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-overlay);
+  z-index: 10;
+  color: var(--color-text-secondary);
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--color-gray-300);
+  border-top: 3px solid var(--color-error);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.loading-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.vis-network-error-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-overlay);
+  z-index: 10;
+  color: var(--color-error);
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.7;
+}
+
+.error-text {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.vis-network-empty-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.button {
+  padding: 8px 16px;
+  border: 1px solid var(--color-gray-300);
+  border-radius: 4px;
+  background-color: var(--color-bg-container);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button:hover:not(:disabled) {
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-gray-400);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button.button-primary {
+  background-color: var(--color-error);
+  border-color: var(--color-error);
+  color: var(--color-bg-container);
+}
+
+.button.button-primary:hover:not(:disabled) {
+  background-color: var(--color-error-hover);
+  border-color: var(--color-error-hover);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+:deep(.vis-network) {
+  outline: none;
+  background: transparent;
+  border-radius: 8px;
+}
+
+:deep(canvas) {
+  cursor: grab;
+  display: block;
+  border-radius: 8px;
+}
+
+:deep(canvas):active {
+  cursor: grabbing;
+}
+
+:deep(.vis-navigation) {
+  background: var(--color-bg-container);
+  border: 1px solid var(--color-gray-300);
+  border-radius: 4px;
+  box-shadow: var(--shadow-sm);
+}
+
+:deep(.vis-navigation) button {
+  background: var(--color-bg-container);
+  border: 1px solid var(--color-gray-300);
+  color: var(--color-text-primary);
+  padding: 6px 12px;
+  margin: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+:deep(.vis-navigation) button:hover {
+  background: var(--color-error);
+  color: var(--color-bg-container);
+  border-color: var(--color-error);
+}
+
+:deep(.vis-navigation) button:active {
+  transform: scale(0.95);
+}
+
+:deep(.vis-tooltip) {
+  background: var(--color-bg-overlay);
+  color: var(--color-bg-container);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: var(--font-size-normal);
+  max-width: 200px;
+  word-wrap: break-word;
+  box-shadow: var(--shadow-md);
+}
+
+:deep(.vis-manipulation) {
+  background: var(--color-bg-container);
+  border: 1px solid var(--color-gray-300);
+  border-radius: 4px;
+  box-shadow: var(--shadow-sm);
+  padding: 8px;
+}
+
+:deep(.vis-manipulation) button {
+  background: var(--color-bg-container);
+  border: 1px solid var(--color-gray-300);
+  color: var(--color-text-primary);
+  padding: 6px 12px;
+  margin: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+:deep(.vis-manipulation) button:hover {
+  background: var(--color-error);
+  color: var(--color-bg-container);
+  border-color: var(--color-error);
+}

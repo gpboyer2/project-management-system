@@ -1,0 +1,101 @@
+/* 概览页布局 */
+.ide-dashboard-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* 基本信息编辑区 */
+.ide-dashboard-info-section {
+  background-color: var(--color-bg-container);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.ide-dashboard-info-form {
+  max-width: 600px;
+}
+
+.ide-dashboard-info-field {
+  margin-bottom: 20px;
+}
+
+.ide-dashboard-info-field:last-child {
+  margin-bottom: 0;
+}
+
+.ide-dashboard-info-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.ide-dashboard-info-required {
+  color: var(--color-error);
+  margin-right: 4px;
+}
+
+.ide-dashboard-info-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-container);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.ide-dashboard-info-input:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px var(--color-blue-alpha-10);
+}
+
+.ide-dashboard-info-input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.ide-dashboard-info-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-container);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 4px;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  transition: all 0.2s;
+}
+
+.ide-dashboard-info-textarea:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px var(--color-blue-alpha-10);
+}
+
+.ide-dashboard-info-textarea::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.ide-topology {
+  height: 500px;
+  background-color: var(--color-bg-container);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ide-topology-loading,
+.ide-topology-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+}

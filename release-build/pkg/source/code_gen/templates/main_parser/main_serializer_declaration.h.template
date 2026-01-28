@@ -1,0 +1,17 @@
+{#
+主序列化器函数声明模板（用于插入到头文件中）
+模板变量:
+  protocol_name - 协议名称
+  default_byte_order - 默认字节序枚举值
+#}
+
+// ============================================================================
+// 序列化函数声明
+// ============================================================================
+
+SerializeResult serialize_{{ protocol_name }}(
+    const {{ protocol_name }}Result& data,
+    uint8_t* buffer,
+    size_t buffer_size,
+    ByteOrder byte_order = ByteOrder::{{ default_byte_order }}
+);

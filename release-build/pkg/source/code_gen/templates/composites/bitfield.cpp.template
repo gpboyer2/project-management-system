@@ -1,0 +1,56 @@
+{#
+Bitfield 类型内联实现
+位域本质是无符号整数,直接调用 deserialize_unsigned_int_generic()
+
+模板变量:
+  field_name - 字段名称
+  is_reversed - 是否逆序
+  sub_fields - 子字段数组
+#}
+{# Bitfield 解析：底层仍然是无符号整数，但读取宽度必须与 byte_length 匹配，
+   否则 deserialize_unsigned_int_generic 会错误地多读数据。
+   先用窄类型按字节长度读取，再提升到 uint64_t 做位运算。 #}
+{% set storage_type = "uint64_t" %}
+{% if byte_length == 1 %}
+{%   set storage_type = "uint8_t" %}
+{% elif byte_length == 2 %}
+{%   set storage_type = "uint16_t" %}
+{% elif byte_length == 4 %}
+{%   set storage_type = "uint32_t" %}
+{% elif byte_length == 8 %}
+{%   set storage_type = "uint64_t" %}
+{% endif %}
+{
+    {{ storage_type }} {{ field_name }}_raw_narrow = 0;
+    DeserializeResult res = deserialize_unsigned_int_generic<{{ storage_type }}>(ctx, {{ field_name }}_raw_narrow);
+    if (!res.is_success()) return res;
+    uint64_t {{ field_name }}_raw = static_cast<uint64_t>({{ field_name }}_raw_narrow);
+
+    // 解析各个位段
+    {% for sub_field in sub_fields %}
+    {
+        // 位段: {{ sub_field.name }} (bit {{ sub_field.startBit }} - {{ sub_field.endBit }})
+        {% set width = sub_field.endBit - sub_field.startBit + 1 %}
+        {% if width == 64 %}
+        uint64_t mask = ~0ULL;
+        {% else %}
+        uint64_t mask = (1ULL << {{ width }}) - 1;
+        {% endif %}
+        uint64_t {{ sub_field.name }}_value = ({{ field_name }}_raw >> {{ sub_field.startBit }}) & mask;
+
+        {% if sub_field.maps %}
+        // 值映射
+        std::string {{ sub_field.name }}_meaning = "";
+        {% for map in sub_field.maps %}
+        if ({{ sub_field.name }}_value == {{ map.value }}) {
+            {{ sub_field.name }}_meaning = "{{ map.meaning }}";
+        }
+        {% endfor %}
+        {{ result_prefix }}.{{ field_name }}.{{ sub_field.name }} = {{ sub_field.name }}_value;
+        {{ result_prefix }}.{{ field_name }}.{{ sub_field.name }}_meaning = {{ sub_field.name }}_meaning;
+        {% else %}
+        {{ result_prefix }}.{{ field_name }}.{{ sub_field.name }} = {{ sub_field.name }}_value;
+        {% endif %}
+    }
+    {% endfor %}
+}

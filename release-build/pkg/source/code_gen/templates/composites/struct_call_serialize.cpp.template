@@ -1,0 +1,20 @@
+{#
+Struct 字段序列化调用模板
+用于在主序列化函数中调用结构体的所有子字段
+与 struct_call.cpp.template 对称
+
+模板变量:
+  field_name_capitalized - 结构体字段名称（首字母大写）
+  description - 结构体描述
+  has_description - 是否有描述
+  sub_field_calls - 子字段序列化调用代码数组
+#}
+// ========================================================================
+// 序列化 {{ field_name_capitalized }} 结构体
+{% if has_description %}
+// {{ description }}
+{% endif %}
+// ========================================================================
+{% for sub_field_call in sub_field_calls %}
+{{ sub_field_call.call_code }}
+{% endfor %}

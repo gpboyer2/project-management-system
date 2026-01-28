@@ -1,0 +1,27 @@
+# 开发环境 Docker Compose 配置
+# 用途：本地开发调试，支持热重载
+
+services:
+  cssc-node-view:
+    build:
+      context: ..
+      dockerfile: release-build/docker/Dockerfile.dev
+    container_name: cssc-node-view-dev
+    ports:
+      - "9300:9300"
+      - "9200:9200"
+      - "9210:9210"
+    volumes:
+      # 源码挂载，实现热重载
+      - ../client:/AlphaCoda/client
+      - ../server:/AlphaCoda/server
+      # 数据持久化
+      - cssc-data:/AlphaCoda/server/data
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:9200/api
+    restart: unless-stopped
+
+volumes:
+  cssc-data:
+    driver: local

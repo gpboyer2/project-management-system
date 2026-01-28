@@ -1,0 +1,37 @@
+# 构建和依赖目录
+node_modules/
+dist/
+build/
+public/
+coverage/
+.nyc_output/
+tmp/
+logs/
+
+# 资源文件目录
+/src/assets/
+src/components/ReSplitPane/iconfont/
+src/components/ReFlowChart/src/assets/iconfont/
+
+# 配置文件
+package.json
+.eslintrc.json
+tsconfig.json
+.env
+.env.local
+.env.*.local
+
+# 文档目录
+docs/
+
+# 特定文件类型
+*.min.js
+*.log
+*.yaml
+*.yml
+*.md
+
+# 系统文件
+.DS_Store
+.vscode/
+.idea/

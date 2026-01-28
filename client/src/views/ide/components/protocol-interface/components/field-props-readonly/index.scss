@@ -1,0 +1,265 @@
+// 字段属性只读面板样式
+// 符合 Ant Design Pro 设计规范
+
+.field-props-readonly {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-bg-container);
+}
+
+// ==================== 字段头部 ====================
+.field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border-secondary);
+  background: var(--color-bg-container);
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+
+    i {
+      line-height: 1;
+    }
+  }
+
+  &__name {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+  }
+}
+
+// ==================== 核心属性标签 ====================
+.field-core-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border-secondary);
+  background: var(--color-bg-page);
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px var(--spacing-xs);
+    background: var(--color-bg-container);
+    border: 1px solid var(--color-border-secondary);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+
+    &--required {
+      background: var(--color-success-bg);
+      border-color: var(--color-success-border);
+      color: var(--color-success);
+    }
+  }
+}
+
+// ==================== 属性分组容器 ====================
+.field-groups {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+// ==================== 属性分组 ====================
+.field-group {
+  margin-bottom: var(--spacing-xs);
+  padding-left: var(--spacing-xs);
+  border-left: 3px solid var(--color-primary-500);
+
+  // 分组颜色变体
+  &--numeric {
+    border-left-color: var(--color-primary-500);
+  }
+
+  &--maps {
+    border-left-color: var(--color-primary-400);
+  }
+
+  &--fields {
+    border-left-color: var(--color-success);
+  }
+
+  &--condition {
+    border-left-color: var(--color-warning);
+  }
+
+  &--algorithm {
+    border-left-color: var(--color-text-tertiary);
+  }
+
+  &--other {
+    border-left-color: var(--color-border-primary);
+  }
+
+  // 分组标题
+  &__title {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-xxs);
+    padding-top: var(--spacing-xxs);
+  }
+
+  // 分组内容
+  &__content {
+    padding-left: var(--spacing-xxs);
+  }
+
+  // 属性行
+  &__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-xxs) 0;
+    font-size: var(--font-size-xs);
+    line-height: 1.5;
+  }
+
+  &__label {
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+  }
+
+  &__value {
+    color: var(--color-text-primary);
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-left: var(--spacing-xs);
+  }
+
+  // 值映射样式
+  &__map-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xxs) 0;
+    font-size: var(--font-size-xs);
+    line-height: 1.5;
+  }
+
+  &__map-key {
+    color: var(--color-text-secondary);
+    font-family: var(--font-family-code);
+    min-width: 32px;
+  }
+
+  &__map-arrow {
+    color: var(--color-text-disabled);
+  }
+
+  &__map-label {
+    color: var(--color-text-primary);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__map-more {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+    padding: var(--spacing-xxs) 0;
+    font-style: italic;
+  }
+
+  // 有效性条件样式
+  &__condition {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    padding: var(--spacing-xxs) 0;
+    line-height: 1.5;
+  }
+
+  // ==================== 子字段详细列表 ====================
+  &__subfields {
+    margin-top: var(--spacing-xxs);
+  }
+
+  &__subfield-item {
+    padding: var(--spacing-xxs) 0;
+    border-top: 1px dashed var(--color-border-secondary);
+  }
+
+  &__subfield-main {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    line-height: 1.5;
+  }
+
+  &__subfield-name {
+    color: var(--color-text-primary);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__subfield-case {
+    margin-left: var(--spacing-xxs);
+    color: var(--color-text-tertiary);
+    font-family: var(--font-family-code);
+  }
+
+  &__subfield-type {
+    color: var(--color-text-secondary);
+    font-family: var(--font-family-code);
+  }
+
+  &__subfield-len {
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+
+  &__subfield-desc {
+    margin-top: 2px;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-tertiary);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+// ==================== 空状态 ====================
+.field-props-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-tertiary);
+
+  &__icon {
+    font-size: 32px;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  &__text {
+    font-size: var(--font-size-sm);
+    margin: 0;
+  }
+}

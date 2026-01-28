@@ -1,0 +1,51 @@
+.welcome-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: linear-gradient(135deg, var(--gradient-purple-start) 0%, var(--gradient-purple-end) 100%);
+}
+
+.welcome-content {
+  text-align: center;
+  color: white;
+}
+
+.welcome-title {
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.welcome-subtitle {
+  font-size: 18px;
+  margin-bottom: 48px;
+  opacity: 0.9;
+}
+
+.quick-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.action-button {
+  padding: 12px 32px;
+  background: white;
+  color: var(--gradient-purple-start);
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.button-icon {
+  font-size: 18px;
+}

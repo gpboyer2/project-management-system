@@ -1,0 +1,107 @@
+{#
+主解析器实现模板 - 两阶段重构版本
+模板变量:
+  protocol_name - 协议名称
+  protocol_version - 协议版本
+  protocol_description - 协议描述
+  default_byte_order - 默认字节序
+  
+  -- 原有 Business 层 --
+  fields - 顶层字段数组，每个字段有调用代码（兼容性保留）
+  
+  -- 两阶段重构新增 --
+  raw_field_calls - Raw 层字段解析代码数组
+  from_raw_conversions - Raw → Business 转换代码数组
+  has_two_phase - 是否使用两阶段
+  
+  -- 压缩相关 --
+  has_compression_init - 是否有压缩器初始化
+  compression_init - 压缩器初始化列表
+  has_message_compression - 是否有报文级压缩
+  message_compression - 报文级压缩配置
+  max_message_size - 最大报文大小
+#}
+#include "{{ protocol_name }}_parser.h"
+#include <cstring>
+
+using namespace protocol_parser;
+
+namespace protocol_parser {
+
+// ============================================================================
+// Phase 1: Raw 结构体方法实现（协议层）
+// ============================================================================
+
+bool {{ protocol_name }}_Raw::parse_from(const uint8_t* buffer, size_t len, ByteOrder byte_order) {
+    if (buffer == nullptr || len == 0) {
+        return false;
+    }
+
+    DeserializeContext ctx(buffer, len, byte_order);
+    {{ protocol_name }}_Raw& raw = *this;
+
+{% for field in raw_field_calls %}
+    // {{ field.field_name }} - {{ field.description }}
+{{ field.raw_parse_code }}
+{% endfor %}
+
+    return true;
+}
+
+// ============================================================================
+// Phase 2: Business 结构体方法实现（应用层）
+// ============================================================================
+
+bool {{ protocol_name }}Result::from_raw(const {{ protocol_name }}_Raw& raw, {{ protocol_name }}Result& result) {
+{% for conversion in from_raw_conversions %}
+    // {{ conversion.field_name }} - {{ conversion.description }}
+{{ conversion.conversion_code }}
+
+{% endfor %}
+    return true;
+}
+
+{{ protocol_name }}_Raw {{ protocol_name }}Result::to_raw() const {
+    {{ protocol_name }}_Raw raw;
+    
+    // TODO: 实现 Business → Raw 转换
+    // 在 serializer 中实现
+    
+    return raw;
+}
+
+// ============================================================================
+// Phase 3: Facade 接口实现（集成层）
+// ============================================================================
+
+DeserializeResult deserialize_{{ protocol_name }}(
+    const uint8_t* data,
+    size_t length,
+    {{ protocol_name }}Result& result,
+    ByteOrder byte_order
+) {
+    // 协议信息
+    // 名称: {{ protocol_name }}
+    // 版本: {{ protocol_version }}
+    // 描述: {{ protocol_description }}
+
+    if (data == nullptr || length == 0) {
+        return DeserializeResult(INVALID_FORMAT, "Invalid input data", 0);
+    }
+
+    // Step 1: Binary → Raw (协议层解析)
+    {{ protocol_name }}_Raw raw;
+    if (!raw.parse_from(data, length, byte_order)) {
+        return DeserializeResult(PARSE_ERROR, "Failed to parse raw binary data", 0);
+    }
+
+    // Step 2: Raw → Business (应用层转换)
+    if (!{{ protocol_name }}Result::from_raw(raw, result)) {
+        return DeserializeResult(INVALID_VALUE, "Business validation failed", 0);
+    }
+
+    // 返回成功结果
+    return DeserializeResult(SUCCESS, "Deserialize successful", length);
+}
+
+} // namespace protocol_parser

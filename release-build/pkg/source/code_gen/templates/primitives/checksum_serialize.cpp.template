@@ -1,0 +1,43 @@
+// {{ field_name }}
+// Checksum 序列化
+// 算法: {{ algorithm_name }}
+// 范围: [offset_of_{{ range_start_ref }}_start, offset_of_{{ range_end_ref }}_end)
+
+{
+    // 1. 实例化校验对象
+    protocol_parser::{{ cpp_class }} checker({{ constructor_args }});
+
+    // 2. 配置参数
+{{ setter_calls }}
+
+    // 3. 计算校验范围
+    size_t checksum_start = offset_of_{{ range_start_ref }}_start;
+    size_t checksum_end = offset_of_{{ range_end_ref }}_end;
+
+    if (checksum_start > ctx.offset || checksum_end > ctx.offset) {
+        return SerializeResult(INVALID_FORMAT, "Checksum range invalid (future offset)", 0);
+    }
+
+    size_t data_len = 0;
+    if (checksum_end >= checksum_start) {
+        data_len = checksum_end - checksum_start;
+    } else {
+        return SerializeResult(INVALID_FORMAT, "Checksum range invalid (end < start)", 0);
+    }
+
+    // 4. 执行计算
+    // 注意：这里假设 ctx.buffer 包含了前面序列化的数据
+    {{ return_type }} checksum_val = checker.calculate(ctx.buffer + checksum_start, data_len);
+
+    // 5. 写入结果
+    // Checksum 类型本质上是一个整数，长度由 byteLength 决定
+    if (!ctx.has_space({{ byte_length }})) {
+        return SerializeResult(BUFFER_OVERFLOW, "Not enough space for checksum", 0);
+    }
+
+    uint8_t* ptr = ctx.buffer + ctx.offset;
+    protocol_parser::write_with_byte_order(ptr, checksum_val, ctx.byte_order);
+
+    ctx.advance({{ byte_length }});
+}
+

@@ -1,0 +1,166 @@
+{#
+主解析器头文件模板 - 两阶段重构版本
+模板变量:
+  protocol_name - 协议名称
+  PROTOCOL_NAME_UPPER - 协议名称大写
+  namespace - 命名空间名称
+  
+  -- Raw 层（协议层）--
+  raw_structs - Raw 嵌套结构体定义数组（预渲染的字符串）
+  raw_fields - Raw 顶层字段数组，每个字段包含：
+     - field_cpp_type: C++ 类型
+     - field_name: 字段名
+     - description: 字段描述
+     - is_padding: 是否为 Padding
+     - is_reserved: 是否为 Reserved
+     - is_bitfield_raw: 是否为原始 Bitfield 整数
+     - is_array_padding/is_array_reserved: 是否为数组形式
+     - byte_length: 字节长度
+  
+  -- Business 层（应用层）--
+  structs - 子结构体定义数组（预渲染的字符串）
+  fields - 顶层字段数组，每个字段包含：
+     - is_struct: 是否为 Struct 类型
+     - is_bitfield: 是否为 Bitfield 类型
+     - is_checksum: 是否为 Checksum 类型
+     - has_valid_when: 是否有 validWhen 配置
+     - struct_type: Struct 类型名称
+     - bitfield_sub_fields: Bitfield 子字段数组
+     - field_cpp_type: C++ 类型
+     - field_name: 字段名
+     - description: 字段描述
+  constructor_initializers - 构造函数初始化列表（已格式化的字符串）
+  has_initializers - 是否有初始化列表
+  has_valid_when_fields - 是否有 validWhen 字段
+  
+  -- 通用 --
+  default_byte_order - 默认字节序枚举值
+  framework_relative_path - 框架头文件相对路径（默认 './'）
+  has_compression_members - 是否有压缩器成员变量
+  compression_members - 压缩器成员变量数组
+#}
+#ifndef {{ PROTOCOL_NAME_UPPER }}_PARSER_H
+#define {{ PROTOCOL_NAME_UPPER }}_PARSER_H
+
+#include "{{ framework_relative_path | default('./') }}protocol_parser_framework/protocol_common.h"
+{% if has_timestamp_fields %}#include "{{ framework_relative_path | default('./') }}protocol_parser_framework/protocol_timestamp.h"
+{% endif %}{% if has_checksum_fields %}#include "{{ framework_relative_path | default('./') }}protocol_parser_framework/protocol_checksum.h"
+{% endif %}
+
+namespace {{ namespace }} {
+
+// ============================================================================
+// Phase 1: 协议层结构体 (Protocol Layer / Raw)
+// 职责：二进制数据的序列化/反序列化，严格对应报文格式
+// ============================================================================
+
+{% for raw_struct in raw_structs %}
+{{ raw_struct }}
+
+{% endfor %}
+// {{ protocol_name }}_Raw - 协议层主结构体
+{% if struct_alignment %}#pragma pack(push, {{ struct_alignment }})
+{% endif %}struct {{ protocol_name }}_Raw {
+{% for field in raw_fields %}{% if field.is_array_padding %}    uint8_t {{ field.field_name }}[{{ field.byte_length }}];  // {{ field.description }}
+{% elif field.is_array_reserved %}    uint8_t {{ field.field_name }}[{{ field.byte_length }}];  // {{ field.description }}
+{% else %}    {{ field.field_cpp_type }} {{ field.field_name }};  // {{ field.description }}
+{% endif %}{% endfor %}
+
+    {{ protocol_name }}_Raw() = default;
+
+    // Raw 层方法
+    bool parse_from(const uint8_t* buffer, size_t len, ByteOrder byte_order);
+    bool serialize_to(uint8_t* buffer, size_t buffer_size, ByteOrder byte_order) const;
+};
+{% if struct_alignment %}#pragma pack(pop)
+{% endif %}
+
+// ============================================================================
+// Phase 2: 应用层结构体 (Application Layer / Business)
+// 职责：数据的语义转换、校验及业务结构映射
+// ============================================================================
+
+{% for struct in structs %}
+{{ struct }}
+
+{% endfor %}
+// {{ protocol_name }}Result - 业务层主结构体
+{% if struct_alignment %}#pragma pack(push, {{ struct_alignment }})
+{% endif %}struct {{ protocol_name }}Result {
+    {% for field in fields %}
+{% if field.is_padding %}{# Padding 类型不生成成员变量，跳过 #}{% elif field.is_command %}    // Command 字段: {{ field.field_name }}
+    {{ field.command_cpp_type }} {{ field.field_name }}_command;  // {{ field.description }} (命令字)
+{% for case_field in field.case_fields %}
+{% if case_field.is_struct %}    {{ case_field.struct_type }} {{ case_field.field_name }};  // {{ case_field.description }}
+{% elif case_field.is_bitfield %}    struct {
+{% for sub_field in case_field.bitfield_sub_fields %}        uint64_t {{ sub_field.name }} = 0;      // {{ sub_field.name }}位段值
+        {% if sub_field.has_maps %}
+        std::string {{ sub_field.name }}_meaning; // {{ sub_field.name }}位段含义
+        {% endif %}
+{% endfor %}    } {{ case_field.field_name }};
+{% elif case_field.is_encode %}    {{ case_field.field_cpp_type }} {{ case_field.field_name }}_value;  // {{ case_field.description }} (Value)
+    std::string {{ case_field.field_name }}_meaning;  // {{ case_field.description }} (Meaning)
+{% else %}    {{ case_field.field_cpp_type }} {{ case_field.field_name }};  // {{ case_field.description }}
+{% endif %}{% endfor %}
+{% elif field.is_struct %}    {{ field.struct_type }} {{ field.field_name }};  // {{ field.description }}{% if field.unit %} [{{ field.unit }}]{% endif %}
+
+{% elif field.is_bitfield %}    struct {
+{% for sub_field in field.bitfield_sub_fields %}        uint64_t {{ sub_field.name }} = 0;      // {{ sub_field.name }}位段值
+        {% if sub_field.has_maps %}
+        std::string {{ sub_field.name }}_meaning; // {{ sub_field.name }}位段含义
+        {% endif %}
+{% endfor %}    } {{ field.field_name }};
+{% elif field.is_checksum %}    uint64_t {{ field.field_name }};  // {{ field.description }}{% if field.unit %} [{{ field.unit }}]{% endif %}
+
+{% elif field.is_encode %}    {{ field.field_cpp_type }} {{ field.field_name }}_value;  // {{ field.description }} (Value)
+    std::string {{ field.field_name }}_meaning;  // {{ field.description }} (Meaning)
+
+{% else %}    {{ field.field_cpp_type }} {{ field.field_name }};  // {{ field.description }}{% if field.unit %} [{{ field.unit }}]{% endif %}
+{% if field.has_valid_when %}    bool {{ field.field_name }}_valid;  // {{ field.field_name }} 有效性标志 (validWhen)
+{% endif %}
+{% endif %}{% endfor %}
+
+    {{ protocol_name }}Result()
+{% if has_initializers %}
+        : {{ constructor_initializers }} {}
+{% else %}
+        {}
+{% endif %}
+
+    // Raw ↔ Business 转换方法
+    static bool from_raw(const {{ protocol_name }}_Raw& raw, {{ protocol_name }}Result& result);
+    {{ protocol_name }}_Raw to_raw() const;
+};
+{% if struct_alignment %}#pragma pack(pop)
+{% endif %}
+
+// 协议结构体大小（字节数）
+#define {{ PROTOCOL_NAME_UPPER }}_RAW_LENGTH sizeof({{ protocol_name }}_Raw)
+#define {{ PROTOCOL_NAME_UPPER }}_LENGTH sizeof({{ protocol_name }}Result)
+
+// ============================================================================
+// Phase 3: 集成接口 (Integration Facade)
+// 组合两阶段调用，保持向后兼容
+// ============================================================================
+
+// 反序列化函数（二进制 → 结构体）
+// 内部流程：Binary → Raw (parse_from) → Business (from_raw)
+DeserializeResult deserialize_{{ protocol_name }}(
+    const uint8_t* data,
+    size_t length,
+    {{ protocol_name }}Result& result,
+    ByteOrder byte_order = {{ default_byte_order }}
+);
+
+// 序列化函数（结构体 → 二进制）
+// 内部流程：Business → Raw (to_raw) → Binary (serialize_to)
+SerializeResult serialize_{{ protocol_name }}(
+    const {{ protocol_name }}Result& data,
+    uint8_t* buffer,
+    size_t buffer_size,
+    ByteOrder byte_order = {{ default_byte_order }}
+);
+
+} // namespace {{ namespace }}
+
+#endif // {{ PROTOCOL_NAME_UPPER }}_PARSER_H

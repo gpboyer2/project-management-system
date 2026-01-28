@@ -1,0 +1,44 @@
+{
+  "name": "protocol-code-generator",
+  "version": "1.0.0",
+  "description": "Protocol Parser Code Generator - Node.js Implementation",
+  "type": "module",
+  "main": "main.js",
+  "bin": {
+    "protocol-codegen": "./main.js"
+  },
+  "engines": {
+    "node": ">=18.17 || >=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/Bemied/code_gen_test"
+  },
+  "files": [
+    "main.js",
+    "code-generator.js",
+    "config-parser.js",
+    "cpp-header-generator.js",
+    "cpp-impl-generator.js",
+    "template-manager.js"
+  ],
+  "scripts": {
+    "start": "node main.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "echo \"Warning: eslint not configured yet\""
+  },
+  "keywords": [
+    "protocol",
+    "parser",
+    "code-generator",
+    "c++"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "commander": "^12.0.0",
+    "nunjucks": "^3.2.4"
+  }
+}

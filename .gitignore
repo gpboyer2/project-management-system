@@ -1,0 +1,153 @@
+# 依赖目录
+node_modules/
+client copy
+
+# 例外：允许监听 node-red-master/packages/node_modules
+!node-red-master/packages/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 运行时数据
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# 覆盖率目录
+coverage/
+.nyc_output
+
+# 构建输出
+dist/
+dist-ssr/
+build/
+out/
+*.local
+
+# 环境变量文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 日志文件
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 临时文件
+tmp/
+temp/
+# ./logicflow-node-red-vue3-master
+# ./logicflow-node-red-vue3-master/
+# ./logicflow-node-red-vue3-master/*
+# logicflow-node-red-vue3-master
+# logicflow-node-red-vue3-master/
+# logicflow-node-red-vue3-master/*
+
+# 操作系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 测试文件
+test-results/
+test-screenshots/
+coverage/
+server/test/reports/
+release-build/docker/reports/
+
+# 缓存目录
+.cache/
+.parcel-cache/
+# cache/
+
+# 锁文件（根据项目需要选择保留或删除）
+# package-lock.json
+# yarn.lock
+
+# 本地配置文件
+config/local.json
+config/local.*.json
+
+# Qoder 编辑器配置
+.qoder
+
+# 数据库文件
+*.db
+*.sqlite
+*.sqlite3
+
+# 备份文件
+*.bak
+*.backup
+
+# 压缩文件
+*.zip
+*.tar.gz
+*.rar
+
+# 生产打包目录
+release-build/dist
+release-build/source/server
+release-build/source/code_gen
+release-build/source/node_modules
+release-build/source/client
+release-build/source/cssc-node-view-standalone
+release-build/source/.frontend_build_time
+
+# Node-View 特定文件
+node-red-data/
+flows.json.backup
+*.credentials.json
+
+# 文档生成目录
+docs/_build/
+site/
+
+# 监控和分析
+.nyc_output
+coverage
+
+# 其他工具生成的文件
+*.tgz
+
+# 配置文件
+*.ini
+
+# 导出数据目录
+server/data/exports/
+
+# 代码生成目录
+generated_code/*
+.idea/*
+
+# AI 相关文件
+AI.md
+AGENTS.md
+CLAUDE.md
+openspec/*
+.claude/
+.cursor/
+
+# Ralph 自动化工具运行时文件
+.call_count
+.circuit_breaker_history
+.circuit_breaker_state
+.last_reset
+.response_analysis
+progress.json
+
+# VSCode 插件生成文件
+.VSCodeCounter/# Playwright artifacts
+server/test/e2e/artifacts/

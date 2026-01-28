@@ -1,0 +1,40 @@
+{#
+Float 类型内联实现
+
+模板变量:
+  field_name - 字段名称
+  precision - 精度 (float/double)
+  has_range - 是否有范围验证
+  is_single_range - 是否为单范围
+  ranges - 范围数组
+#}
+{
+    {% if precision == "float" %}
+    float {{ field_name }}_value = 0.0f;
+    DeserializeResult res = deserialize_float_generic<float>(ctx, {{ field_name }}_value);
+    {% else %}
+    double {{ field_name }}_value = 0.0;
+    DeserializeResult res = deserialize_float_generic<double>(ctx, {{ field_name }}_value);
+    {% endif %}
+    if (!res.is_success()) return res;
+    {% if has_range and is_single_range %}
+    if ({{ field_name }}_value < {{ ranges[0].min }} || {{ field_name }}_value > {{ ranges[0].max }}) {
+        return DeserializeResult(INVALID_VALUE, "{{ field_name }} out of range", 0);
+    }
+    {% elif has_range %}
+    // 多范围验证（内联范围数据）
+    {% if precision == "float" %}
+    static const std::vector<std::pair<float, float>> {{ field_name }}_ranges = {
+    {% else %}
+    static const std::vector<std::pair<double, double>> {{ field_name }}_ranges = {
+    {% endif %}
+        {% for range in ranges %}
+        { {{ range.min }}, {{ range.max }} }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    };
+    if (!validate_multi_range({{ field_name }}_value, {{ field_name }}_ranges)) {
+        return DeserializeResult(INVALID_VALUE, "{{ field_name }} out of range", 0);
+    }
+    {% endif %}
+    {{ result_prefix }}.{{ field_name }} = {{ field_name }}_value;
+}

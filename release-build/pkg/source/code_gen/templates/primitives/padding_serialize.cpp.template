@@ -1,0 +1,28 @@
+{#
+Padding 类型序列化实现
+与 padding.cpp.template 对称
+
+模板变量:
+  field_name - 字段名称
+  byte_length - 字节长度
+  fill_value - 填充值（可选，默认0x00）
+#}
+{
+    {% if byte_length %}
+        {% if fill_value %}
+    SerializeResult res = write_padding_generic(ctx, {{ byte_length }}, {{ fill_value }});
+        {% else %}
+    SerializeResult res = write_padding_generic(ctx, {{ byte_length }});
+        {% endif %}
+    if (!res.is_success()) return res;
+    {% elif bit_length %}
+        {% if fill_value and fill_value != "0x00" and fill_value != "00" %}
+    SerializeResult res = write_padding_bits_generic(ctx, {{ bit_length }}, 1);
+        {% else %}
+    SerializeResult res = write_padding_bits_generic(ctx, {{ bit_length }}, 0);
+        {% endif %}
+    if (!res.is_success()) return res;
+    {% else %}
+    // Warning: Padding/Reserved field has no length definition
+    {% endif %}
+}

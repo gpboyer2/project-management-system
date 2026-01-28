@@ -1,0 +1,113 @@
+
+{
+  "protocolName": "DeviceProtocol", //分发器名称 (必填)
+  "description": "设备通信协议分发器", //描述 (可选)
+  "dispatch": { //分发字段定义 (必填)
+    "field": "messageId", //字段名称 (必填)
+    "type": "UnsignedInt", //字段类型 (必填)
+    "byteOrder": "big", //字节序 (必填)
+    "offset": 0, //偏移量 (必填)
+    "size": 2 //字节长度 (必填)
+  },
+  "messages": { //报文映射表 (必填)
+    "1": {
+      "name": "LoginRequest", //协议名称 (必填)
+      "version": "1.0", //协议版本 (可选)
+      "description": "登录请求协议", //描述 (可选)
+      "defaultByteOrder": "big", //默认字节序 (可选)
+      "fields": [ //字段定义 (必填)
+        {
+          "type": "UnsignedInt", //类型
+          "fieldName": "messageId", //字段名称 (必填)
+          "byteLength": 2, //按字节定义长度 (必填)
+          "description": "消息ID", //描述 (可选)
+          "defaultValue": 1 //默认值 (可选)
+        },
+        {
+          "type": "UnsignedInt", //类型
+          "fieldName": "userId", //字段名称 (必填)
+          "byteLength": 4, //按字节定义长度 (必填)
+          "description": "用户ID" //描述 (可选)
+        },
+        {
+          "type": "String", //类型
+          "fieldName": "username", //字段名称 (必填)
+          "length": 32, //字段长度 (必填)
+          "encoding": "UTF-8", //编码格式 (可选)
+          "description": "用户名" //描述 (可选)
+        },
+        {
+          "type": "String", //类型
+          "fieldName": "password", //字段名称 (必填)
+          "length": 32, //字段长度 (必填)
+          "encoding": "UTF-8", //编码格式 (可选)
+          "description": "密码（已加密）" //描述 (可选)
+        },
+        {
+          "type": "Timestamp", //类型
+          "fieldName": "loginTime", //字段名称 (必填)
+          "byteLength": 8, //字节长度 (必填)
+          "unit": "milliseconds", //时间单位 (必填)
+          "description": "登录时间戳" //描述 (可选)
+        }
+      ]
+    },
+    "2": {
+      "name": "Heartbeat", //协议名称 (必填)
+      "version": "1.0", //协议版本 (可选)
+      "description": "心跳协议", //描述 (可选)
+      "defaultByteOrder": "big", //默认字节序 (可选)
+      "fields": [ //字段定义 (必填)
+        {
+          "type": "UnsignedInt", //类型
+          "fieldName": "messageId", //字段名称 (必填)
+          "byteLength": 2, //按字节定义长度 (必填)
+          "description": "消息ID", //描述 (可选)
+          "defaultValue": 2 //默认值 (可选)
+        },
+        {
+          "type": "UnsignedInt", //类型
+          "fieldName": "sequence", //字段名称 (必填)
+          "byteLength": 4, //按字节定义长度 (必填)
+          "description": "序列号" //描述 (可选)
+        },
+        {
+          "type": "Timestamp", //类型
+          "fieldName": "timestamp", //字段名称 (必填)
+          "byteLength": 8, //字节长度 (必填)
+          "unit": "milliseconds", //时间单位 (必填)
+          "description": "时间戳" //描述 (可选)
+        }
+      ]
+    },
+    "3": {
+      "name": "Heartbeat", //协议名称 (必填)
+      "version": "1.0", //协议版本 (可选)
+      "description": "心跳协议", //描述 (可选)
+      "defaultByteOrder": "big", //默认字节序 (可选)
+      "fields": [ //字段定义 (必填)
+        {
+          "type": "UnsignedInt", //类型
+          "fieldName": "messageId", //字段名称 (必填)
+          "byteLength": 2, //按字节定义长度 (必填)
+          "description": "消息ID", //描述 (可选)
+          "defaultValue": 2 //默认值 (可选)
+        },
+        {
+          "type": "UnsignedInt", //类型
+          "fieldName": "sequence", //字段名称 (必填)
+          "byteLength": 4, //按字节定义长度 (必填)
+          "description": "序列号" //描述 (可选)
+        },
+        {
+          "type": "Timestamp", //类型
+          "fieldName": "timestamp", //字段名称 (必填)
+          "byteLength": 8, //字节长度 (必填)
+          "unit": "milliseconds", //时间单位 (必填)
+          "description": "时间戳" //描述 (可选)
+        }
+      ]
+    },
+  }
+}
+

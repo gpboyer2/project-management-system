@@ -1,0 +1,13 @@
+// vue-node 组件样式
+.vue-node-container {
+  padding: 12px;
+  border-radius: 4px;
+  background: var(--color-bg-container);
+}
+
+.vue-node-operator {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

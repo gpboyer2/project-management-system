@@ -1,0 +1,10 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#fff">
+  <!-- 单向箭头表示无连接的快速传输 -->
+  <path d="M4 8L20 8M20 8L17 5M20 8L17 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M4 16L20 16M20 16L17 13M20 16L17 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 数据报表示（独立的数据包） -->
+  <rect x="8" y="6" width="3" height="4" rx="0.5" fill="currentColor" opacity="0.6"/>
+  <rect x="13" y="6" width="2" height="4" rx="0.5" fill="currentColor" opacity="0.4"/>
+  <rect x="8" y="14" width="2" height="4" rx="0.5" fill="currentColor" opacity="0.4"/>
+  <rect x="11" y="14" width="3" height="4" rx="0.5" fill="currentColor" opacity="0.6"/>
+</svg>

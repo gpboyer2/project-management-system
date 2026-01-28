@@ -1,0 +1,107 @@
+// 版本历史弹窗样式
+.version-history-dialog {
+  .el-dialog__body {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+}
+
+.version-header {
+  display: flex;
+  gap: 24px;
+  padding: 16px;
+  background: var(--component-tabs-bar-bg);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.version-header-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.version-label {
+  font-size: 13px;
+  color: var(--component-text-secondary);
+}
+
+.version-value {
+  font-size: 14px;
+  color: var(--component-text-primary);
+  font-weight: 500;
+}
+
+.version-value--id {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--component-primary);
+}
+
+.version-list {
+  // 滚动由父级 .el-dialog__body 控制
+}
+
+.version-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border: 1px solid var(--component-border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.version-item:hover {
+  border-color: var(--color-border-primary);
+  background: var(--component-tree-hover);
+}
+
+.version-item--current {
+  border-color: var(--color-primary-300);
+  background: var(--color-primary-50);
+}
+
+.version-item--latest {
+  border-color: var(--color-success);
+  background: var(--color-success-bg);
+}
+
+.version-item-main {
+  flex: 1;
+}
+
+.version-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.version-number {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--component-text-primary);
+}
+
+.version-tag {
+  font-size: 12px;
+}
+
+.version-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--component-text-secondary);
+}
+
+.version-id {
+  font-family: 'Courier New', monospace;
+}
+
+.version-time {
+  color: var(--component-text-tertiary);
+}

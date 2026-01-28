@@ -1,0 +1,47 @@
+{#
+Encode 类型序列化实现
+与 encode.cpp.template 对称
+从 _value 字段读取原始值
+
+模板变量:
+  field_name - 字段名称
+  base_type - 基础类型 (signed/unsigned)
+  byte_length - 字节长度
+  is_reversed - 是否逆序
+#}
+{# 序列化 Encode：根据 base_type + byte_length 选择底层整数类型。
+   base_type == "signed"   -> int8_t/int16_t/int32_t/int64_t
+   base_type == "unsigned" -> uint8_t/uint16_t/uint32_t/uint64_t
+   未指定时按 unsigned 处理。 #}
+{% if base_type == "signed" %}
+{%   set cpp_type = "int64_t" %}
+{%   if byte_length == 1 %}
+{%     set cpp_type = "int8_t" %}
+{%   elif byte_length == 2 %}
+{%     set cpp_type = "int16_t" %}
+{%   elif byte_length == 4 %}
+{%     set cpp_type = "int32_t" %}
+{%   elif byte_length == 8 %}
+{%     set cpp_type = "int64_t" %}
+{%   endif %}
+{% else %}
+{%   set cpp_type = "uint64_t" %}
+{%   if byte_length == 1 %}
+{%     set cpp_type = "uint8_t" %}
+{%   elif byte_length == 2 %}
+{%     set cpp_type = "uint16_t" %}
+{%   elif byte_length == 4 %}
+{%     set cpp_type = "uint32_t" %}
+{%   elif byte_length == 8 %}
+{%     set cpp_type = "uint64_t" %}
+{%   endif %}
+{% endif %}
+{
+    {{ cpp_type }} {{ field_name }}_raw = static_cast<{{ cpp_type }}>({{ data_prefix }}.{{ field_name }}_value);
+    {% if base_type == "signed" %}
+    SerializeResult res = serialize_signed_int_generic<{{ cpp_type }}>(ctx, {{ field_name }}_raw);
+    {% else %}
+    SerializeResult res = serialize_unsigned_int_generic<{{ cpp_type }}>(ctx, {{ field_name }}_raw);
+    {% endif %}
+    if (!res.is_success()) return res;
+}

@@ -1,0 +1,38 @@
+// palette 组件样式
+.tools-palette {
+  width: 200px;
+  padding: 12px;
+}
+
+.red-ui-palette-node {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  cursor: move;
+}
+
+.red-ui-palette-label {
+  flex: 1;
+}
+
+.red-ui-palette-icon-container {
+  margin-right: 8px;
+}
+
+.red-ui-palette-port {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-gray-400);
+}
+
+.red-ui-palette-port-input {
+  left: -5px;
+}
+
+.red-ui-palette-port-output {
+  right: -5px;
+}

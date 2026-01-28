@@ -1,0 +1,67 @@
+// field-toolbox 组件样式
+@use '../../index.scss' as *;
+
+.field-type-grid {
+  padding: 8px;
+}
+
+.field-type-grid .field-type-grid-inner {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.field-type-grid .field-type-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background-color: var(--color-bg-container);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 8px;
+  cursor: grab;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.field-type-grid .field-type-card:active {
+  cursor: grabbing;
+}
+
+.field-type-grid .field-type-card:hover {
+  border-color: var(--color-primary-100);
+  background-color: var(--color-bg-secondary);
+  box-shadow: 0 2px 8px var(--color-black-alpha-6);
+  transform: translateY(-1px);
+}
+
+.field-type-grid .field-type-card .field-type-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.field-type-grid .field-type-card .field-type-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-gray-600);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.field-type-grid .field-type-card .field-type {
+  display: none;
+}
+
+.field-type-grid .field-type-empty {
+  grid-column: span 2;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--color-gray-500);
+  font-size: 14px;
+}
+
+.field-type-grid .field-type-empty p {
+  margin: 0;
+}

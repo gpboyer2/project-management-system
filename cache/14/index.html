@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统架构可视化 - 四层架构图</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Chiron+Hei+HK:wght@400;700&family=Noto+Sans+SC:wght@400;500;700&family=Quattrocento+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <script src="./system_architecture.js"></script>
+    <style>
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Quattrocento Sans', 'Noto Sans SC', sans-serif;
+            background: #1A1D21;
+            color: #F5F7FA;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* 主容器布局 */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* 顶部区域容器 */
+        .top-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 标题区域 */
+        .header-section {
+            padding: 16px 24px;
+            background: rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .main-title {
+            font-family: 'Chiron Hei HK', 'Noto Sans SC', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #F5F7FA;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #B0BEC5;
+            font-weight: 400;
+        }
+
+        /* 说明区域 */
+        .instructions-section {
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.02);
+            font-size: 13px;
+            color: #B0BEC5;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .instruction-item {
+            display: inline-block;
+            margin-right: 24px;
+            margin-bottom: 4px;
+        }
+
+        .instruction-key {
+            background: rgba(66,133,244,0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 11px;
+            color: #4285F4;
+        }
+
+        /* 控制面板 */
+        .controls-section {
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            height: 60px;
+        }
+
+        .control-button {
+            background: rgba(66,133,244,0.2);
+            border: 1px solid #4285F4;
+            color: #F5F7FA;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .control-button:hover {
+            background: rgba(66,133,244,0.4);
+            transform: translateY(-1px);
+        }
+
+        .control-button:active {
+            transform: translateY(0);
+        }
+
+        .control-button.secondary {
+            background: rgba(156,39,176,0.2);
+            border-color: #9C27B0;
+        }
+
+        .control-button.secondary:hover {
+            background: rgba(156,39,176,0.4);
+        }
+
+        .search-container {
+            position: relative;
+            margin-left: auto;
+        }
+
+        .search-input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #F5F7FA;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            width: 200px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4285F4;
+        }
+
+        .search-input::placeholder {
+            color: #78909C;
+        }
+
+        /* 可视化画布 */
+        .canvas-section {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #1f2226 0%, #1A1D21 100%);
+        }
+
+        .svg-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 状态栏 */
+        .status-section {
+            padding: 10px 24px;
+            background: rgba(255,255,255,0.05);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: #B0BEC5;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-label {
+            color: #78909C;
+        }
+
+        .status-value {
+            color: #F5F7FA;
+            font-family: 'Quattrocento Sans', monospace;
+        }
+
+        /* 图例 */
+        .legend {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(0,0,0,0.7);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            min-width: 140px;
+        }
+
+        .legend-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #F5F7FA;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 11px;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .legend-line {
+            width: 16px;
+            height: 2px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        /* 工具提示 */
+        .tooltip {
+            position: fixed;
+            background: rgba(0,0,0,0.9);
+            color: #F5F7FA;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            max-width: 250px;
+            line-height: 1.4;
+        }
+
+        .tooltip-title {
+            font-weight: 600;
+            color: #4285F4;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .tooltip-content {
+            color: #B0BEC5;
+        }
+
+        /* 节点样式 */
+        .node {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .node:hover {
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        .node-circle {
+            stroke-width: 2px;
+        }
+
+        .node-label {
+            font-size: 11px;
+            fill: #F5F7FA;
+            text-anchor: middle;
+            pointer-events: none;
+            font-family: 'Quattrocento Sans', 'Noto Sans SC', sans-serif;
+        }
+
+        /* 连线样式 */
+        .link {
+            fill: none;
+            stroke: #546E7A;
+            stroke-opacity: 0.6;
+            stroke-width: 1px;
+        }
+
+        /* 虚线框样式 */
+        .bounding-box {
+            fill: none;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .bbox-system {
+            stroke: #4285F4;
+            stroke-width: 3px;
+            stroke-dasharray: 10, 5;
+            opacity: 0.7;
+            filter: drop-shadow(0 0 3px rgba(66,133,244,0.3));
+        }
+
+        .bbox-subsystem {
+            stroke: #9C27B0;
+            stroke-width: 2px;
+            stroke-dasharray: 8, 4;
+            opacity: 0.6;
+            filter: drop-shadow(0 0 2px rgba(156,39,176,0.3));
+        }
+
+        .bbox-device {
+            stroke: #4CAF50;
+            stroke-width: 1px;
+            stroke-dasharray: 5, 3;
+            opacity: 0.5;
+            filter: drop-shadow(0 0 1px rgba(76,175,80,0.3));
+        }
+
+        /* 动画效果 */
+        @keyframes nodeEnter {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .node-enter {
+            animation: nodeEnter 0.6s ease-out;
+        }
+
+        .bbox-fadein {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .bbox-pulse {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* 选中高亮效果 */
+        .node-highlighted .node-circle {
+            filter: drop-shadow(0 0 8px rgba(66,133,244,0.8));
+        }
+
+        .link-highlighted {
+            stroke: #4285F4;
+            stroke-opacity: 1;
+            stroke-width: 2px;
+        }
+
+        .bbox-highlighted {
+            opacity: 1 !important;
+            filter: drop-shadow(0 0 8px rgba(66,133,244,0.6)) !important;
+        }
+
+        /* 置灰效果 */
+        .node-dimmed {
+            opacity: 0.3;
+        }
+
+        .node-dimmed .node-circle {
+            opacity: 0.3;
+        }
+
+        .link-dimmed {
+            stroke-opacity: 0.1;
+        }
+
+        .bbox-dimmed {
+            opacity: 0.15 !important;
+        }
+
+        .label-dimmed {
+            opacity: 0.3;
+        }
+
+        /* 加载状态 */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #B0BEC5;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(66,133,244,0.3);
+            border-top: 3px solid #4285F4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- 顶部区域 -->
+        <div class="top-section">
+            <!-- 标题区域 -->
+            <header class="header-section">
+                <h1 class="main-title">系统架构可视化</h1>
+                <p class="subtitle">四层架构图 - 系统 / 子系统 / 设备 / 软件 (120个节点)</p>
+            </header>
+
+            <!-- 说明区域 -->
+            <section class="instructions-section">
+                <span class="instruction-item"><span class="instruction-key">滚轮</span> 缩放视图</span>
+                <span class="instruction-item"><span class="instruction-key">悬停节点+滚轮</span> 焦点缩放</span>
+                <span class="instruction-item"><span class="instruction-key">拖拽</span> 移动节点</span>
+                <span class="instruction-item"><span class="instruction-key">点击</span> 选中节点</span>
+                <span class="instruction-item"><span class="instruction-key">双击</span> 聚焦节点</span>
+            </section>
+
+            <!-- 控制面板 -->
+            <section class="controls-section">
+                <button class="control-button" id="resetView">重置视图</button>
+                <button class="control-button secondary" id="fitToView">适应画布</button>
+                <button class="control-button secondary" id="centerView">居中显示</button>
+
+                <div class="search-container">
+                    <input type="text" class="search-input" id="searchInput" placeholder="搜索节点...">
+                </div>
+            </section>
+        </div>
+
+        <!-- 可视化画布 -->
+        <section class="canvas-section">
+            <svg class="svg-container" id="mainSvg"></svg>
+            
+            <!-- 图例 -->
+            <div class="legend" id="legend">
+                <div class="legend-title">图例</div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4285F4;"></div>
+                    <span>系统节点</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #9C27B0;"></div>
+                    <span>子系统节点</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #4CAF50;"></div>
+                    <span>设备节点</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #FF9800;"></div>
+                    <span>软件节点</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-line" style="background: #546E7A; height: 1px;"></div>
+                    <span>层级关系</span>
+                </div>
+            </div>
+
+            <!-- 加载状态 -->
+            <div class="loading" id="loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <div>正在加载系统架构...</div>
+            </div>
+        </section>
+
+        <!-- 状态栏 -->
+        <footer class="status-section">
+            <div class="status-item">
+                <span class="status-label">缩放级别:</span>
+                <span class="status-value" id="scaleValue">100%</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">当前聚焦:</span>
+                <span class="status-value" id="focusNode">无</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">节点总数:</span>
+                <span class="status-value" id="totalNodes">120</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">选中节点:</span>
+                <span class="status-value" id="selectedNode">无</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 工具提示 -->
+    <div class="tooltip" id="tooltip" style="display: none;"></div>
+</body>
+
+<script src="./main.js"></script>
+</html>

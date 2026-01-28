@@ -1,0 +1,103 @@
+.ide-tree-node {
+  display: flex;
+  flex-direction: column;
+}
+
+.ide-tree-node-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.ide-tree-node-content:hover {
+  background-color: var(--component-tree-hover);
+}
+
+.ide-tree-node-content--selected {
+  background-color: var(--component-tree-selected);
+  color: var(--component-tree-selected-color);
+}
+
+.ide-tree-node-content--context-menu {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: -2px;
+}
+
+.ide-tree-node-content--selected:hover {
+  background-color: var(--component-tree-selected);
+  color: var(--component-tree-selected-color);
+}
+
+.ide-tree-node-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-radius: 2px;
+}
+
+.ide-tree-node-toggle:hover {
+  background-color: var(--component-border);
+}
+
+.ide-tree-node-toggle-icon {
+  width: 12px;
+  height: 12px;
+  color: var(--component-text-secondary);
+  transition: all 0.15s ease;
+}
+
+.ide-tree-node-toggle-icon:hover {
+  color: var(--component-text-primary);
+}
+
+.ide-tree-node-spacer {
+  width: 12px;
+  display: inline-block;
+}
+
+.ide-tree-node-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--component-text-secondary);
+}
+
+.ide-tree-node-label {
+  flex: 1;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--component-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ide-tree-node-draft-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 6px;
+  height: 16px;
+  font-size: 11px;
+  line-height: 1;
+  background-color: var(--color-warning-alpha-10);
+  color: var(--color-warning);
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.ide-tree-node-children {
+  display: flex;
+  flex-direction: column;
+}

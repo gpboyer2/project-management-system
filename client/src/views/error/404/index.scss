@@ -1,0 +1,52 @@
+.error-page {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg-secondary);
+}
+
+.error-content {
+  text-align: center;
+  max-width: 500px;
+}
+
+.error-image {
+  margin-bottom: var(--spacing-xl);
+  position: relative;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    max-height: 100%;
+    max-width: 100%;
+  }
+}
+
+.error-number {
+  font-size: 120px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-300);
+  text-shadow: 2px 2px 4px var(--shadow-xs);
+}
+
+h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xl);
+}
+
+p {
+  font-size: var(--font-size-xl);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xl);
+}
+
+.error-actions {
+  display: flex;
+  gap: var(--spacing-xl);
+  justify-content: center;
+}

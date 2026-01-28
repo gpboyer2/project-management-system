@@ -1,0 +1,30 @@
+{#
+Timestamp 类型序列化实现
+时间戳序列化：从纳秒（内部统一表示）转换为协议单位
+
+模板变量:
+  field_name - 字段名称
+  unit - 时间单位
+  serialize_function - 单位转换函数名（由注册表提供）
+  byte_length - 字节长度
+#}
+{# Timestamp 序列化：根据 byteLength 选择对应的 C++ 类型 #}
+{% if byte_length == 1 %}
+{%   set cpp_type = "uint8_t" %}
+{% elif byte_length == 2 %}
+{%   set cpp_type = "uint16_t" %}
+{% elif byte_length == 4 %}
+{%   set cpp_type = "uint32_t" %}
+{% elif byte_length == 8 %}
+{%   set cpp_type = "uint64_t" %}
+{% else %}
+{%   set cpp_type = "uint64_t" %}
+{% endif %}
+{
+    // 时间戳单位转换: nanoseconds -> {{ unit }}
+    uint64_t {{ field_name }}_raw = {{ serialize_function }}({{ data_prefix }}.{{ field_name }});
+
+    {{ cpp_type }} {{ field_name }}_raw_narrow = static_cast<{{ cpp_type }}>({{ field_name }}_raw);
+    SerializeResult res = serialize_unsigned_int_generic<{{ cpp_type }}>(ctx, {{ field_name }}_raw_narrow);
+    if (!res.is_success()) return res;
+}

@@ -1,0 +1,32 @@
+{#
+BCD 类型内联实现
+调用 protocol_common.h 中的 deserialize_bcd_generic() 函数
+
+模板变量:
+  field_name - 字段名称
+  byte_length - 字节长度
+  has_range - 是否有范围验证
+  is_single_range - 是否为单范围
+  ranges - 范围数组
+#}
+{
+    std::string {{ field_name }}_bcd;
+    DeserializeResult res = deserialize_bcd_generic(ctx, {{ field_name }}_bcd, {{ byte_length }});
+    if (!res.is_success()) return res;
+    {% if has_range and is_single_range %}
+    if ({{ field_name }}_bcd < "{{ ranges[0].min }}" || {{ field_name }}_bcd > "{{ ranges[0].max }}") {
+        return DeserializeResult(INVALID_VALUE, "{{ field_name }} BCD out of range", 0);
+    }
+    {% elif has_range %}
+    // 多范围验证（内联范围数据，BCD字符串比较）
+    static const std::vector<std::pair<std::string, std::string>> {{ field_name }}_ranges = {
+        {% for range in ranges %}
+        {"{{ range.min }}", "{{ range.max }}"}{% if not loop.last %},{% endif %}
+        {% endfor %}
+    };
+    if (!validate_multi_range({{ field_name }}_bcd, {{ field_name }}_ranges)) {
+        return DeserializeResult(INVALID_VALUE, "{{ field_name }} BCD out of range", 0);
+    }
+    {% endif %}
+    {{ result_prefix }}.{{ field_name }} = {{ field_name }}_bcd;
+}

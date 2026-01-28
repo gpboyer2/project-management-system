@@ -1,0 +1,77 @@
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--component-sidebar-bg);
+  border-bottom: 1px solid var(--component-border);
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.editor-mode-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toolbar-btn:hover:not(:disabled) {
+  background: var(--color-white-alpha-5);
+  border-color: var(--color-text-secondary);
+}
+
+.toolbar-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toolbar-btn.toolbar-btn-primary {
+  background: var(--color-primary-500);
+  border-color: var(--color-primary-500);
+}
+
+.toolbar-btn.toolbar-btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+}
+
+.toolbar-btn.toolbar-btn-danger {
+  background: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.toolbar-btn.toolbar-btn-danger:hover:not(:disabled) {
+  background: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.btn-icon i {
+  font-size: 16px;
+}
+
+.btn-text {
+  font-size: 12px;
+}

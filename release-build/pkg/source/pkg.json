@@ -1,0 +1,25 @@
+{
+  "name": "cssc-node-view",
+  "version": "1.0.0",
+  "main": "app.js",
+  "bin": "app.js",
+  "pkg": {
+    "scripts": [
+      "app.js",
+      "server/**/*.js"
+    ],
+    "assets": [
+      "client/dist/**/*",
+      "favicon.ico",
+      "node_modules/better-sqlite3/lib/binding/*.node",
+      "node_modules/sqlite3/lib/binding/**/*.node"
+    ],
+    "targets": [
+      "node18-linux-x64",
+      "node18-linux-arm64",
+      "node18-win-x64",
+      "node18-macos-x64",
+      "node18-macos-arm64"
+    ]
+  }
+}

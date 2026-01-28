@@ -1,0 +1,17 @@
+// Add packet dialog styles
+
+.config-divider-text {
+  font-size: 12px;
+  color: var(--component-text-secondary);
+  font-weight: 500;
+}
+
+// DDS 配置区域样式
+:deep(.el-divider--horizontal) {
+  margin: 16px 0;
+}
+
+:deep(.el-divider__text) {
+  background-color: var(--color-bg-container);
+  padding: 0 8px;
+}

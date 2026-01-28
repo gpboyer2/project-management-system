@@ -1,0 +1,72 @@
+{#
+MessageId 类型内联实现
+用于标识报文类型的专用字段，主要用于协议分发
+
+模板变量:
+  field_name - 字段名称
+  byte_length - 字节长度
+  value_type - 数据类型 ("UnsignedInt" / "SignedInt")
+  message_id_value - 期望的 MessageId 值（用于验证）
+  has_compression - 是否使用压缩
+  compression_type - 压缩类型（varint）
+#}
+{# 根据 value_type 和 byte_length 选择 C++ 类型
+   value_type == "SignedInt" -> int8_t/int16_t/int32_t/int64_t
+   value_type == "UnsignedInt" 或未指定 -> uint8_t/uint16_t/uint32_t/uint64_t
+#}
+{% if value_type == "SignedInt" %}
+{%   set is_signed = true %}
+{%   if byte_length == 1 %}
+{%     set cpp_type = "int8_t" %}
+{%   elif byte_length == 2 %}
+{%     set cpp_type = "int16_t" %}
+{%   elif byte_length == 4 %}
+{%     set cpp_type = "int32_t" %}
+{%   elif byte_length == 8 %}
+{%     set cpp_type = "int64_t" %}
+{%   else %}
+{%     set cpp_type = "int64_t" %}
+{%   endif %}
+{% else %}
+{%   set is_signed = false %}
+{%   if byte_length == 1 %}
+{%     set cpp_type = "uint8_t" %}
+{%   elif byte_length == 2 %}
+{%     set cpp_type = "uint16_t" %}
+{%   elif byte_length == 4 %}
+{%     set cpp_type = "uint32_t" %}
+{%   elif byte_length == 8 %}
+{%     set cpp_type = "uint64_t" %}
+{%   else %}
+{%     set cpp_type = "uint64_t" %}
+{%   endif %}
+{% endif %}
+{
+    {{ cpp_type }} {{ field_name }}_raw = 0;
+
+    {% if is_signed %}
+    DeserializeResult res = deserialize_signed_int_generic<{{ cpp_type }}>(ctx, {{ field_name }}_raw);
+    {% else %}
+    DeserializeResult res = deserialize_unsigned_int_generic<{{ cpp_type }}>(ctx, {{ field_name }}_raw);
+    {% endif %}
+    if (!res.is_success()) return res;
+    {% if message_id_value is defined and message_id_value is not none %}
+
+    // 验证 MessageId 值是否匹配
+    {% if is_signed %}
+    if (static_cast<int64_t>({{ field_name }}_raw) != {{ message_id_value }}LL) {
+        return DeserializeResult(INVALID_VALUE,
+            "{{ field_name }} mismatch: expected {{ message_id_value }}, got " + std::to_string({{ field_name }}_raw),
+            0);
+    }
+    {% else %}
+    if (static_cast<uint64_t>({{ field_name }}_raw) != {{ message_id_value }}ULL) {
+        return DeserializeResult(INVALID_VALUE,
+            "{{ field_name }} mismatch: expected {{ message_id_value }}, got " + std::to_string({{ field_name }}_raw),
+            0);
+    }
+    {% endif %}
+    {% endif %}
+
+    {{ result_prefix }}.{{ field_name }} = {{ field_name }}_raw;
+}

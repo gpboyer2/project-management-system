@@ -1,0 +1,54 @@
+{
+  "name": "logicflow-node-view-vue3",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite --force",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint",
+    "lint:fix": "eslint \"**/*.{vue,js,ts}\" --fix",
+    "lint:staged": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{vue,js,ts}": [
+      "eslint --fix --quiet"
+    ]
+  },
+  "dependencies": {
+    "@logicflow/core": "^1.1.23",
+    "@logicflow/extension": "^1.1.23",
+    "axios": "^1.6.0",
+    "dayjs": "^1.11.19",
+    "element-plus": "^2.0.4",
+    "highlight.js": "^11.11.1",
+    "jszip": "^3.10.1",
+    "mockjs": "^1.1.0",
+    "pinia": "^2.1.0",
+    "pinia-plugin-persistedstate": "^3.2.0",
+    "socket.io-client": "^4.8.3",
+    "vis-data": "^8.0.3",
+    "vis-network": "^10.0.2",
+    "vue": "^3.2.25",
+    "vue-draggable-plus": "^0.6.0",
+    "vue-router": "^4.2.0",
+    "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "@types/node": "^20.8.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4",
+    "@vitejs/plugin-vue": "^4.5.0",
+    "@vue/runtime-core": "^3.5.22",
+    "eslint": "^8.57.1",
+    "eslint-plugin-vue": "^9.32.0",
+    "mobx": "^5.15.7",
+    "sass": "^1.93.3",
+    "typescript": "^5.9.3",
+    "unplugin-auto-import": "^0.6.1",
+    "unplugin-vue-components": "^0.17.21",
+    "vite": "^4.5.0",
+    "vue-tsc": "^2.2.12"
+  }
+}

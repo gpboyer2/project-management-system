@@ -1,0 +1,10 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="#fff">
+  <!-- 双向箭头表示可靠的双向连接 -->
+  <path d="M4 12H20M4 12L7 9M4 12L7 15M20 12L17 9M20 12L17 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 连接点表示握手建立连接 -->
+  <circle cx="4" cy="12" r="2" fill="currentColor"/>
+  <circle cx="20" cy="12" r="2" fill="currentColor"/>
+  <!-- 数据包表示 -->
+  <rect x="10" y="6" width="4" height="3" rx="0.5" fill="currentColor" opacity="0.7"/>
+  <rect x="10" y="15" width="4" height="3" rx="0.5" fill="currentColor" opacity="0.7"/>
+</svg>

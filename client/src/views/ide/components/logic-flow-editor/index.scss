@@ -1,0 +1,206 @@
+.ide-logic-editor {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+  background-color: var(--color-bg-secondary);
+  display: flex;
+  flex-direction: row;
+  min-width: 0;
+}
+
+.ide-logic-main {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.ide-logic-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.ide-logic-sidebar {
+  width: 288px;
+  flex-shrink: 0;
+  background-color: var(--color-bg-secondary);
+  border-left: 1px solid var(--color-border-secondary);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 50;
+  height: 100%;
+}
+
+.ide-logic-toolbar {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: var(--color-bg-container);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  z-index: 100;
+}
+
+.ide-logic-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ide-logic-toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--color-border-secondary);
+}
+
+.ide-logic-toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ide-logic-toolbar-btn:hover {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.ide-logic-toolbar-btn-active {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-500);
+  border-color: var(--color-primary-500);
+}
+
+.ide-logic-toolbar-btn-primary {
+  background-color: var(--color-success);
+  color: var(--color-bg-container);
+  border-color: var(--color-success);
+}
+
+.ide-logic-toolbar-btn-primary:hover {
+  background-color: var(--color-success-hover);
+  border-color: var(--color-success-hover);
+  color: var(--color-bg-container);
+}
+
+.ide-logic-toolbar-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.ide-logic-stats {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  display: flex;
+  gap: 16px;
+  padding: 8px 12px;
+  background-color: var(--color-white-alpha-90);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  z-index: 100;
+}
+
+.ide-logic-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ide-logic-stat-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.ide-toolbox-tabs {
+  display: flex;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--color-border-secondary);
+  background-color: var(--color-bg-container);
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.ide-toolbox-tab {
+  flex: 1;
+  height: 48px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  position: relative;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.ide-toolbox-tab:hover {
+  color: var(--color-text-primary);
+}
+
+.ide-toolbox-tab--active {
+  color: var(--color-primary-500);
+  font-weight: 600;
+}
+
+.ide-toolbox-tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-primary-500);
+}
+
+.ide-toolbox-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.ide-toolbox-content--no-padding {
+  padding: 0;
+}
+
+.ide-toolbox-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--color-text-tertiary);
+  padding: 32px;
+  text-align: center;
+}
+
+.ide-toolbox-empty-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.ide-toolbox-properties {
+  padding: 12px;
+}

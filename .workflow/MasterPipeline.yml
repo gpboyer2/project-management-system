@@ -1,0 +1,110 @@
+# Gitee Go 流水线配置
+# 用途：构建 Docker 镜像并推送到镜像仓库
+# 触发条件：推送到 master 分支时自动触发
+
+name: Docker 镜像构建
+
+description: 构建 cssc-node-view 项目的 Docker 镜像并推送到镜像仓库
+
+# 触发条件
+trigger:
+  push:
+    include:
+      - master
+      - main
+  tag:
+    include:
+      - v*
+
+# 全局变量
+variables:
+  IMAGE_NAME: cssc-node-view
+  DOCKERFILE_PATH: release-build/docker/Dockerfile.prod
+  BUILD_CONTEXT: .
+
+# 流水线阶段
+stages:
+  # 阶段1：构建 Docker 镜像
+  - stage:
+      name: 构建镜像
+      jobs:
+        - job:
+            name: docker-build
+            display-name: Docker 镜像构建
+            runs-on: docker-linux
+            steps:
+              # 步骤1：检出代码
+              - step:
+                  name: checkout
+                  display-name: 检出代码
+                  uses:
+                    - name: git-checkout
+                      with:
+                        ref: ${GITEE_PIPELINE_BUILD_REF}
+
+              # 步骤2：构建镜像
+              - step:
+                  name: image-build
+                  display-name: 构建 Docker 镜像
+                  uses:
+                    - name: image-compile
+                      with:
+                        # 镜像仓库地址（需要在网页端配置凭证）
+                        registry: ${DOCKER_REGISTRY}
+                        # 镜像名称
+                        image_name: ${IMAGE_NAME}
+                        # 镜像 Tag，使用构建号和分支名
+                        image_tag: ${GITEE_PIPELINE_BUILD_NUMBER}-${GITEE_PIPELINE_BUILD_REF}
+                        # Dockerfile 路径
+                        dockerfile: ${DOCKERFILE_PATH}
+                        # 构建上下文
+                        context: ${BUILD_CONTEXT}
+                        # 构建参数
+                        build_args: |
+                          NODE_VERSION=22
+                          MIRROR_URL=https://registry.npmmirror.com
+                        # 启用 Docker 缓存
+                        no_cache: false
+                        # 产出参数别名
+                        output_alias: IMAGE_OUTPUT
+
+  # 阶段2：推送镜像（可选，需要配置镜像仓库凭证）
+  - stage:
+      name: 推送镜像
+      jobs:
+        - job:
+            name: docker-push
+            display-name: 推送 Docker 镜像
+            runs-on: docker-linux
+            depend-on: docker-build
+            steps:
+              - step:
+                  name: image-push
+                  display-name: 推送到镜像仓库
+                  uses:
+                    - name: image-push
+                      with:
+                        # 镜像仓库地址
+                        registry: ${DOCKER_REGISTRY}
+                        # 镜像名称
+                        image_name: ${IMAGE_NAME}
+                        # 镜像 Tag
+                        image_tag: ${GITEE_PIPELINE_BUILD_NUMBER}-${GITEE_PIPELINE_BUILD_REF}
+                        # 是否同时推送 latest 标签
+                        push_latest: true
+
+# 备选方案：使用自定义脚本构建
+# 如果上面的配置不生效，可以使用以下方式在网页端配置：
+#
+# 1. 在 Gitee 网页端开通流水线
+# 2. 添加"镜像构建"任务
+# 3. 配置以下参数：
+#    - 仓库地址：你的镜像仓库地址（如 registry.cn-hangzhou.aliyuncs.com）
+#    - 仓库用户名：镜像仓库用户名
+#    - 仓库密码：镜像仓库密码
+#    - 镜像 Tag：${GITEE_PIPELINE_BUILD_NUMBER}
+#    - Dockerfile 路径：release-build/docker/Dockerfile.prod
+#    - Context：.
+#    - 构建参数：
+#      NODE_VERSION=22
+#      MIRROR_URL=https://registry.npmmirror.com

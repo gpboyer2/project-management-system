@@ -1,0 +1,46 @@
+{#
+SignedInt 类型内联实现
+
+模板变量:
+  field_name - 字段名称
+  has_range - 是否有范围验证
+  is_single_range - 是否为单范围
+  ranges - 范围数组
+#}
+{# 模式2: 只生成内联代码块。根据 byte_length 选择最合适的有符号整数类型。
+   1 -> int8_t
+   2 -> int16_t
+   4 -> int32_t
+   8 -> int64_t
+   其它情况退化为 int64_t（协议配置如果写错，让问题在测试中暴露）。 #}
+{% set cpp_type = "int64_t" %}
+{% if byte_length == 1 %}
+{%   set cpp_type = "int8_t" %}
+{% elif byte_length == 2 %}
+{%   set cpp_type = "int16_t" %}
+{% elif byte_length == 4 %}
+{%   set cpp_type = "int32_t" %}
+{% elif byte_length == 8 %}
+{%   set cpp_type = "int64_t" %}
+{% endif %}
+{
+    {{ cpp_type }} {{ field_name }}_raw = 0;
+    DeserializeResult res = deserialize_signed_int_generic<{{ cpp_type }}>(ctx, {{ field_name }}_raw);
+    if (!res.is_success()) return res;
+    {% if has_range and is_single_range %}
+    if ({{ field_name }}_raw < {{ ranges[0].min }} || {{ field_name }}_raw > {{ ranges[0].max }}) {
+        return DeserializeResult(INVALID_VALUE, "{{ field_name }} out of range", 0);
+    }
+    {% elif has_range %}
+    // 多范围验证（内联范围数据）
+    static const std::vector<std::pair<int64_t, int64_t>> {{ field_name }}_ranges = {
+        {% for range in ranges %}
+        { {{ range.min }}, {{ range.max }} }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    };
+    if (!validate_multi_range<int64_t>(static_cast<int64_t>({{ field_name }}_raw), {{ field_name }}_ranges)) {
+        return DeserializeResult(INVALID_VALUE, "{{ field_name }} out of range", 0);
+    }
+    {% endif %}
+    {{ result_prefix }}.{{ field_name }} = {{ field_name }}_raw;
+}

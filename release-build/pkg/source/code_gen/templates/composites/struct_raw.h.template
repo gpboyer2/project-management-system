@@ -1,0 +1,31 @@
+{#
+Struct Raw 类型头文件模板
+用于两阶段重构中的协议层（Phase 1）嵌套结构体
+
+模板变量:
+  struct_name - 结构体名称（包含 _Raw 后缀）
+  field_name_capitalized - 字段名称（首字母大写）
+  description - 结构体描述
+  fields - 字段数组，每个字段包含：
+     - field_cpp_type: C++ 类型
+     - field_name: 字段名
+     - description: 字段描述
+     - is_padding: 是否为 Padding 字段
+     - is_reserved: 是否为 Reserved 字段
+     - is_bitfield_raw: 是否为原始 Bitfield 整数
+     - is_array_padding: 是否为数组形式的 Padding
+     - is_array_reserved: 是否为数组形式的 Reserved
+     - byte_length: 字节长度（用于数组）
+#}
+// {{ field_name_capitalized }} Raw 结构体（协议层）
+{% if description %}
+// {{ description }}
+{% endif %}
+struct {{ struct_name }} {
+{% for field in fields %}{% if field.is_array_padding %}    uint8_t {{ field.field_name }}[{{ field.byte_length }}];  // {{ field.description }}
+{% elif field.is_array_reserved %}    uint8_t {{ field.field_name }}[{{ field.byte_length }}];  // {{ field.description }}
+{% else %}    {{ field.field_cpp_type }} {{ field.field_name }};  // {{ field.description }}
+{% endif %}{% endfor %}
+
+    {{ struct_name }}() = default;
+};

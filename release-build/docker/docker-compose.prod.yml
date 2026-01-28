@@ -1,0 +1,33 @@
+# 生产环境 Docker Compose 配置
+# 用途：生产环境部署
+
+services:
+  cssc-node-view:
+    build:
+      context: ..
+      dockerfile: release-build/docker/Dockerfile.prod
+    container_name: cssc-node-view-prod
+    ports:
+      - "9300:9300"
+      - "9200:9200"
+      - "9210:9210"
+    volumes:
+      # 只挂载数据目录
+      - cssc-data:/AlphaCoda/server/data
+      - cssc-logs:/AlphaCoda/logs
+    environment:
+      - NODE_ENV=production
+    restart: always
+    # 健康检查
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  cssc-data:
+    driver: local
+  cssc-logs:
+    driver: local

@@ -1,0 +1,128 @@
+# 生产环境 Dockerfile - 激进优化版
+# 使用 BuildKit cache mount 缓存 pnpm store 和编译产物
+
+# ============================================
+# 阶段0：预安装构建工具（稳定的基础层）
+# ============================================
+FROM node:22-alpine AS build-tools
+# 使用阿里云 Alpine 镜像加速
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
+    apk add --no-cache python3 make g++ py3-setuptools && \
+    corepack enable && \
+    corepack prepare pnpm@9 --activate
+
+# ============================================
+# 阶段1：构建前端
+# ============================================
+FROM build-tools AS frontend-builder
+WORKDIR /app
+# 先复制 .env.prod 到项目根目录（vite.config.ts 的 envDir 指向这里）
+COPY .env.prod .env
+RUN npm config set registry https://registry.npmmirror.com
+COPY client/package.json client/pnpm-lock.yaml ./client/
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    --mount=type=cache,target=/root/.cache/node-gyp \
+    cd /app/client && pnpm install --prod=false --frozen-lockfile
+COPY client/ ./client/
+RUN cd /app/client && pnpm run build
+
+
+# ============================================
+# 阶段2：构建后端（含原生模块编译）
+# ============================================
+FROM build-tools AS backend-builder
+
+WORKDIR /build
+
+# 设置 npm 镜像加速
+RUN npm config set registry https://registry.npmmirror.com
+
+# 先复制依赖文件（利用 Docker 层缓存）
+COPY server/package.json server/pnpm-lock.yaml ./
+
+# 使用 cache mount 缓存 pnpm store 和 node-gyp 编译产物
+# --mount=type=cache,target=/root/.local/share/pnpm/store  缓存 pnpm 下载
+# --mount=type=cache,target=/root/.cache/node-gyp          缓存原生模块编译（better-sqlite3）
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    --mount=type=cache,target=/root/.cache/node-gyp \
+    --mount=type=cache,target=/tmp/pkg-build \
+    pnpm install --prod --frozen-lockfile
+
+# 准备精简版 server 代码（排除 test、data、migrations 等非运行时文件）
+WORKDIR /build/server-clean
+COPY server/package.json server/server.js server/swagger.js \
+     server/favicon.ico server/.babelrc server/init.sql ./
+COPY server/mvc ./mvc
+COPY server/routes ./routes
+COPY server/middleware ./middleware
+COPY server/utils ./utils
+COPY server/database ./database
+COPY server/plugins ./plugins
+COPY server/etc ./etc
+
+
+# ============================================
+# 阶段3：运行时镜像（极简版）
+# ============================================
+FROM node:22-alpine AS runtime
+
+WORKDIR /app
+
+# 只安装运行时必需的库
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
+    apk add --no-cache sqlite-libs gettext-envsubst && \
+    rm -rf /var/cache/apk/*
+
+# 复制前端构建产物（只复制静态文件，不含 node_modules）
+COPY --from=frontend-builder /app/client/dist ./client/dist
+
+# 运行时环境变量（容器启动时可覆盖）
+ENV VITE_API_BASE_URL=http://localhost:9200/api
+ENV VITE_FRONTEND_PORT=9300
+ENV VITE_WS_PORT=9210
+ENV VITE_WS_URL=
+
+# 复制后端代码（精简版，只含运行时必需文件，一个 COPY 层）
+COPY --from=backend-builder /build/server-clean ./server/
+
+# 复制生产依赖
+COPY --from=backend-builder /build/node_modules ./server/node_modules
+
+# 激进清理：减小镜像体积
+RUN rm -rf /root/.npm /root/.cache /root/.config /tmp/* && \
+    # 删除 node_modules 中的文档和测试文件
+    find /app/server/node_modules -name "*.md" -type f -delete 2>/dev/null || true && \
+    find /app/server/node_modules -name "README*" -type f -delete 2>/dev/null || true && \
+    find /app/server/node_modules -name "LICENSE*" -type f -delete 2>/dev/null || true && \
+    find /app/server/node_modules -name "*.ts" -type f -delete 2>/dev/null || true && \
+    find /app/server/node_modules -name "*.ts.map" -type f -delete 2>/dev/null || true && \
+    find /app/server/node_modules -name "*.map" -type f -delete 2>/dev/null || true && \
+    find /app/server/node_modules -name "*.vue" -type f -delete 2>/dev/null || true && \
+    find /app/server/node_modules -name "test" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /app/server/node_modules -name "tests" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /app/server/node_modules -name "__tests__" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /app/server/node_modules -name "*.test.js" -type f -delete 2>/dev/null || true && \
+    find /app/server/node_modules -name "*.spec.js" -type f -delete 2>/dev/null || true && \
+    find /app/server/node_modules -name "example*" -type f -delete 2>/dev/null || true && \
+    find /app/server/node_modules -name "examples" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    # 删除 pnpm 相关元数据（节省空间）
+    find /app/server/node_modules/.pnpm -name "*.map" -type f -delete 2>/dev/null || true && \
+    # 清理 .cache 目录
+    rm -rf /app/server/node_modules/.cache
+
+# 复制启动脚本
+COPY release-build/docker/entrypoint-prod.sh /entrypoint.sh
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
+
+# 创建数据目录
+RUN mkdir -p /app/server/data /app/logs
+
+# 暴露端口
+EXPOSE 9300 9200 9210
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:9200/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" || exit 1
+
+# 启动
+CMD ["/entrypoint.sh"]

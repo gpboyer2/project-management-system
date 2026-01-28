@@ -1,0 +1,456 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV 架构：上下文感知的交互视图</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --sidebar-width: 300px;
+            --primary-color: #00b894;
+            --system-bg: #0984e3;
+            --container-bg: #00cec9;
+            --hardware-bg: #636e72;
+            --external-bg: #b2bec3;
+            --danger-color: #d63031;
+            --border-color: #dfe6e9;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 侧边栏 (保持不变) */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+        }
+        .sidebar h2 { margin-top: 0; color: #2d3436; font-size: 18px; }
+        .control-group { margin-bottom: 15px; }
+        select { width: 100%; padding: 8px; margin-top: 5px; }
+        .btn { background: var(--primary-color); color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        .btn:hover { opacity: 0.9; }
+        .info-panel { margin-top: auto; padding: 15px; background: #eefbf9; border-radius: 4px; font-size: 12px; color: #006266; }
+
+        /* 主画布 */
+        .main-canvas {
+            flex: 1;
+            position: relative;
+            overflow: hidden; /* 允许拖拽平移，这里简化为 hidden */
+            background-color: #fdfdfd;
+            background-image: radial-gradient(#dfe6e9 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* 导航条 */
+        .navbar {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 10;
+            font-size: 14px;
+            display: flex;
+            gap: 10px;
+        }
+        .nav-item { cursor: pointer; color: var(--system-bg); font-weight: bold; }
+        .nav-item:hover { text-decoration: underline; }
+        .nav-arrow { color: #999; }
+
+        /* 节点通用样式 */
+        .node {
+            position: absolute;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        /* Level 0 样式 */
+        .l0-system {
+            width: 160px;
+            height: 100px;
+            background: var(--system-bg);
+            color: white;
+            cursor: pointer;
+        }
+        .l0-system:hover { transform: scale(1.05); }
+
+        /* Level 2 样式：外部系统 (Context) */
+        .context-node {
+            width: 120px;
+            height: 80px;
+            background: var(--external-bg);
+            color: white;
+            border: 2px dashed #fff;
+            z-index: 1; /* 在底层 */
+        }
+        .context-label { font-size: 10px; text-transform: uppercase; margin-bottom: 4px; opacity: 0.8; }
+
+        /* Level 2 样式：系统边界框 */
+        .system-boundary {
+            position: absolute;
+            border: 2px dashed var(--system-bg);
+            background: rgba(9, 132, 227, 0.03);
+            border-radius: 10px;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .boundary-label {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--system-bg);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Level 2 样式：内部硬件 */
+        .internal-hardware {
+            background: white;
+            border: 2px solid var(--hardware-bg);
+            color: #333;
+            width: 180px;
+            padding: 10px;
+            align-items: stretch; /* 让内部软件撑开 */
+        }
+        .hw-header {
+            background: var(--hardware-bg);
+            color: white;
+            font-size: 11px;
+            padding: 3px;
+            margin: -10px -10px 10px -10px; /* 贴顶 */
+            text-align: center;
+        }
+
+        /* Level 2 样式：内部软件 */
+        .internal-software {
+            background: var(--container-bg);
+            color: white;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            position: relative; /* 为了连线定位 */
+        }
+        .internal-software:last-child { margin-bottom: 0; }
+
+        /* 连线层 */
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .edge {
+            stroke: #999;
+            stroke-width: 2;
+            fill: none;
+            stroke-dasharray: 5,5;
+        }
+        .edge-label {
+            font-size: 10px;
+            fill: #666;
+            background: white;
+        }
+
+        /* 影响分析高亮 */
+        .affected-node {
+            box-shadow: 0 0 0 4px rgba(214, 48, 49, 0.4) !important;
+            border-color: var(--danger-color) !important;
+        }
+        .affected-edge {
+            stroke: var(--danger-color);
+            stroke-width: 3;
+            stroke-dasharray: none;
+        }
+        .affected-text {
+            fill: var(--danger-color);
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>EV 架构交互视图</h2>
+        <div class="control-group">
+            <label style="font-size:12px">模拟协议变更：</label>
+            <select id="protocol-select">
+                <option value="">-- 选择协议 --</option>
+                <option value="mqtt">MQTT (车云通信)</option>
+                <option value="can">CAN-FD (底盘控制)</option>
+                <option value="someip">SOME/IP (域间服务)</option>
+            </select>
+            <button class="btn" onclick="analyze()">分析影响</button>
+            <button class="btn" style="background:#b2bec3" onclick="reset()">重置</button>
+        </div>
+        <div class="info-panel" id="info">
+            当前视图：Level 0 体系全景<br>
+            点击 [智能汽车] 进入内部交互视图。
+        </div>
+    </div>
+
+    <div class="main-canvas" id="canvas">
+        <div class="navbar" id="navbar">
+            <div class="nav-item" onclick="showLevel0()">体系全景</div>
+        </div>
+        <svg id="svg-layer"></svg>
+        <div id="node-layer"></div>
+    </div>
+
+    <script>
+        // 数据定义
+        const data = {
+            // Level 0 节点
+            l0_nodes: [
+                { id: 'sys_car', name: '智能汽车', type: 'l0-system', x: 400, y: 300 },
+                { id: 'sys_cloud', name: '车企云平台', type: 'l0-system', x: 400, y: 100 },
+                { id: 'sys_app', name: '手机 App', type: 'l0-system', x: 700, y: 300 }
+            ],
+            // Level 2 节点 (进入汽车内部)
+            l2_context: [
+                // 外部依赖保留在边缘
+                { id: 'ctx_cloud', name: '车企云平台', type: 'context-node', x: 400, y: 50 },
+                { id: 'ctx_app', name: '手机 App', type: 'context-node', x: 750, y: 300 }
+            ],
+            l2_hardware: [
+                // 内部硬件容器
+                { id: 'hw_cockpit', name: '座舱域控制器 (8295)', type: 'internal-hardware', x: 250, y: 200 },
+                { id: 'hw_adas', name: '智驾域控制器 (Orin)', type: 'internal-hardware', x: 250, y: 400 },
+                { id: 'hw_gateway', name: '中央网关 (NXP)', type: 'internal-hardware', x: 550, y: 200 }
+            ],
+            l2_software: [
+                // 软件组件 (所属硬件ID, 相对顺序)
+                { id: 'sw_hmi', name: 'HMI 交互界面', parent: 'hw_cockpit' },
+                { id: 'sw_nav', name: '导航引擎', parent: 'hw_cockpit' },
+                { id: 'sw_plan', name: '规划控制算法', parent: 'hw_adas' },
+                { id: 'sw_percept', name: '视觉感知', parent: 'hw_adas' },
+                { id: 'sw_tbox', name: 'T-Box 通信服务', parent: 'hw_gateway' },
+                { id: 'sw_route', name: '路由转发', parent: 'hw_gateway' }
+            ],
+            // 连线定义
+            edges: [
+                // L0 连线
+                { source: 'sys_car', target: 'sys_cloud', label: 'MQTT/4G', proto: 'mqtt', view: 'l0' },
+                { source: 'sys_app', target: 'sys_cloud', label: 'HTTPS', proto: 'https', view: 'l0' },
+                
+                // L2 连线 (包含跨边界交互)
+                // 1. 内部交互
+                { source: 'sw_hmi', target: 'sw_route', label: 'SOME/IP', proto: 'someip', view: 'l2' },
+                { source: 'sw_plan', target: 'sw_route', label: 'SOME/IP', proto: 'someip', view: 'l2' },
+                // 2. 跨边界交互 (关键改进点！)
+                { source: 'sw_tbox', target: 'ctx_cloud', label: 'MQTT (遥测)', proto: 'mqtt', view: 'l2' },
+                { source: 'ctx_app', target: 'ctx_cloud', label: 'HTTPS', proto: 'https', view: 'l2' } // 手机不直连车，连云
+            ]
+        };
+
+        let currentView = 'l0';
+
+        function init() {
+            showLevel0();
+            window.addEventListener('resize', () => renderEdges());
+        }
+
+        function showLevel0() {
+            currentView = 'l0';
+            document.getElementById('navbar').innerHTML = `<div class="nav-item">体系全景</div>`;
+            document.getElementById('info').innerHTML = `当前视图：Level 0 体系全景<br>展示宏观系统关系。`;
+            
+            const layer = document.getElementById('node-layer');
+            layer.innerHTML = '';
+
+            // 渲染 L0 节点
+            data.l0_nodes.forEach(n => {
+                const el = document.createElement('div');
+                el.className = `node ${n.type}`;
+                el.style.left = (n.x - 80) + 'px';
+                el.style.top = (n.y - 50) + 'px';
+                el.innerHTML = `<div>${n.name}</div><div style="font-size:10px; opacity:0.8">[双击钻取]</div>`;
+                el.id = n.id;
+                
+                if(n.id === 'sys_car') {
+                    el.ondblclick = showLevel2;
+                }
+                layer.appendChild(el);
+            });
+
+            setTimeout(renderEdges, 50);
+        }
+
+        function showLevel2() {
+            currentView = 'l2';
+            document.getElementById('navbar').innerHTML = `
+                <div class="nav-item" onclick="showLevel0()">体系全景</div>
+                <div class="nav-arrow">></div>
+                <div class="nav-item">智能汽车 (内部交互)</div>
+            `;
+            document.getElementById('info').innerHTML = `当前视图：Level 2 系统内部<br>注意观察右侧和上方的外部节点，它们展示了内部组件如何与外界通信。`;
+
+            const layer = document.getElementById('node-layer');
+            layer.innerHTML = '';
+
+            // 1. 渲染外部上下文节点 (Context)
+            data.l2_context.forEach(n => {
+                const el = document.createElement('div');
+                el.className = `node ${n.type}`;
+                el.style.left = (n.x - 60) + 'px';
+                el.style.top = (n.y - 40) + 'px';
+                el.innerHTML = `<div class="context-label">外部系统</div><div>${n.name}</div>`;
+                el.id = n.id;
+                layer.appendChild(el);
+            });
+
+            // 2. 渲染系统边界框 (Boundary)
+            const boundary = document.createElement('div');
+            boundary.className = 'system-boundary';
+            boundary.style.left = '100px';
+            boundary.style.top = '150px';
+            boundary.style.width = '600px';
+            boundary.style.height = '400px';
+            boundary.innerHTML = `<div class="boundary-label">智能汽车 (System Boundary)</div>`;
+            layer.appendChild(boundary);
+
+            // 3. 渲染内部硬件 (Hardware)
+            data.l2_hardware.forEach(hw => {
+                const el = document.createElement('div');
+                el.className = `node ${hw.type}`;
+                el.style.left = hw.x + 'px';
+                el.style.top = hw.y + 'px';
+                el.id = hw.id;
+                
+                // Header
+                const header = document.createElement('div');
+                header.className = 'hw-header';
+                header.innerText = hw.name;
+                el.appendChild(header);
+
+                // 4. 渲染内部软件 (Software inside Hardware)
+                data.l2_software.filter(sw => sw.parent === hw.id).forEach(sw => {
+                    const swEl = document.createElement('div');
+                    swEl.className = 'internal-software';
+                    swEl.innerText = sw.name;
+                    swEl.id = sw.id;
+                    el.appendChild(swEl);
+                });
+
+                layer.appendChild(el);
+            });
+
+            setTimeout(renderEdges, 50);
+        }
+
+        function renderEdges() {
+            const svg = document.getElementById('svg-layer');
+            svg.innerHTML = '';
+
+            data.edges.filter(e => e.view === currentView).forEach(edge => {
+                const sEl = document.getElementById(edge.source);
+                const tEl = document.getElementById(edge.target);
+
+                if (sEl && tEl) {
+                    const sRect = sEl.getBoundingClientRect();
+                    const tRect = tEl.getBoundingClientRect();
+                    const cRect = document.getElementById('canvas').getBoundingClientRect();
+
+                    const x1 = sRect.left + sRect.width/2 - cRect.left;
+                    const y1 = sRect.top + sRect.height/2 - cRect.top;
+                    const x2 = tRect.left + tRect.width/2 - cRect.left;
+                    const y2 = tRect.top + tRect.height/2 - cRect.top;
+
+                    // 线条
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute("x1", x1);
+                    line.setAttribute("y1", y1);
+                    line.setAttribute("x2", x2);
+                    line.setAttribute("y2", y2);
+                    line.setAttribute("class", "edge");
+                    line.setAttribute("data-proto", edge.proto);
+                    svg.appendChild(line);
+
+                    // 标签
+                    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    text.setAttribute("x", (x1+x2)/2);
+                    text.setAttribute("y", (y1+y2)/2 - 5);
+                    text.setAttribute("text-anchor", "middle");
+                    text.setAttribute("class", "edge-label");
+                    text.textContent = edge.label;
+                    text.setAttribute("data-proto", edge.proto);
+                    svg.appendChild(text);
+                }
+            });
+        }
+
+        function analyze() {
+            const proto = document.getElementById('protocol-select').value;
+            if(!proto) return;
+
+            reset();
+
+            // 1. 高亮线条
+            const lines = document.querySelectorAll(`line[data-proto="${proto}"]`);
+            const texts = document.querySelectorAll(`text[data-proto="${proto}"]`);
+            
+            if(lines.length === 0 && currentView === 'l2' && proto === 'mqtt') {
+                // 特殊处理：如果在 L2 选了 MQTT，虽然内部没有直接 MQTT 线（只有 T-Box 到 Cloud），但也应该高亮
+            }
+
+            lines.forEach(l => l.classList.add('affected-edge'));
+            texts.forEach(t => t.classList.add('affected-text'));
+
+            // 2. 高亮节点 (简单逻辑：找到连线的两端)
+            data.edges.filter(e => e.view === currentView && e.proto === proto).forEach(edge => {
+                const s = document.getElementById(edge.source);
+                const t = document.getElementById(edge.target);
+                if(s) s.classList.add('affected-node');
+                if(t) t.classList.add('affected-node');
+                
+                // 如果是软件，高亮其父硬件
+                const swNode = data.l2_software.find(sw => sw.id === edge.source || sw.id === edge.target);
+                if(swNode) {
+                    const hw = document.getElementById(swNode.parent);
+                    if(hw) hw.classList.add('affected-node');
+                }
+            });
+        }
+
+        function reset() {
+            document.querySelectorAll('.affected-edge').forEach(e => e.classList.remove('affected-edge'));
+            document.querySelectorAll('.affected-text').forEach(e => e.classList.remove('affected-text'));
+            document.querySelectorAll('.affected-node').forEach(e => e.classList.remove('affected-node'));
+            document.getElementById('protocol-select').value = "";
+        }
+
+        window.onload = init;
+    </script>
+
+
+</body></html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base64 to SVG Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .input-section, .output-section {
+            margin-bottom: 30px;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: monospace;
+            resize: vertical;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        .button-group {
+            margin: 20px 0;
+        }
+        button {
+            padding: 12px 30px;
+            margin-right: 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .preview-area {
+            margin-top: 20px;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fafafa;
+        }
+        .preview-image {
+            max-width: 100%;
+            max-height: 500px;
+        }
+        .svg-output {
+            margin-top: 20px;
+        }
+        .svg-code {
+            background-color: #f8f8f8;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .download-button {
+            background-color: #2196F3;
+        }
+        .download-button:hover {
+            background-color: #1976D2;
+        }
+        .copy-button {
+            background-color: #FF9800;
+        }
+        .copy-button:hover {
+            background-color: #F57C00;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            border-bottom-color: #4CAF50;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .info-box {
+            background-color: #e8f4f8;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .error {
+            background-color: #ffebee;
+            border-left-color: #f44336;
+            color: #c62828;
+        }
+        .success {
+            background-color: #e8f5e9;
+            border-left-color: #4CAF50;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Base64 转 SVG 工具</h1>
+
+        <div class="info-box">
+            <strong>使用说明：</strong>
+            <ul>
+                <li>粘贴您的 base64 图片字符串（可以包含或不包含 data:image 前缀）</li>
+                <li>工具会自动将图片转换为 SVG 格式</li>
+                <li>支持 PNG、JPEG、GIF 等常见图片格式</li>
+                <li>生成的 SVG 可以直接下载或复制代码</li>
+            </ul>
+        </div>
+
+        <div class="input-section">
+            <h3>📝 输入 Base64 字符串：</h3>
+            <textarea id="base64Input" rows="8" placeholder="请粘贴您的 base64 图片字符串...
+例如：
+data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
+或者直接粘贴 base64 部分：
+iVBORw0KGgoAAAANSUhEUgAA..."></textarea>
+
+            <div class="button-group">
+                <button onclick="convertToSVG()">🔄 转换为 SVG</button>
+                <button onclick="clearAll()">🗑️ 清空所有</button>
+                <button onclick="loadSample()" style="background-color: #9C27B0;">📌 加载示例</button>
+            </div>
+        </div>
+
+        <div id="messageBox" class="info-box" style="display: none;"></div>
+
+        <div class="tabs" id="resultTabs" style="display: none;">
+            <div class="tab active" onclick="switchTab('preview')">👁️ 预览</div>
+            <div class="tab" onclick="switchTab('code')">💻 SVG 代码</div>
+        </div>
+
+        <div id="outputSection" style="display: none;">
+            <div class="tab-content active" id="previewTab">
+                <div class="output-section">
+                    <h3>🎨 SVG 预览：</h3>
+                    <div class="preview-area" id="svgPreview">
+                        <!-- SVG 将显示在这里 -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="codeTab">
+                <div class="svg-output">
+                    <h3>📄 SVG 代码：</h3>
+                    <div class="svg-code" id="svgCode">
+                        <!-- SVG 代码将显示在这里 -->
+                    </div>
+                    <div class="button-group">
+                        <button class="copy-button" onclick="copySVGCode()">📋 复制代码</button>
+                        <button class="download-button" onclick="downloadSVG()">💾 下载 SVG</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSVG = null;
+
+        function showMessage(message, type = 'info') {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.className = 'info-box ' + type;
+            messageBox.style.display = 'block';
+
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 5000);
+        }
+
+        function cleanBase64(base64) {
+            // 移除可能的 data:image 前缀
+            if (base64.includes(',')) {
+                base64 = base64.split(',')[1];
+            }
+            // 移除所有空白字符
+            base64 = base64.replace(/\s/g, '');
+            return base64;
+        }
+
+        function detectImageFormat(base64) {
+            // 解码前几个字节来检测图片格式
+            const binaryString = atob(base64.substring(0, 100));
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+
+            // 检查文件头
+            if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) {
+                return 'png';
+            } else if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) {
+                return 'jpeg';
+            } else if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46) {
+                return 'gif';
+            } else if (bytes[0] === 0x42 && bytes[1] === 0x4D) {
+                return 'bmp';
+            } else if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+                       bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) {
+                return 'webp';
+            }
+            return 'png'; // 默认为 PNG
+        }
+
+        function convertToSVG() {
+            const base64Input = document.getElementById('base64Input').value.trim();
+
+            if (!base64Input) {
+                showMessage('请输入 Base64 字符串！', 'error');
+                return;
+            }
+
+            try {
+                const cleanedBase64 = cleanBase64(base64Input);
+                const imageFormat = detectImageFormat(cleanedBase64);
+
+                // 创建一个临时的图片来获取尺寸
+                const img = new Image();
+                img.onload = function() {
+                    const width = this.width;
+                    const height = this.height;
+
+                    // 创建 SVG
+                    const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="${width}"
+     height="${height}"
+     viewBox="0 0 ${width} ${height}">
+    <image width="${width}"
+           height="${height}"
+           xlink:href="data:image/${imageFormat};base64,${cleanedBase64}" />
+</svg>`;
+
+                    currentSVG = {
+                        code: svg,
+                        width: width,
+                        height: height
+                    };
+
+                    displayResult();
+                    showMessage('转换成功！', 'success');
+                };
+
+                img.onerror = function() {
+                    showMessage('无法识别的 Base64 图片格式，请检查输入！', 'error');
+                };
+
+                img.src = `data:image/${imageFormat};base64,${cleanedBase64}`;
+
+            } catch (error) {
+                showMessage('转换失败：' + error.message, 'error');
+                console.error(error);
+            }
+        }
+
+        function displayResult() {
+            if (!currentSVG) return;
+
+            // 显示结果区域
+            document.getElementById('resultTabs').style.display = 'flex';
+            document.getElementById('outputSection').style.display = 'block';
+
+            // 显示 SVG 预览
+            const previewDiv = document.getElementById('svgPreview');
+            previewDiv.innerHTML = currentSVG.code;
+
+            // 显示 SVG 代码
+            document.getElementById('svgCode').textContent = currentSVG.code;
+        }
+
+        function switchTab(tabName) {
+            // 更新标签样式
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 切换内容
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            if (tabName === 'preview') {
+                document.getElementById('previewTab').classList.add('active');
+            } else {
+                document.getElementById('codeTab').classList.add('active');
+            }
+        }
+
+        function copySVGCode() {
+            if (!currentSVG) {
+                showMessage('没有可复制的 SVG 代码！', 'error');
+                return;
+            }
+
+            navigator.clipboard.writeText(currentSVG.code).then(() => {
+                showMessage('SVG 代码已复制到剪贴板！', 'success');
+            }).catch(err => {
+                // 降级方案
+                const textArea = document.createElement('textarea');
+                textArea.value = currentSVG.code;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showMessage('SVG 代码已复制到剪贴板！', 'success');
+            });
+        }
+
+        function downloadSVG() {
+            if (!currentSVG) {
+                showMessage('没有可下载的 SVG 文件！', 'error');
+                return;
+            }
+
+            const blob = new Blob([currentSVG.code], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `image_${new Date().getTime()}.svg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showMessage('SVG 文件下载成功！', 'success');
+        }
+
+        function clearAll() {
+            document.getElementById('base64Input').value = '';
+            document.getElementById('resultTabs').style.display = 'none';
+            document.getElementById('outputSection').style.display = 'none';
+            document.getElementById('svgPreview').innerHTML = '';
+            document.getElementById('svgCode').textContent = '';
+            currentSVG = null;
+            showMessage('已清空所有内容', 'info');
+        }
+
+        function loadSample() {
+            // 一个小的示例 base64 图片（1x1 像素的红色点）
+            const sampleBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg==';
+            document.getElementById('base64Input').value = sampleBase64;
+            showMessage('已加载示例 Base64 字符串，点击"转换为 SVG"查看效果', 'info');
+        }
+
+        // 页面加载时的提示
+        window.onload = function() {
+            showMessage('欢迎使用 Base64 转 SVG 工具！请粘贴您的 Base64 字符串开始转换。', 'info');
+        };
+    </script>
+</body>
+</html>

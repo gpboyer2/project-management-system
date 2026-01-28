@@ -1,0 +1,49 @@
+// {{ field_name }}
+// Checksum 解析与验证
+// 算法: {{ algorithm_name }}
+// 范围: [offset_of_{{ range_start_ref }}_start, offset_of_{{ range_end_ref }}_end)
+
+{
+    // 1. 读取流中的校验值
+    if (!ctx.has_bytes({{ byte_length }})) {
+        return DeserializeResult(INSUFFICIENT_DATA, "Not enough data for checksum", 0);
+    }
+
+    const uint8_t* ptr = ctx.data + ctx.offset;
+    {{ return_type }} expected_val = protocol_parser::read_with_byte_order<{{ return_type }}>(ptr, ctx.byte_order);
+
+    // 2. 实例化校验对象
+    protocol_parser::{{ cpp_class }} checker({{ constructor_args }});
+
+    // 3. 配置参数
+    {{ setter_calls | indent(4) }}
+
+    // 4. 计算本地校验值
+    size_t checksum_start = offset_of_{{ range_start_ref }}_start;
+    size_t checksum_end = offset_of_{{ range_end_ref }}_end;
+
+    // 确保范围在有效数据内
+    // 注意：解析时 ctx.offset 指向的是 checksum 字段本身的位置
+    // 而 range 应该是指向 checksum 之前的数据
+    if (checksum_start > ctx.offset || checksum_end > ctx.offset) {
+         return DeserializeResult(INVALID_FORMAT, "Checksum range invalid (future offset)", 0);
+    }
+
+    size_t data_len = 0;
+    if (checksum_end >= checksum_start) {
+        data_len = checksum_end - checksum_start;
+    } else {
+        return DeserializeResult(INVALID_FORMAT, "Checksum range invalid (end < start)", 0);
+    }
+
+    {{ return_type }} calculated_val = checker.calculate(ctx.data + checksum_start, data_len);
+
+    // 5. 比对
+    if (calculated_val != expected_val) {
+        return DeserializeResult(INVALID_CHECKSUM, "Checksum verification failed");
+    }
+
+    // 验证通过，推进指针
+    ctx.advance({{ byte_length }});
+}
+

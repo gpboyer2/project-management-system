@@ -1,0 +1,85 @@
+{#
+主序列化器实现模板 - 两阶段重构版本
+与 main_parser.cpp.template 对称
+
+模板变量:
+  protocol_name - 协议名称
+  protocol_version - 协议版本
+  protocol_description - 协议描述
+  default_byte_order - 默认字节序
+  
+  -- 原有 Business 层 --
+  fields - 顶层字段数组，每个字段有序列化调用代码（兼容性保留）
+  
+  -- 两阶段重构新增 --
+  raw_field_calls - Raw 层字段序列化代码数组
+  to_raw_conversions - Business → Raw 转换代码数组
+  has_two_phase - 是否使用两阶段
+#}
+
+// ============================================================================
+// Phase 1: Raw 结构体序列化方法实现（协议层）
+// ============================================================================
+
+bool {{ protocol_name }}_Raw::serialize_to(uint8_t* buffer, size_t buffer_size, ByteOrder byte_order) const {
+    if (buffer == nullptr || buffer_size == 0) {
+        return false;
+    }
+
+    SerializeContext ctx(buffer, buffer_size, byte_order);
+    const {{ protocol_name }}_Raw& raw = *this;
+
+{% for field in raw_field_calls %}
+    // {{ field.field_name }} - {{ field.description }}
+{{ field.raw_serialize_code }}
+{% endfor %}
+
+    return true;
+}
+
+// ============================================================================
+// Phase 2: Business → Raw 转换方法实现（应用层）
+// ============================================================================
+
+{{ protocol_name }}_Raw {{ protocol_name }}Result::to_raw() const {
+    {{ protocol_name }}_Raw raw;
+    const {{ protocol_name }}Result& data = *this;
+
+{% for conversion in to_raw_conversions %}
+    // {{ conversion.field_name }} - {{ conversion.description }}
+{{ conversion.to_raw_code }}
+
+{% endfor %}
+    return raw;
+}
+
+// ============================================================================
+// Phase 3: Facade 接口实现（集成层）
+// ============================================================================
+
+SerializeResult serialize_{{ protocol_name }}(
+    const {{ protocol_name }}Result& data,
+    uint8_t* buffer,
+    size_t buffer_size,
+    ByteOrder byte_order
+) {
+    // 协议信息
+    // 名称: {{ protocol_name }}
+    // 版本: {{ protocol_version }}
+    // 描述: {{ protocol_description }}
+
+    if (buffer == nullptr || buffer_size == 0) {
+        return SerializeResult(INVALID_FORMAT, "Invalid output buffer", 0);
+    }
+
+    // Step 1: Business → Raw (应用层转换)
+    {{ protocol_name }}_Raw raw = data.to_raw();
+
+    // Step 2: Raw → Binary (协议层序列化)
+    if (!raw.serialize_to(buffer, buffer_size, byte_order)) {
+        return SerializeResult(SERIALIZE_ERROR, "Failed to serialize raw structure", 0);
+    }
+
+    // 返回成功结果
+    return SerializeResult(SUCCESS, "Serialize successful", sizeof({{ protocol_name }}_Raw));
+}

@@ -1,0 +1,913 @@
+/* ==========================================
+   通信协议流程画布页面 - Ant Design Pro 风格
+   ========================================== */
+
+/* 主容器 - 全屏布局（画布类页面不使用 .page-container 限宽）*/
+.page-flowchart {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-page);
+  color: var(--color-text-primary);
+  outline: none;
+}
+
+/* 主要内容区域 */
+.flowchart-content {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ========== 左侧调色板 ========== */
+.flowchart-sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--color-bg-container);
+  border-right: 1px solid var(--color-border-primary);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* 调色板搜索区域 */
+.flowchart-sidebar .palette-search {
+  padding: var(--spacing-normal) var(--spacing-normal);
+  border-bottom: 1px solid var(--color-border-secondary);
+  background-color: var(--color-bg-container);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.flowchart-sidebar .palette-search .el-icon {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.flowchart-sidebar .palette-search .searchBox-input {
+  width: 100%;
+  height: 32px;
+  padding: 4px 11px;
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-base);
+  background-color: var(--color-bg-container);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-normal);
+  font-family: var(--font-family-sans);
+  transition: var(--transition-fast);
+}
+
+.flowchart-sidebar .palette-search .searchBox-input::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+.flowchart-sidebar .palette-search .searchBox-input:hover {
+  border-color: var(--color-primary-400);
+}
+
+.flowchart-sidebar .palette-search .searchBox-input:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 2px var(--color-primary-500-alpha-10);
+}
+
+/* 调色板容器 */
+.palette-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 调色板滚动条 */
+.palette-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-secondary) transparent;
+}
+
+.palette-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.palette-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.palette-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-secondary);
+  border-radius: 2px;
+}
+
+.palette-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-border-primary);
+}
+
+/* 调色板分类 */
+.palette-category {
+  border-bottom: 1px solid var(--color-border-secondary);
+}
+
+.palette-category.palette-closed .palette-header .el-icon {
+  transform: rotate(-90deg);
+}
+
+/* 分类头部 */
+.palette-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background-color: var(--color-bg-secondary);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  font-weight: 500;
+  font-size: var(--font-size-normal);
+  color: var(--color-text-primary);
+}
+
+.palette-header:hover {
+  background-color: var(--color-primary-50);
+}
+
+.palette-header .el-icon {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  transition: var(--transition-fast);
+}
+
+.palette-header span {
+  flex: 1;
+}
+
+/* 分类内容 */
+.palette-content {
+  background-color: var(--color-bg-container);
+  padding: var(--spacing-sm) 0;
+}
+
+/* 节点列表 */
+.palette-node-list {
+  padding: 0 var(--spacing-base);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* 调色板节点 - 胶囊形状 + 圆形图标设计（与画布节点一致） */
+.flowchart-sidebar .palette-container .palette-node-list .palette-node {
+  position: relative;
+  margin: 0;
+  height: 44px;
+  border-radius: 22px;
+  border: 1px solid var(--color-border-primary);
+  width: 180px;
+  cursor: grab;
+  transition: var(--transition-fast);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  background-color: var(--color-bg-container) !important;
+  box-shadow: var(--shadow-xs);
+  overflow: visible;
+  padding: 0 16px 0 6px;
+  gap: 10px;
+}
+
+.flowchart-sidebar .palette-container .palette-node-list .palette-node:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-500);
+}
+
+.flowchart-sidebar .palette-container .palette-node-list .palette-node:active {
+  cursor: grabbing;
+  transform: scale(1.02);
+}
+
+/* 节点标签 */
+.flowchart-sidebar .palette-container .palette-node-list .palette-node .palette-label {
+  flex: 1;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 节点图标容器 - 圆形彩色背景 */
+.flowchart-sidebar .palette-container .palette-node-list .palette-node .palette-icon-container {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.flowchart-sidebar .palette-container .palette-node-list .palette-node .palette-icon-container .palette-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  background-position: 50% 50%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  filter: brightness(0) invert(1);
+}
+
+.flowchart-sidebar .palette-container .palette-node-list .palette-node .palette-icon-container .el-icon {
+  color: var(--color-bg-container);
+  font-size: 16px;
+}
+
+/* 节点端口 - 左侧调色板不显示端口 */
+.flowchart-sidebar .palette-container .palette-node-list .palette-node .palette-port {
+  display: none;
+}
+
+/* ========== 中间画布区域 ========== */
+.flowchart-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-container);
+  position: relative;
+}
+
+/* ========== 顶部工具栏 - 紧凑型（48px）========== */
+.flowchart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-base);
+  background-color: var(--color-bg-container);
+  border-bottom: 1px solid var(--color-border-primary);
+  box-shadow: var(--shadow-sm);
+  height: 48px;
+  gap: var(--spacing-base);
+  position: relative;
+}
+
+.flowchart-header > * {
+  display: flex;
+  align-items: center;
+}
+
+/* 左侧标题区域 */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+  height: 100%;
+  padding-right: var(--spacing-base);
+  border-right: 1px solid var(--color-border-secondary);
+}
+
+/* 返回按钮 - 小型尺寸 */
+.back-button {
+  background-color: transparent;
+  border: 1px solid var(--color-border-primary);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  padding: 0 7px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  font-size: var(--font-size-sm);
+}
+
+.back-button:hover {
+  color: var(--color-primary-500);
+  border-color: var(--color-primary-500);
+  background-color: var(--color-primary-50);
+}
+
+/* 页面标题 */
+.header-title {
+  font-size: var(--font-size-normal);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.header-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 14px;
+  background-color: var(--color-primary-500);
+  border-radius: 2px;
+}
+
+/* 通信节点名称编辑器 */
+.comm-node-name-editor {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding-left: var(--spacing-lg);
+  border-left: 1px solid var(--color-border-secondary);
+}
+
+.comm-node-name-label {
+  font-size: var(--font-size-normal);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.comm-node-name-input {
+  width: 160px;
+  height: 24px;
+  padding: 0 7px;
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-sans);
+  color: var(--color-text-primary);
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.comm-node-name-input:hover {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border-secondary);
+}
+
+.comm-node-name-input:focus {
+  background-color: var(--color-bg-container);
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 2px var(--color-primary-500-alpha-10);
+}
+
+.comm-node-name-input::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+/* 中间操作区域 */
+.header-center {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--spacing-base);
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0;
+  height: 100%;
+  scrollbar-width: none;
+}
+
+.header-center::-webkit-scrollbar {
+  display: none;
+}
+
+/* 右侧信息区域 */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-shrink: 0;
+  padding-left: var(--spacing-base);
+  border-left: 1px solid var(--color-border-secondary);
+  height: 100%;
+}
+
+/* 按钮组 - 简洁排列，无背景框 */
+.button-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+/* 工具栏按钮 - 小型尺寸（文档7.1：高度24px）*/
+.header-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 7px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  background-color: transparent;
+  font-size: var(--font-size-normal);
+  font-weight: 400;
+  font-family: var(--font-family-sans);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+  height: 24px;
+  min-width: 24px;
+  user-select: none;
+}
+
+.header-button .el-icon {
+  font-size: 14px;
+}
+
+.header-button span {
+  font-size: var(--font-size-sm);
+}
+
+.header-button:hover:not(:disabled) {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-500);
+  border-color: var(--color-primary-200);
+}
+
+.header-button:active:not(:disabled) {
+  background-color: var(--color-primary-100);
+}
+
+.header-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: var(--color-text-disabled);
+}
+
+.header-button.active {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-500);
+  border-color: var(--color-primary-300);
+}
+
+.header-button:not(:has(span:not(:empty))) {
+  min-width: 24px;
+  padding: 0;
+  justify-content: center;
+}
+
+/* 统计信息 - 简洁样式，无背景框 */
+.header-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-base);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  font-weight: 400;
+  font-size: var(--font-size-sm);
+}
+
+.stat-item .el-icon {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+
+/* 设置区域 */
+.header-settings {
+  display: flex;
+  align-items: center;
+}
+
+/* ========== 画布内容区域 ========== */
+.flowchart-content-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-bg-secondary);
+}
+
+.canvas-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* ========== 右侧属性面板 ========== */
+.flowchart-right {
+  background-color: var(--color-bg-container);
+  border-left: 1px solid var(--color-border-primary);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+
+/* 调整手柄 */
+.flowchart-right .resize-handle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: ew-resize;
+  background-color: transparent;
+  transition: var(--transition-fast);
+  z-index: 100;
+}
+
+.flowchart-right .resize-handle:hover {
+  background-color: var(--color-primary-400);
+}
+
+.flowchart-right .resize-handle:active {
+  background-color: var(--color-primary-500);
+}
+
+/* 属性面板头部 */
+.cssc-properties-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-base);
+  border-bottom: 1px solid var(--color-border-secondary);
+  background-color: var(--color-bg-secondary);
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.cssc-properties-header h3 {
+  margin: 0;
+  font-size: var(--font-size-normal);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.cssc-properties-close {
+  background: none;
+  border: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-normal);
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cssc-properties-close:hover {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+/* 属性面板内容 */
+.cssc-properties-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-base);
+}
+
+/* 属性区块 */
+.cssc-property-section {
+  margin-bottom: var(--spacing-base);
+}
+
+.cssc-property-section h4 {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-normal);
+  font-weight: 600;
+  color: var(--color-primary-500);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 2px solid var(--color-primary-100);
+}
+
+/* 属性表单 */
+.cssc-property-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* 表单字段 */
+.cssc-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xxs);
+}
+
+.cssc-form-field label {
+  font-size: var(--font-size-normal);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.cssc-form-field input,
+.cssc-form-field textarea,
+.cssc-form-field select {
+  padding: 4px 11px;
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-base);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-normal);
+  font-family: var(--font-family-sans);
+  background-color: var(--color-bg-container);
+  transition: var(--transition-fast);
+}
+
+.cssc-form-field input,
+.cssc-form-field select {
+  height: 32px;
+}
+
+.cssc-form-field textarea {
+  min-height: 80px;
+  resize: vertical;
+  height: auto;
+  line-height: var(--line-height-base);
+}
+
+.cssc-form-field input:hover,
+.cssc-form-field textarea:hover,
+.cssc-form-field select:hover {
+  border-color: var(--color-primary-400);
+}
+
+.cssc-form-field input:focus,
+.cssc-form-field textarea:focus,
+.cssc-form-field select:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 2px var(--color-primary-500-alpha-10);
+}
+
+.cssc-form-field input:disabled {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+}
+
+.cssc-form-field input[type="color"] {
+  height: 32px;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+}
+
+.cssc-form-field select {
+  cursor: pointer;
+}
+
+/* 表单分区 */
+.cssc-form-section {
+  margin: var(--spacing-base) 0 var(--spacing-xxs) 0;
+}
+
+.cssc-form-section .cssc-section-title {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-normal);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  padding-bottom: var(--spacing-xxs);
+  border-bottom: 1px solid var(--color-border-secondary);
+}
+
+/* 字段帮助文本 */
+.cssc-form-field .cssc-field-help {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+  margin-top: var(--spacing-xs);
+}
+
+/* 复选框标签 */
+.cssc-form-field .cssc-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  cursor: pointer;
+  padding: 4px 11px;
+  min-height: 32px;
+  border-radius: var(--radius-base);
+  transition: var(--transition-fast);
+  border: 1px solid var(--color-border-primary);
+}
+
+.cssc-form-field .cssc-checkbox-label:hover {
+  background-color: var(--color-primary-50);
+  border-color: var(--color-primary-300);
+}
+
+.cssc-form-field .cssc-checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  margin: 0;
+  accent-color: var(--color-primary-500);
+}
+
+.cssc-form-field .cssc-checkbox-label span {
+  font-size: var(--font-size-normal);
+  color: var(--color-text-primary);
+}
+
+/* 空属性状态 */
+.cssc-empty-properties {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 240px;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  padding: var(--spacing-3xl);
+}
+
+.cssc-empty-properties .el-icon {
+  font-size: 48px;
+  margin-bottom: var(--spacing-base);
+  opacity: 0.4;
+  color: var(--color-primary-300);
+}
+
+.cssc-empty-properties p {
+  margin: 0;
+  font-size: var(--font-size-normal);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+/* ========== 导入对话框 ========== */
+.import-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-bg-mask);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.import-dialog {
+  background-color: var(--color-bg-container);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 90%;
+  max-width: 560px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-lg);
+  height: 56px;
+  background-color: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-secondary);
+}
+
+.dialog-header h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.dialog-close {
+  background: none;
+  border: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: var(--spacing-normal);
+  border-radius: var(--radius-base);
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog-close:hover {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+}
+
+.dialog-content {
+  flex: 1;
+  padding: var(--spacing-lg);
+  overflow-y: auto;
+}
+
+.dialog-content .form-field {
+  margin-bottom: var(--spacing-3xl);
+}
+
+.dialog-content .form-field:last-child {
+  margin-bottom: 0;
+}
+
+.dialog-content .form-field label {
+  display: block;
+  font-size: var(--font-size-normal);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.dialog-content .form-field input[type="file"] {
+  width: 100%;
+  padding: var(--spacing-lg);
+  border: 1px dashed var(--color-border-primary);
+  border-radius: var(--radius-base);
+  background-color: var(--color-bg-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-normal);
+}
+
+.dialog-content .form-field input[type="file"]:hover {
+  border-color: var(--color-primary-400);
+  background-color: var(--color-primary-50);
+}
+
+.dialog-content .form-field textarea {
+  width: 100%;
+  padding: 4px 11px;
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-base);
+  background-color: var(--color-bg-container);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-normal);
+  font-family: var(--font-family-code);
+  resize: vertical;
+  min-height: 160px;
+  transition: var(--transition-fast);
+}
+
+.dialog-content .form-field textarea:hover {
+  border-color: var(--color-primary-400);
+}
+
+.dialog-content .form-field textarea:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 2px var(--color-primary-500-alpha-10);
+}
+
+.dialog-content .form-field textarea::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-base);
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--color-border-secondary);
+  background-color: var(--color-bg-secondary);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.dialog-actions .button {
+  height: 32px;
+  padding: 4px 15px;
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  font-size: var(--font-size-normal);
+  font-weight: 500;
+  font-family: var(--font-family-sans);
+  background-color: var(--color-bg-container);
+  color: var(--color-text-primary);
+  transition: var(--transition-fast);
+}
+
+.dialog-actions .button:hover {
+  color: var(--color-primary-500);
+  border-color: var(--color-primary-500);
+}
+
+.dialog-actions .button.button-primary {
+  background-color: var(--color-primary-500);
+  border-color: var(--color-primary-500);
+  color: var(--color-bg-container);
+}
+
+.dialog-actions .button.button-primary:hover {
+  background-color: var(--color-primary-600);
+  border-color: var(--color-primary-600);
+}

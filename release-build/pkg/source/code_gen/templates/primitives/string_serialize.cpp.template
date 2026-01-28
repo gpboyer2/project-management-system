@@ -1,0 +1,13 @@
+{#
+String 类型序列化实现
+与 string.cpp.template 对称
+
+模板变量:
+  field_name - 字段名称
+  length - 字符串长度（0表示变长）
+  encoding - 编码格式
+#}
+{
+    SerializeResult res = serialize_string_generic(ctx, {{ data_prefix }}.{{ field_name }}, {{ length }}, "{{ encoding }}");
+    if (!res.is_success()) return res;
+}

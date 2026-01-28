@@ -1,0 +1,90 @@
+// add-field-menu 内容样式（packet-config 页面）
+// 说明：弹层定位交给 Element Plus Popper（el-popover + virtual-ref），这里仅保留内容样式
+
+.packet-config-add-field-menu-popper {
+  padding: 0;
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--radius-normal);
+  background-color: var(--color-bg-container);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-popover);
+}
+
+.add-field-menu {
+  min-width: 320px;
+  max-width: 420px;
+  max-height: 480px;
+  overflow: hidden;
+}
+
+.add-field-menu-header {
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-secondary);
+}
+
+.add-field-menu-list {
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.add-field-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-normal);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.add-field-menu-item:hover {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border-secondary);
+}
+
+.add-field-menu-item .add-field-menu-item-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+.add-field-menu-item .menu-item-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.add-field-menu-item .menu-item-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.add-field-menu-item .menu-item-desc {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,12 @@
+{
+  "name": "cssc-node-view",
+  "version": "1.0.0",
+  "main": "app.js",
+  "bin": "app.js",
+  "pkg": {
+    "assets": [
+      "server/favicon.ico",
+      "client/dist/**/*"
+    ]
+  }
+}

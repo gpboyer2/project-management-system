@@ -1,0 +1,500 @@
+// 全局样式：用于覆盖 Element Plus 弹窗组件
+
+// 品牌色弹窗样式
+.confirm-dialog-brand {
+  border-radius: 4px;
+}
+
+.confirm-dialog-brand .el-message-box__header {
+  padding-bottom: 12px;
+}
+
+.confirm-dialog-brand .el-message-box__title {
+  font-weight: 600;
+  color: var(--color-gray-800);
+}
+
+.confirm-dialog-brand .el-message-box__content {
+  color: var(--color-gray-600);
+}
+
+.confirm-dialog-brand .el-message-box__btns .el-button--primary {
+  background-color: var(--color-primary-500);
+  border-color: var(--color-primary-500);
+  border-radius: 2px;
+}
+
+.confirm-dialog-brand .el-message-box__btns .el-button--primary:hover,
+.confirm-dialog-brand .el-message-box__btns .el-button--primary:focus {
+  background-color: var(--color-primary-400);
+  border-color: var(--color-primary-400);
+}
+
+.confirm-dialog-brand .el-message-box__btns .el-button--default {
+  border-radius: 2px;
+}
+
+// 代码预览弹窗样式 (全局)
+// 发布对话框样式
+.publish-dialog {
+  display: flex;
+  flex-direction: column;
+  margin-top: 5vh !important;
+}
+
+.publish-dialog .el-dialog__header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border-secondary);
+}
+
+.publish-dialog .el-dialog__body {
+  padding: 0;
+  height: 65vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.publish-dialog .el-dialog__footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--color-border-secondary);
+}
+
+.publish-dialog-header .version-info {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-gray-900);
+}
+
+.publish-dialog-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.publish-dialog-content .publish-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0;
+  background: var(--color-gray-100);
+  border-bottom: 1px solid var(--color-border-secondary);
+}
+
+.publish-dialog-content .publish-tabs .publish-tab {
+  padding: 12px 24px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--color-gray-700);
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.publish-dialog-content .publish-tabs .publish-tab:hover {
+  color: var(--color-info);
+  background: var(--color-blue-alpha-10);
+}
+
+.publish-dialog-content .publish-tabs .publish-tab.active {
+  color: var(--color-info);
+  background: var(--color-bg-container);
+  border-bottom-color: var(--color-info);
+}
+
+.publish-dialog-content .publish-tab-content {
+  flex: 1;
+  overflow: auto;
+  background: var(--color-bg-container);
+}
+
+// 文字版影响分析
+.publish-dialog-content .publish-tab-content .impact-text-view {
+  padding: 20px;
+  height: 100%;
+  overflow: auto;
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border-secondary);
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item {
+  background: var(--color-gray-50);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s;
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item .impact-item-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item .impact-item-header .impact-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item .impact-item-header .impact-icon.protocol {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item .impact-item-header .impact-icon.hardware {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item .impact-item-header .impact-icon.node {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item .impact-item-header .impact-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  flex: 1;
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item .impact-item-header .impact-badge {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item .impact-item-header .impact-badge.high {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item .impact-item-header .impact-badge.medium {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item .impact-item-header .impact-badge.low {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item .impact-item-desc {
+  font-size: 13px;
+  color: var(--color-gray-700);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item .impact-affected {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item .impact-affected .affected-label {
+  font-size: 12px;
+  color: var(--color-gray-500);
+}
+
+.publish-dialog-content .publish-tab-content .impact-text-view .impact-section .impact-list .impact-item .impact-affected .affected-tag {
+  font-size: 12px;
+  padding: 2px 8px;
+  background: var(--color-gray-200);
+  border-radius: 4px;
+  color: var(--color-gray-700);
+}
+
+// 拓扑图视图
+.impact-topology-view {
+  height: 100%;
+  min-height: 450px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.publish-topology-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  position: relative;
+  background-color: var(--color-bg-container);
+  background-image: radial-gradient(var(--color-gray-300) 1px, transparent 1px);
+  background-size: 20px 20px;
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+// 拓扑图导航条
+.publish-navbar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: var(--color-bg-container);
+  padding: 6px 12px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  z-index: 10;
+  font-size: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.publish-nav-item {
+  cursor: pointer;
+  color: var(--color-topology-blue);
+  font-weight: bold;
+}
+
+.publish-nav-item:hover {
+  text-decoration: underline;
+}
+
+.publish-nav-arrow {
+  color: var(--color-gray-500);
+}
+
+// SVG连线层
+.publish-svg-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+// 节点层
+.publish-node-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+// 节点通用样式
+.publish-node {
+  position: absolute;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+// L0系统节点
+.publish-l0-system {
+  width: 140px;
+  height: 80px;
+  background: var(--color-topology-blue);
+  color: var(--color-bg-container);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.publish-l0-system:hover {
+  transform: scale(1.05);
+}
+
+.publish-node-hint {
+  font-size: 10px;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+// 外部上下文节点
+.publish-context-node {
+  width: 100px;
+  height: 60px;
+  background: var(--color-gray-400);
+  color: var(--color-bg-container);
+  border: 2px dashed var(--color-bg-container);
+  z-index: 1;
+  font-size: 12px;
+}
+
+.publish-context-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+  opacity: 0.8;
+}
+
+// 系统边界框
+.publish-system-boundary {
+  position: absolute;
+  border: 2px dashed var(--color-topology-blue);
+  background: var(--color-topology-system-bg);
+  border-radius: 8px;
+  z-index: 0;
+  pointer-events: none;
+  left: 80px;
+  top: 100px;
+  width: 550px;
+  height: 300px;
+}
+
+.publish-boundary-label {
+  position: absolute;
+  top: -10px;
+  left: 16px;
+  background: var(--color-topology-blue);
+  color: var(--color-bg-container);
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+// 内部硬件节点
+.publish-internal-hardware {
+  background: var(--color-bg-container);
+  border: 2px solid var(--color-topology-gray);
+  color: var(--color-gray-900);
+  width: 160px;
+  padding: 8px;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+}
+
+.publish-hw-header {
+  background: var(--color-topology-gray);
+  color: var(--color-bg-container);
+  font-size: 10px;
+  padding: 3px;
+  margin: -8px -8px 8px -8px;
+  text-align: center;
+  border-radius: 4px 4px 0 0;
+}
+
+// 内部节点
+.publish-internal-node {
+  background: var(--color-topology-cyan);
+  color: var(--color-bg-container);
+  padding: 6px;
+  margin-bottom: 4px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.publish-internal-node:last-child {
+  margin-bottom: 0;
+}
+
+// 受影响高亮
+.publish-affected {
+  box-shadow: 0 0 0 3px var(--color-error-alpha-30) !important;
+  border-color: var(--color-error-critical) !important;
+}
+
+.publish-internal-node.publish-affected {
+  box-shadow: 0 0 0 2px var(--color-error-alpha-60) !important;
+}
+
+// SVG连线样式
+.publish-svg-layer .edge {
+  stroke: var(--color-gray-500);
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 5, 5;
+}
+
+.publish-svg-layer .edge-label {
+  font-size: 10px;
+  fill: var(--color-gray-700);
+}
+
+.publish-svg-layer .affected-edge {
+  stroke: var(--color-error-critical);
+  stroke-width: 3;
+  stroke-dasharray: none;
+}
+
+.publish-svg-layer .affected-text {
+  fill: var(--color-error-critical);
+  font-weight: bold;
+  font-size: 11px;
+}
+
+// 发布对话框底部按钮
+.publish-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.publish-dialog-footer .btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.publish-dialog-footer .btn.btn-secondary {
+  background: var(--color-gray-200);
+  color: var(--color-gray-700);
+}
+
+.publish-dialog-footer .btn.btn-secondary:hover {
+  background: var(--color-gray-300);
+}
+
+.publish-dialog-footer .btn.btn-primary {
+  background: var(--color-success-hover);
+  color: var(--color-bg-container);
+}
+
+.publish-dialog-footer .btn.btn-primary:hover {
+  background: var(--color-success-hover);
+  filter: brightness(0.95);
+}
+
+.code-preview-dialog {
+  display: flex;
+  flex-direction: column;
+  margin-top: 5vh !important;
+}
+
+.code-preview-dialog .el-dialog__body {
+  padding: 0;
+  height: 70vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}

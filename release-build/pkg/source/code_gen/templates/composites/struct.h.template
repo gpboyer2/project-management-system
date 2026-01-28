@@ -1,0 +1,43 @@
+{#
+Struct 类型头文件模板（Business 层 / 应用层）
+模板变量:
+  struct_name - 结构体名称
+  field_name_capitalized - 字段名称（首字母大写）
+  description - 结构体描述
+  fields - 字段数组，每个字段包含：
+     - is_bitfield: 是否为 Bitfield 类型
+     - bitfield_sub_fields: Bitfield 子字段数组（name, description）
+     - is_encode: 是否为 Encode 类型
+     - has_valid_when: 是否有 validWhen 配置（两阶段重构）
+     - field_type: C++ 类型
+     - field_name: 字段名
+     - description: 字段描述
+     - unit: 单位（可选）
+  constructor_initializers - 构造函数初始化列表（已格式化的字符串）
+  has_initializers - 是否有初始化列表
+#}
+// {{ field_name_capitalized }} 结构体（业务层）
+{% if description %}
+// {{ description }}
+{% endif %}
+struct {{ struct_name }} {
+{% for field in fields %}    {% if field.is_bitfield %}    struct {
+{% for sub_field in field.bitfield_sub_fields %}        uint64_t {{ sub_field.name }} = 0;      // {{ sub_field.name }}位段值
+        {% if sub_field.has_maps %}
+        std::string {{ sub_field.name }}_meaning; // {{ sub_field.name }}位段含义
+        {% endif %}
+{% endfor %}    } {{ field.field_name }};
+    {% elif field.is_encode %}    {{ field.field_type }} {{ field.field_name }}_value;  // {{ field.description }} (Value)
+    std::string {{ field.field_name }}_meaning;  // {{ field.description }} (Meaning)
+    {% else %}    {{ field.field_type }} {{ field.field_name }};  // {{ field.description }}{% if field.unit %} [{{ field.unit }}]{% endif %}
+{% if field.has_valid_when %}    bool {{ field.field_name }}_valid;  // {{ field.field_name }} 有效性标志 (validWhen)
+{% endif %}
+    {% endif %}{% endfor %}
+
+    {{ struct_name }}()
+{% if has_initializers %}
+        : {{ constructor_initializers }} {}
+{% else %}
+        {}
+{% endif %}
+};

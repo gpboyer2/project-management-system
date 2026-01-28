@@ -1,0 +1,121 @@
+// 仪表板组件样式
+
+.editor-dashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--color-bg-page);
+  overflow: hidden;
+}
+
+.editor-dashboard-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 24px 32px 16px 32px;
+  flex-shrink: 0;
+}
+
+.editor-dashboard-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-bg-container);
+  margin: 0;
+}
+
+.editor-dashboard-subtitle {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.editor-dashboard-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.editor-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 16px 32px 32px 32px;
+  overflow-y: auto;
+}
+
+.editor-dashboard-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background-color: var(--color-bg-container);
+  border: 1px solid var(--component-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.editor-dashboard-card:hover {
+  background-color: var(--color-bg-tertiary);
+  border-color: var(--color-primary-500);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.editor-dashboard-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background-color: var(--color-primary-500-alpha-10);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.editor-dashboard-card-icon i {
+  font-size: 24px;
+  color: var(--color-primary-500);
+}
+
+.editor-dashboard-card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.editor-dashboard-card-label {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.editor-dashboard-card-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.2;
+}
+
+.editor-dashboard-card-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.editor-dashboard-card:hover .editor-dashboard-card-arrow {
+  opacity: 1;
+}
+
+.editor-dashboard-card-arrow i {
+  font-size: 18px;
+  color: var(--color-text-secondary);
+}

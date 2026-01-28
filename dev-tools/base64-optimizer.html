@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base64 图片优化工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .input-section {
+            margin-bottom: 30px;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: monospace;
+            resize: vertical;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        .button-group {
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 12px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .secondary {
+            background-color: #2196F3;
+        }
+        .secondary:hover {
+            background-color: #1976D2;
+        }
+        .danger {
+            background-color: #f44336;
+        }
+        .danger:hover {
+            background-color: #d32f2f;
+        }
+        .warning {
+            background-color: #FF9800;
+        }
+        .warning:hover {
+            background-color: #F57C00;
+        }
+        .preview-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .preview-box {
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .preview-box h3 {
+            margin-top: 0;
+            color: #555;
+        }
+        .image-preview {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border: 1px solid #ddd;
+            background: white;
+        }
+        .stats {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .stats-value {
+            font-weight: bold;
+            color: #333;
+        }
+        .reduction {
+            color: #4CAF50;
+        }
+        .increase {
+            color: #f44336;
+        }
+        .output-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f8f8;
+            border-radius: 5px;
+        }
+        .output-code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            color: #666;
+            border-bottom: 2px solid transparent;
+        }
+        .tab.active {
+            color: #4CAF50;
+            border-bottom-color: #4CAF50;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .info-box {
+            background-color: #e8f4f8;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .error {
+            background-color: #ffebee;
+            border-left-color: #f44336;
+            color: #c62828;
+        }
+        .success {
+            background-color: #e8f5e9;
+            border-left-color: #4CAF50;
+            color: #2e7d32;
+        }
+        .warning-box {
+            background-color: #fff3e0;
+            border-left-color: #FF9800;
+            color: #f57c00;
+        }
+        .compression-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option-group label {
+            font-weight: bold;
+            color: #555;
+        }
+        .option-group input,
+        .option-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗜️ Base64 图片优化工具</h1>
+
+        <div class="info-box">
+            <strong>🎯 优化方案：</strong>
+            <ul>
+                <li><strong>压缩优化：</strong>通过降低质量和分辨率减小文件大小</li>
+                <li><strong>格式转换：</strong>自动选择最优格式（WebP > JPEG > PNG）</li>
+                <li><strong>简化SVG：</strong>对于矢量图，移除不必要的元数据</li>
+                <li><strong>分块上传：</strong>超大Base64可以分割成小块</li>
+            </ul>
+        </div>
+
+        <div class="input-section">
+            <h3>📝 输入 Base64 字符串：</h3>
+            <textarea id="base64Input" rows="8" placeholder="粘贴您的 base64 图片字符串...
+支持格式：data:image/...;base64,... 或纯 base64 字符串"></textarea>
+
+            <div class="stats" id="inputStats" style="display: none;">
+                <div class="stats-item">
+                    <span>原始大小：</span>
+                    <span class="stats-value" id="originalSize">0 KB</span>
+                </div>
+                <div class="stats-item">
+                    <span>图片格式：</span>
+                    <span class="stats-value" id="originalFormat">-</span>
+                </div>
+                <div class="stats-item">
+                    <span>图片尺寸：</span>
+                    <span class="stats-value" id="originalDimensions">-</span>
+                </div>
+            </div>
+
+            <div class="compression-options">
+                <div class="option-group">
+                    <label>🎨 优化目标：</label>
+                    <select id="optimizeTarget">
+                        <option value="size">最小文件大小</option>
+                        <option value="balance">平衡质量和大小</option>
+                        <option value="quality">保持高质量</option>
+                    </select>
+                </div>
+                <div class="option-group">
+                    <label>📐 最大宽度（像素）：</label>
+                    <input type="number" id="maxWidth" value="1920" min="100" max="4000">
+                </div>
+                <div class="option-group">
+                    <label>📐 最大高度（像素）：</label>
+                    <input type="number" id="maxHeight" value="1080" min="100" max="4000">
+                </div>
+                <div class="option-group">
+                    <label>💾 输出格式：</label>
+                    <select id="outputFormat">
+                        <option value="auto">自动选择</option>
+                        <option value="webp">WebP（推荐）</option>
+                        <option value="jpeg">JPEG</option>
+                        <option value="png">PNG</option>
+                        <option value="svg">SVG（矢量图）</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button onclick="analyzeImage()">📊 分析图片</button>
+                <button onclick="optimizeImage()" class="secondary">🚀 开始优化</button>
+                <button onclick="splitBase64()" class="warning">✂️ 分割字符串</button>
+                <button onclick="clearAll()" class="danger">🗑️ 清空</button>
+            </div>
+        </div>
+
+        <div id="messageBox" class="info-box" style="display: none;"></div>
+
+        <div id="resultSection" class="hidden">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('preview')">预览对比</button>
+                <button class="tab" onclick="switchTab('compressed')">压缩结果</button>
+                <button class="tab" onclick="switchTab('code')">代码</button>
+                <button class="tab" onclick="switchTab('svg')">SVG优化</button>
+            </div>
+
+            <!-- 预览对比标签 -->
+            <div class="tab-content active" id="previewTab">
+                <div class="preview-section">
+                    <div class="preview-box">
+                        <h3>原始图片</h3>
+                        <img id="originalImage" class="image-preview" alt="原始图片">
+                    </div>
+                    <div class="preview-box">
+                        <h3>优化后</h3>
+                        <img id="optimizedImage" class="image-preview" alt="优化后图片">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 压缩结果标签 -->
+            <div class="tab-content" id="compressedTab">
+                <div class="output-section">
+                    <h3>📈 优化结果</h3>
+                    <div class="stats">
+                        <div class="stats-item">
+                            <span>原始大小：</span>
+                            <span class="stats-value" id="origSize">0 KB</span>
+                        </div>
+                        <div class="stats-item">
+                            <span>优化后大小：</span>
+                            <span class="stats-value" id="optSize">0 KB</span>
+                        </div>
+                        <div class="stats-item">
+                            <span>压缩率：</span>
+                            <span class="stats-value" id="compressionRatio">0%</span>
+                        </div>
+                        <div class="stats-item">
+                            <span>节省空间：</span>
+                            <span class="stats-value" id="savedSpace">0 KB</span>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button onclick="downloadOptimized()" class="secondary">💾 下载优化后图片</button>
+                        <button onclick="copyOptimizedBase64()">📋 复制 Base64</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 代码标签 -->
+            <div class="tab-content" id="codeTab">
+                <div class="output-section">
+                    <h3>📄 优化后的 Base64 代码：</h3>
+                    <div class="output-code" id="outputCode"></div>
+                    <div class="button-group">
+                        <button onclick="copyOptimizedBase64()">📋 复制代码</button>
+                        <button onclick="downloadAsFile()" class="secondary">💾 下载为文件</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SVG优化标签 -->
+            <div class="tab-content" id="svgTab">
+                <div class="output-section">
+                    <h3>🎨 SVG 优化选项：</h3>
+                    <div class="compression-options">
+                        <div class="option-group">
+                            <label>简化路径：</label>
+                            <input type="checkbox" id="simplifyPaths" checked>
+                        </div>
+                        <div class="option-group">
+                            <label>移除元数据：</label>
+                            <input type="checkbox" id="removeMetadata" checked>
+                        </div>
+                        <div class="option-group">
+                            <label>精度：</label>
+                            <select id="precision">
+                                <option value="1">低（最小）</option>
+                                <option value="2" selected>中</option>
+                                <option value="3">高（质量）</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="convertToOptimizedSVG()">🔄 转换为优化的 SVG</button>
+                    <div id="svgOutput" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let originalImageData = null;
+        let optimizedImageData = null;
+
+        function showMessage(message, type = 'info') {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.className = 'info-box ' + type;
+            messageBox.style.display = 'block';
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 5000);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function cleanBase64(base64) {
+            if (base64.includes(',')) {
+                base64 = base64.split(',')[1];
+            }
+            return base64.replace(/\s/g, '');
+        }
+
+        function getImageFormat(base64) {
+            const binaryString = atob(base64.substring(0, 100));
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+
+            if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47) return 'png';
+            if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) return 'jpeg';
+            if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46) return 'gif';
+            if (bytes[0] === 0x42 && bytes[1] === 0x4D) return 'bmp';
+            if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+                bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return 'webp';
+            return 'png';
+        }
+
+        function analyzeImage() {
+            const base64Input = document.getElementById('base64Input').value.trim();
+            if (!base64Input) {
+                showMessage('请输入 Base64 字符串！', 'error');
+                return;
+            }
+
+            const cleanedBase64 = cleanBase64(base64Input);
+            const format = getImageFormat(cleanedBase64);
+
+            // 计算大小
+            const size = cleanedBase64.length * 0.75; // Base64 比原图大约 33%
+
+            // 显示统计信息
+            document.getElementById('inputStats').style.display = 'block';
+            document.getElementById('originalSize').textContent = formatFileSize(size);
+            document.getElementById('originalFormat').textContent = format.toUpperCase();
+
+            // 加载图片获取尺寸
+            const img = new Image();
+            img.onload = function() {
+                document.getElementById('originalDimensions').textContent = `${this.width} × ${this.height}`;
+                originalImageData = {
+                    width: this.width,
+                    height: this.height,
+                    size: size,
+                    format: format,
+                    base64: cleanedBase64,
+                    dataUrl: `data:image/${format};base64,${cleanedBase64}`
+                };
+                document.getElementById('originalImage').src = this.src;
+                showMessage('图片分析完成！', 'success');
+            };
+            img.onerror = function() {
+                showMessage('无法加载图片！', 'error');
+            };
+            img.src = `data:image/${format};base64,${cleanedBase64}`;
+        }
+
+        function optimizeImage() {
+            if (!originalImageData) {
+                analyzeImage();
+                if (!originalImageData) return;
+            }
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+
+            img.onload = function() {
+                // 获取优化参数
+                const maxWidth = parseInt(document.getElementById('maxWidth').value);
+                const maxHeight = parseInt(document.getElementById('maxHeight').value);
+                const outputFormat = document.getElementById('outputFormat').value;
+                const optimizeTarget = document.getElementById('optimizeTarget').value;
+
+                // 计算新尺寸
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxWidth || height > maxHeight) {
+                    const ratio = Math.min(maxWidth / width, maxHeight / height);
+                    width *= ratio;
+                    height *= ratio;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                // 设置压缩质量
+                let quality = 0.8;
+                if (optimizeTarget === 'size') quality = 0.6;
+                else if (optimizeTarget === 'quality') quality = 0.95;
+
+                // 绘制并压缩
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // 选择输出格式
+                let finalFormat = outputFormat;
+                if (outputFormat === 'auto') {
+                    // 自动选择最优格式
+                    if (width > 1000 || height > 1000) {
+                        finalFormat = 'jpeg'; // 大图用 JPEG
+                    } else if (hasTransparency(img)) {
+                        finalFormat = 'png'; // 有透明度用 PNG
+                    } else {
+                        finalFormat = 'webp'; // 其他用 WebP
+                    }
+                }
+
+                // 转换为 Base64
+                const mimeType = finalFormat === 'jpg' ? 'jpeg' : finalFormat;
+                const optimizedBase64 = canvas.toDataURL(`image/${mimeType}`, quality);
+                const optimizedCleanBase64 = cleanBase64(optimizedBase64);
+
+                // 保存优化后的数据
+                optimizedImageData = {
+                    width: width,
+                    height: height,
+                    size: optimizedCleanBase64.length * 0.75,
+                    format: finalFormat,
+                    base64: optimizedCleanBase64,
+                    dataUrl: optimizedBase64
+                };
+
+                // 显示结果
+                displayResults();
+                showMessage('优化完成！', 'success');
+            };
+
+            img.src = originalImageData.dataUrl;
+        }
+
+        function hasTransparency(img) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            try {
+                const imageData = ctx.getImageData(0, 0, 1, 1);
+                return imageData.data[3] < 255;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function displayResults() {
+            document.getElementById('resultSection').classList.remove('hidden');
+
+            // 显示优化后的图片
+            document.getElementById('optimizedImage').src = optimizedImageData.dataUrl;
+
+            // 显示统计信息
+            document.getElementById('origSize').textContent = formatFileSize(originalImageData.size);
+            document.getElementById('optSize').textContent = formatFileSize(optimizedImageData.size);
+
+            const reduction = ((originalImageData.size - optimizedImageData.size) / originalImageData.size * 100).toFixed(1);
+            const saved = originalImageData.size - optimizedImageData.size;
+
+            document.getElementById('compressionRatio').textContent = reduction + '%';
+            document.getElementById('compressionRatio').className = 'stats-value ' + (reduction > 0 ? 'reduction' : 'increase');
+            document.getElementById('savedSpace').textContent = formatFileSize(saved);
+            document.getElementById('savedSpace').className = 'stats-value ' + (saved > 0 ? 'reduction' : 'increase');
+
+            // 显示代码
+            document.getElementById('outputCode').textContent = optimizedImageData.dataUrl;
+        }
+
+        function switchTab(tabName) {
+            // 切换标签样式
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 切换内容
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        function copyOptimizedBase64() {
+            if (!optimizedImageData) {
+                showMessage('没有可复制的优化数据！', 'error');
+                return;
+            }
+
+            navigator.clipboard.writeText(optimizedImageData.dataUrl).then(() => {
+                showMessage('已复制到剪贴板！', 'success');
+            });
+        }
+
+        function downloadOptimized() {
+            if (!optimizedImageData) {
+                showMessage('没有可下载的数据！', 'error');
+                return;
+            }
+
+            const a = document.createElement('a');
+            a.href = optimizedImageData.dataUrl;
+            a.download = `optimized_image.${optimizedImageData.format}`;
+            a.click();
+        }
+
+        function downloadAsFile() {
+            if (!optimizedImageData) {
+                showMessage('没有可下载的数据！', 'error');
+                return;
+            }
+
+            const blob = new Blob([optimizedImageData.dataUrl], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'base64_image.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function splitBase64() {
+            const base64Input = document.getElementById('base64Input').value.trim();
+            if (!base64Input) {
+                showMessage('请输入 Base64 字符串！', 'error');
+                return;
+            }
+
+            const cleanedBase64 = cleanBase64(base64Input);
+            const chunkSize = 1000000; // 1MB 分块
+            const chunks = [];
+
+            for (let i = 0; i < cleanedBase64.length; i += chunkSize) {
+                chunks.push(cleanedBase64.substring(i, i + chunkSize));
+            }
+
+            // 创建分割后的代码
+            const splitCode = `// Base64 分为 ${chunks.length} 块
+const base64Chunks = [
+${chunks.map(chunk => `    '${chunk}'`).join(',\n')}
+];
+
+// 重新组合
+const fullBase64 = base64Chunks.join('');
+const dataUrl = 'data:image/*;base64,' + fullBase64;`;
+
+            // 显示结果
+            const blob = new Blob([splitCode], { type: 'text/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'base64_chunks.js';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showMessage(`已分割成 ${chunks.length} 块！`, 'success');
+        }
+
+        function convertToOptimizedSVG() {
+            if (!optimizedImageData) {
+                showMessage('请先优化图片！', 'error');
+                return;
+            }
+
+            const simplifyPaths = document.getElementById('simplifyPaths').checked;
+            const removeMetadata = document.getElementById('removeMetadata').checked;
+            const precision = parseInt(document.getElementById('precision').value);
+
+            // 创建优化的 SVG
+            let svg = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+            if (!removeMetadata) {
+                svg += `<!-- Generator: Base64 Optimizer -->\n`;
+                svg += `<!-- Original: ${originalImageData.format.toUpperCase()} ${originalImageData.width}x${originalImageData.height} -->\n`;
+                svg += `<!-- Optimized: ${optimizedImageData.format.toUpperCase()} ${optimizedImageData.width}x${optimizedImageData.height} -->\n`;
+            }
+
+            svg += `<svg xmlns="http://www.w3.org/2000/svg"\n`;
+            svg += `     xmlns:xlink="http://www.w3.org/1999/xlink"\n`;
+            svg += `     width="${optimizedImageData.width}"\n`;
+            svg += `     height="${optimizedImageData.height}"\n`;
+            svg += `     viewBox="0 0 ${optimizedImageData.width} ${optimizedImageData.height}">\n`;
+
+            if (!removeMetadata) {
+                svg += `  <title>Optimized Image</title>\n`;
+                svg += `  <desc>Original size: ${formatFileSize(originalImageData.size)}, Optimized: ${formatFileSize(optimizedImageData.size)}</desc>\n`;
+            }
+
+            svg += `  <image width="${optimizedImageData.width}"\n`;
+            svg += `         height="${optimizedImageData.height}"\n`;
+            svg += `         xlink:href="${optimizedImageData.dataUrl}" />\n`;
+            svg += `</svg>`;
+
+            // 显示 SVG
+            document.getElementById('svgOutput').innerHTML = `
+                <div style="margin-top: 20px;">
+                    <h4>SVG 预览：</h4>
+                    <div style="border: 1px solid #ddd; padding: 20px; background: white;">
+                        ${svg}
+                    </div>
+                    <div class="button-group" style="margin-top: 20px;">
+                        <button onclick="copySVGCode()">📋 复制 SVG</button>
+                        <button onclick="downloadSVG()" class="secondary">💾 下载 SVG</button>
+                    </div>
+                </div>
+            `;
+
+            window.currentSVG = svg;
+        }
+
+        function copySVGCode() {
+            if (!window.currentSVG) {
+                showMessage('没有可复制的 SVG！', 'error');
+                return;
+            }
+            navigator.clipboard.writeText(window.currentSVG).then(() => {
+                showMessage('SVG 已复制到剪贴板！', 'success');
+            });
+        }
+
+        function downloadSVG() {
+            if (!window.currentSVG) {
+                showMessage('没有可下载的 SVG！', 'error');
+                return;
+            }
+            const blob = new Blob([window.currentSVG], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'optimized_image.svg';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function clearAll() {
+            document.getElementById('base64Input').value = '';
+            document.getElementById('inputStats').style.display = 'none';
+            document.getElementById('resultSection').classList.add('hidden');
+            document.getElementById('originalImage').src = '';
+            document.getElementById('optimizedImage').src = '';
+            originalImageData = null;
+            optimizedImageData = null;
+            window.currentSVG = null;
+            showMessage('已清空所有内容', 'info');
+        }
+    </script>
+</body>
+</html>

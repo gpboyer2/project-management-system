@@ -1,0 +1,33 @@
+.field-editor-header .panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--component-border);
+}
+
+.field-editor-header .panel-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-border-secondary);
+}
+
+.field-editor-header .close-btn {
+  padding: 4px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.field-editor-header .close-btn:hover {
+  color: var(--color-text-tertiary);
+  background: var(--color-white-alpha-5);
+}
+
+.field-editor-header .close-btn i {
+  font-size: 18px;
+}

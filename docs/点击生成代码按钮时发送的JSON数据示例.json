@@ -1,0 +1,171 @@
+{
+  "softwareName": "TestSoftware",
+  "description": "测试软件配置",
+  "commNodeList": [
+    {
+      "id": "comm-node-001",
+      "name": "TCP通信节点",
+      "type": "TCP",
+      "nodeList": [
+        {
+          "id": "node-001",
+          "protocolName": "DeviceProtocol",
+          "description": "设备通信协议分发器（多协议模式）",
+          "dispatch": {
+            "mode": "multiple",
+            "field": "messageId",
+            "type": "UnsignedInt",
+            "byteOrder": "big",
+            "offset": 0,
+            "size": 2
+          },
+          "messages": {
+            "1": {
+              "name": "LoginRequest",
+              "version": "1.0",
+              "description": "登录请求协议",
+              "defaultByteOrder": "big",
+              "fields": [
+                {
+                  "type": "UnsignedInt",
+                  "fieldName": "messageId",
+                  "byteLength": 2,
+                  "description": "消息ID",
+                  "defaultValue": 1
+                },
+                {
+                  "type": "UnsignedInt",
+                  "fieldName": "userId",
+                  "byteLength": 4,
+                  "description": "用户ID"
+                },
+                {
+                  "type": "String",
+                  "fieldName": "username",
+                  "length": 32,
+                  "encoding": "UTF-8",
+                  "description": "用户名"
+                }
+              ]
+            },
+            "2": {
+              "name": "Heartbeat",
+              "version": "1.0",
+              "description": "心跳协议",
+              "defaultByteOrder": "big",
+              "fields": [
+                {
+                  "type": "UnsignedInt",
+                  "fieldName": "messageId",
+                  "byteLength": 2,
+                  "description": "消息ID",
+                  "defaultValue": 2
+                },
+                {
+                  "type": "UnsignedInt",
+                  "fieldName": "sequence",
+                  "byteLength": 4,
+                  "description": "序列号"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "node-002",
+          "protocolName": "SimpleProtocol",
+          "description": "简单协议（单协议模式）",
+          "dispatch": {
+            "mode": "single",
+            "field": "messageId",
+            "type": "UnsignedInt",
+            "byteOrder": "big",
+            "offset": 0,
+            "size": 2
+          },
+          "messages": {
+            "0": {
+              "name": "SimpleMessage",
+              "version": "1.0",
+              "description": "简单消息",
+              "defaultByteOrder": "big",
+              "fields": [
+                {
+                  "type": "UnsignedInt",
+                  "fieldName": "messageId",
+                  "byteLength": 2,
+                  "description": "消息ID"
+                },
+                {
+                  "type": "UnsignedInt",
+                  "fieldName": "value",
+                  "byteLength": 4,
+                  "description": "数值"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "comm-node-002",
+      "name": "UDP通信节点",
+      "type": "UDP",
+      "nodeList": [
+        {
+          "id": "node-003",
+          "protocolName": "SensorData",
+          "description": "传感器数据协议（单协议模式）",
+          "dispatch": {
+            "mode": "single",
+            "field": "type",
+            "type": "UnsignedInt",
+            "byteOrder": "little",
+            "offset": 0,
+            "size": 1
+          },
+          "messages": {
+            "0": {
+              "name": "SensorReading",
+              "version": "1.0",
+              "description": "传感器读数",
+              "defaultByteOrder": "little",
+              "fields": [
+                {
+                  "type": "UnsignedInt",
+                  "fieldName": "type",
+                  "byteLength": 1,
+                  "description": "类型"
+                },
+                {
+                  "type": "UnsignedInt",
+                  "fieldName": "sensorId",
+                  "byteLength": 2,
+                  "description": "传感器ID"
+                },
+                {
+                  "type": "Float",
+                  "fieldName": "temperature",
+                  "byteLength": 4,
+                  "precision": "float",
+                  "description": "温度",
+                  "unit": "°C"
+                },
+                {
+                  "type": "Float",
+                  "fieldName": "humidity",
+                  "byteLength": 4,
+                  "precision": "float",
+                  "description": "湿度",
+                  "unit": "%"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+

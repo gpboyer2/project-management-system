@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "composite": false,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "strict": false,
+    "types": ["node"],
+    "skipLibCheck": true,
+    "noEmit": true,
+    "noEmitOnError": true
+  },
+  "include": [".tsconfig-node-empty.ts"]
+}

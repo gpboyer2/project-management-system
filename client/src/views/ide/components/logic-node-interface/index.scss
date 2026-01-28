@@ -1,0 +1,193 @@
+@use '@/views/packet-config/components/packet-protocol-content/index.scss' as *;
+@use '../icd-packet-editor/index.scss' as *;
+
+.ide-interface-editor {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  flex-wrap: nowrap;
+  background-color: var(--color-bg-container);
+}
+
+/* 右侧内容区 */
+.ide-interface-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* 顶部控制栏 */
+.ide-interface-content-toolbox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--color-border-secondary);
+  background-color: var(--color-bg-container);
+  flex-shrink: 0;
+}
+
+.ide-interface-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.ide-interface-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background-color: var(--color-primary-50);
+  margin-right: 10px;
+}
+
+.ide-interface-icon {
+  color: var(--color-primary-500);
+  font-size: 16px;
+}
+
+.ide-interface-title-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.ide-interface-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+.ide-interface-subtitle {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.ide-interface-msg-id {
+  color: var(--color-text-tertiary);
+}
+
+/* 头部操作按钮区 */
+.ide-interface-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ide-interface-header-actions .el-button {
+  margin-left: 0;
+}
+
+.ide-interface-header-actions .el-button i {
+  margin-right: 4px;
+}
+
+.toolbar-status {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-right: 8px;
+}
+
+.toolbar-status--outdated {
+  color: var(--color-warning);
+  background-color: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+}
+
+.toolbar-outdated-group {
+  display: inline-flex;
+  align-items: stretch;
+  height: 24px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(230, 126, 34, 0.06) 0%, rgba(230, 126, 34, 0.03) 100%);
+  border: 1px solid rgba(230, 126, 34, 0.25);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.toolbar-outdated-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 0 12px;
+  color: rgb(230, 126, 34);
+}
+
+.toolbar-outdated-info .el-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar-outdated-group .el-button.toolbar-btn-upgrade {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: unset;
+  padding: 0 14px;
+  margin: 0;
+  border: none;
+  border-left: 1px solid rgba(230, 126, 34, 0.2);
+  border-radius: 0;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgb(230, 126, 34);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toolbar-outdated-group .el-button.toolbar-btn-upgrade:hover {
+  background: rgba(230, 126, 34, 0.12);
+}
+
+.toolbar-outdated-group .el-button.toolbar-btn-upgrade:active {
+  background: rgba(230, 126, 34, 0.2);
+}
+
+.toolbar-outdated-group .el-button.toolbar-btn-upgrade span {
+  color: rgb(230, 126, 34);
+}
+
+.toolbar-outdated-group .el-button.toolbar-btn-upgrade:focus {
+  outline: none;
+}
+
+.toolbar-outdated-group .el-button.toolbar-btn-upgrade:hover span {
+  color: rgb(217, 109, 26);
+}
+
+/* 底部内容区（单栏布局） */
+.ide-interface-content-main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* 空状态 */
+.ide-interface-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+}
+
+.ide-interface-empty p {
+  font-size: 14px;
+  margin: 12px 0 0 0;
+}
+

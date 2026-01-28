@@ -1,0 +1,18 @@
+{#
+Float 类型序列化实现
+与 float.cpp.template 对称
+
+模板变量:
+  field_name - 字段名称
+  precision - 精度 (float/double)
+#}
+{
+    {% if precision == "float" %}
+    float {{ field_name }}_value = static_cast<float>({{ data_prefix }}.{{ field_name }});
+    SerializeResult res = serialize_float_generic<float>(ctx, {{ field_name }}_value);
+    {% else %}
+    double {{ field_name }}_value = static_cast<double>({{ data_prefix }}.{{ field_name }});
+    SerializeResult res = serialize_float_generic<double>(ctx, {{ field_name }}_value);
+    {% endif %}
+    if (!res.is_success()) return res;
+}

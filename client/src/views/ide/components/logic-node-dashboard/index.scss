@@ -1,0 +1,382 @@
+/* 概览页布局 */
+.ide-dashboard-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* 基本信息编辑区 */
+.ide-dashboard-info-section {
+  background-color: var(--color-bg-container);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.ide-dashboard-info-form {
+  max-width: 600px;
+}
+
+.ide-dashboard-info-field {
+  margin-bottom: 20px;
+}
+
+.ide-dashboard-info-field:last-child {
+  margin-bottom: 0;
+}
+
+.ide-dashboard-info-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.ide-dashboard-info-required {
+  color: var(--color-error);
+  margin-right: 4px;
+}
+
+.ide-dashboard-info-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-container);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.ide-dashboard-info-input:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px var(--color-blue-alpha-10);
+}
+
+.ide-dashboard-info-input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.ide-dashboard-info-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-container);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 4px;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  transition: all 0.2s;
+}
+
+.ide-dashboard-info-textarea:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px var(--color-blue-alpha-10);
+}
+
+.ide-dashboard-info-textarea::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+/* 接口列表样式 */
+.ide-interface-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ide-interface-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ide-interface-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.ide-interface-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-bg-container);
+  background-color: var(--color-primary-500);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ide-interface-add-btn:hover {
+  background-color: var(--color-primary-600);
+}
+
+.ide-interface-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ide-interface-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background-color: var(--color-bg-container);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.ide-interface-card:hover {
+  border-color: var(--color-text-tertiary);
+  box-shadow: 0 2px 8px var(--color-black-alpha-4);
+}
+
+.ide-interface-card-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ide-interface-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 20px;
+}
+
+.ide-interface-icon--tcp {
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-500);
+}
+
+.ide-interface-icon--udp {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.ide-interface-icon--can {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.ide-interface-icon--serial {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.ide-interface-icon--default {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
+}
+
+.ide-interface-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ide-interface-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ide-interface-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.ide-interface-direction-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+.ide-interface-direction-badge--input {
+  color: var(--color-info);
+  background-color: var(--color-info-bg);
+}
+
+.ide-interface-direction-badge--output {
+  color: var(--color-success);
+  background-color: var(--color-success-bg);
+}
+
+.ide-interface-detail {
+  font-size: 13px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.ide-interface-card-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.ide-interface-packet-count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.ide-interface-packet-label {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+
+.ide-interface-packet-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-primary-500);
+}
+
+.ide-interface-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.ide-interface-status-label {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+
+.ide-interface-status-value {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.ide-interface-status-value.status-connected {
+  color: var(--color-success);
+  background-color: var(--color-success-bg);
+}
+
+.ide-interface-status-value.status-connecting {
+  color: var(--color-warning);
+  background-color: var(--color-warning-bg);
+}
+
+.ide-interface-status-value.status-error {
+  color: var(--color-error);
+  background-color: var(--color-error-bg);
+}
+
+.ide-interface-status-value.status-disconnected {
+  color: var(--color-text-tertiary);
+  background-color: var(--color-bg-tertiary);
+}
+
+.ide-interface-config-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  background-color: var(--color-bg-container);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ide-interface-config-btn:hover {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-text-tertiary);
+}
+
+.ide-interface-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-primary {
+  color: var(--color-primary-500);
+  border-color: var(--color-primary-100);
+  background-color: var(--color-primary-50);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-100);
+  border-color: var(--color-primary-500);
+}
+
+.btn-secondary {
+  color: var(--color-text-secondary);
+}
+
+.btn-disconnect {
+  color: var(--color-error);
+  border-color: var(--color-error-border);
+  background-color: var(--color-error-bg);
+}
+
+.btn-disconnect:hover {
+  background-color: var(--color-error-alpha-20);
+  border-color: var(--color-error);
+}
+
+.btn-danger {
+  color: var(--color-error-critical);
+  border-color: var(--color-error-border);
+  background-color: var(--color-error-bg);
+}
+
+.btn-danger:hover {
+  background-color: var(--color-error-alpha-20);
+  border-color: var(--color-error-critical);
+}
+
+.ide-interface-config-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ide-list-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+}
+
+.ide-list-empty p {
+  margin-bottom: 16px;
+}
+
+.ide-topology {
+  height: 500px;
+  background-color: var(--color-bg-container);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 12px;
+  overflow: hidden;
+}

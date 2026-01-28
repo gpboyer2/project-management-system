@@ -1,0 +1,46 @@
+{#
+Bitfield 类型序列化实现
+与 bitfield.cpp.template 对称
+从多个子字段重建原始位域值
+
+模板变量:
+  field_name - 字段名称
+  byte_length - 字节长度
+  is_reversed - 是否逆序
+  sub_fields - 子字段数组
+#}
+{# Bitfield 序列化：内部使用 uint64_t 做位运算，但写出字节数必须与 byte_length 匹配。
+   因此在写入前将值收缩为与 byte_length 对应的无符号类型。 #}
+{% set storage_type = "uint64_t" %}
+{% if byte_length == 1 %}
+{%   set storage_type = "uint8_t" %}
+{% elif byte_length == 2 %}
+{%   set storage_type = "uint16_t" %}
+{% elif byte_length == 4 %}
+{%   set storage_type = "uint32_t" %}
+{% elif byte_length == 8 %}
+{%   set storage_type = "uint64_t" %}
+{% endif %}
+{
+    // 重建位域原始值
+    uint64_t {{ field_name }}_raw = 0;
+
+    {% for sub_field in sub_fields %}
+    {
+        // 位段: {{ sub_field.name }} (bit {{ sub_field.startBit }} - {{ sub_field.endBit }})
+        uint64_t {{ sub_field.name }}_value = {{ data_prefix }}.{{ field_name }}.{{ sub_field.name }};
+
+        {% set width = sub_field.endBit - sub_field.startBit + 1 %}
+        {% if width == 64 %}
+        uint64_t mask = ~0ULL;
+        {% else %}
+        uint64_t mask = (1ULL << {{ width }}) - 1;
+        {% endif %}
+        {{ field_name }}_raw |= (({{ sub_field.name }}_value & mask) << {{ sub_field.startBit }});
+    }
+    {% endfor %}
+
+    {{ storage_type }} {{ field_name }}_raw_narrow = static_cast<{{ storage_type }}>({{ field_name }}_raw);
+    SerializeResult res = serialize_unsigned_int_generic<{{ storage_type }}>(ctx, {{ field_name }}_raw_narrow);
+    if (!res.is_success()) return res;
+}

@@ -1,0 +1,15 @@
+{#
+String 类型内联实现
+调用 protocol_common.h 中的 deserialize_string_generic() 函数
+
+模板变量:
+  field_name - 字段名称
+  length - 字符串长度
+  encoding - 编码格式
+#}
+{
+    std::string {{ field_name }}_str;
+    DeserializeResult res = deserialize_string_generic(ctx, {{ field_name }}_str, {{ length }}, "{{ encoding }}");
+    if (!res.is_success()) return res;
+    {{ result_prefix }}.{{ field_name }} = {{ field_name }}_str;
+}

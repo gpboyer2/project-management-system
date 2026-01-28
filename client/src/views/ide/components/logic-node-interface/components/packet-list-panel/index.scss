@@ -1,0 +1,253 @@
+.ide-interface-packets {
+  display: flex;
+  flex-direction: column;
+  width: 180px;
+  height: 100%;
+  border-right: 1px solid var(--component-border);
+  flex-shrink: 0;
+}
+
+.ide-interface-packets-header {
+  height: 56px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--component-text-tertiary);
+  border-bottom: 1px solid var(--component-border);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.ide-interface-packets-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--component-text-secondary);
+}
+
+.ide-interface-packets-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.ide-interface-packets-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--component-text-secondary);
+  gap: 8px;
+}
+
+.ide-interface-packets-empty span {
+  font-size: 12px;
+  text-align: center;
+}
+
+.ide-packet-item {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  border: 1px solid var(--component-border);
+  cursor: pointer;
+  transition: background 0.2s;
+  color: var(--component-text-primary);
+}
+
+.ide-packet-item:hover {
+  background: var(--component-tree-hover);
+  border-color: var(--component-primary);
+}
+
+.ide-packet-item.ide-packet-item--active {
+  background: var(--component-tree-selected);
+  border: 1px solid var(--component-primary);
+  color: var(--component-tree-selected-color);
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+}
+
+/* 报文项头部（名称 + 移除按钮） */
+.ide-packet-item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.ide-packet-item-name {
+  font-size: 13px;
+  color: var(--component-text-primary);
+  margin-bottom: 6px;
+  flex: 1;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+/* 悬停显示的移除按钮 */
+.ide-packet-item-remove {
+  opacity: 0;
+  transition: all 0.15s ease;
+  padding: 2px 4px !important;
+  min-height: auto !important;
+  height: 20px !important;
+  width: 20px !important;
+  color: var(--component-text-tertiary) !important;
+  flex-shrink: 0;
+  border-radius: 4px !important;
+  margin: -2px -4px 0 0;
+}
+
+.ide-packet-item-remove:hover {
+  color: var(--el-color-danger) !important;
+  background: var(--color-error-alpha-10) !important;
+}
+
+.ide-packet-item:hover .ide-packet-item-remove {
+  opacity: 1;
+}
+
+.ide-packet-item-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ide-packet-item-direction {
+  font-size: 11px;
+  color: var(--component-text-secondary);
+}
+
+// 通信配置信息区域
+.ide-packet-item-comm-config {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--component-border);
+}
+
+// 报文配置信息（MessageID / Topic）
+.ide-packet-item-config {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.ide-packet-item-config .config-label {
+  color: var(--component-text-tertiary);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.ide-packet-item-config .config-value {
+  color: var(--component-text-primary);
+  font-family: monospace;
+  font-size: 10px;
+  background: var(--color-bg-secondary);
+  padding: 1px 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100px;
+}
+
+.ide-packet-item-config .config-value--empty {
+  color: var(--component-text-tertiary);
+  font-style: italic;
+  font-family: inherit;
+  background: transparent;
+  padding: 0;
+}
+
+.ide-packet-item-config--dds .config-value {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+.ide-packet-item-config--dds .config-value--empty {
+  background: transparent;
+  color: var(--component-text-tertiary);
+}
+
+// DDS QoS 配置
+.ide-packet-item-qos {
+  font-size: 10px;
+  color: var(--component-text-tertiary);
+  padding-left: 2px;
+}
+
+/* 右键菜单 */
+.ide-packet-context-menu {
+  position: fixed;
+  background: var(--color-bg-container);
+  border: 1px solid var(--component-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  z-index: 2000;
+  min-width: 100px;
+  padding: 4px;
+}
+
+.ide-packet-context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--component-text-primary);
+  transition: all 0.15s ease;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.ide-packet-context-menu-item:hover {
+  background: var(--component-tree-hover);
+}
+
+.ide-packet-context-menu-item:active {
+  transform: scale(0.98);
+}
+
+.ide-packet-context-menu-item--danger {
+  color: var(--el-color-danger);
+}
+
+.ide-packet-context-menu-item--danger:hover {
+  background: var(--color-error-alpha-10);
+}
+
+/* 右键菜单过渡动画 */
+.context-menu-enter-active,
+.context-menu-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.context-menu-enter-from,
+.context-menu-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.context-menu-enter-to,
+.context-menu-leave-from {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ide-interface-packets-actions {
+  padding: 12px;
+  border-top: 1px solid var(--component-border);
+  flex-shrink: 0;
+}

@@ -1,0 +1,178 @@
+{
+    "root": true,
+    "env": {
+        "browser": true,
+        "es2021": true,
+        "node": true
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:vue/vue3-recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "parser": "vue-eslint-parser",
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "parser": "@typescript-eslint/parser",
+        "sourceType": "module",
+        "vueFeatures": {
+            "setupCompilerMacros": true
+        }
+    },
+    "plugins": [
+        "vue",
+        "@typescript-eslint"
+    ],
+    "globals": {
+        "ref": "readonly",
+        "computed": "readonly",
+        "watch": "readonly",
+        "watchEffect": "readonly",
+        "onMounted": "readonly",
+        "onUnmounted": "readonly",
+        "onBeforeMount": "readonly",
+        "onBeforeUnmount": "readonly",
+        "onUpdated": "readonly",
+        "onBeforeUpdate": "readonly",
+        "inject": "readonly",
+        "provide": "readonly",
+        "defineProps": "readonly",
+        "defineEmits": "readonly",
+        "defineExpose": "readonly",
+        "nextTick": "readonly"
+    },
+    "rules": {
+        "vue/multi-word-component-names": "off",
+        "vue/html-self-closing": [
+            "error",
+            {
+                "html": {
+                    "void": "always",
+                    "normal": "always",
+                    "component": "always"
+                }
+            }
+        ],
+        "vue/max-attributes-per-line": [
+            "error",
+            {
+                "singleline": {
+                    "max": 3
+                },
+                "multiline": {
+                    "max": 1
+                }
+            }
+        ],
+        "vue/first-attribute-linebreak": [
+            "error",
+            {
+                "singleline": "ignore",
+                "multiline": "below"
+            }
+        ],
+        "vue/html-closing-bracket-spacing": [
+            "error",
+            {
+                "startTag": "never",
+                "endTag": "never",
+                "selfClosingTag": "always"
+            }
+        ],
+        "vue/html-closing-bracket-newline": [
+            "error",
+            {
+                "singleline": "never",
+                "multiline": "always",
+                "selfClosingTag": {
+                    "singleline": "never",
+                    "multiline": "always"
+                }
+            }
+        ],
+        "vue/html-indent": [
+            "error",
+            2
+        ],
+        "vue/singleline-html-element-content-newline": [
+            "error",
+            {
+                "ignoreWhenNoAttributes": true,
+                "ignoreWhenEmpty": true,
+                "ignores": [
+                    "pre",
+                    "textarea"
+                ]
+            }
+        ],
+        "vue/multiline-html-element-content-newline": [
+            "error",
+            {
+                "ignoreWhenEmpty": true,
+                "ignores": [
+                    "pre",
+                    "textarea"
+                ],
+                "allowEmptyLines": false
+            }
+        ],
+        "vue/html-quotes": [
+            "error",
+            "double"
+        ],
+        "vue/html-comment-content-newline": [
+            "error",
+            {
+                "singleline": "never",
+                "multiline": "always"
+            }
+        ],
+        "vue/html-comment-content-spacing": [
+            "error",
+            "always"
+        ],
+        "vue/no-multi-spaces": [
+            "error",
+            {
+                "ignoreProperties": false
+            }
+        ],
+        "vue/no-spaces-around-equal-signs-in-attribute": [
+            "error"
+        ],
+        "vue/padding-line-between-tags": [
+            "error",
+            [
+                {
+                    "blankLine": "always",
+                    "prev": "*",
+                    "next": "*"
+                }
+            ]
+        ],
+        "indent": [
+            "error",
+            2,
+            {
+                "SwitchCase": 1
+            }
+        ],
+        "@typescript-eslint/no-require-imports": "off",
+        "semi": [
+            "error",
+            "always"
+        ],
+        "no-empty": "warn",
+        "no-console": "off",
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": [
+            "warn",
+            {
+                "argsIgnorePattern": "^_"
+            }
+        ],
+        "@typescript-eslint/no-unused-expressions": "warn",
+        "no-debugger": "warn",
+        "@typescript-eslint/no-explicit-any": "warn"
+    }
+}

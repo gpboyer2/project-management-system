@@ -1,0 +1,10 @@
+{#
+直接插入字段解析内联代码的模板
+模板变量:
+  field_name - 字段名称
+  field_type - 字段类型
+  field_inline_code - 字段内联代码
+  description - 字段描述（可选）
+  has_description - 是否有描述
+#}
+{{ field_inline_code }}

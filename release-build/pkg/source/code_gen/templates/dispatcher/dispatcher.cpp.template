@@ -1,0 +1,118 @@
+{#
+分发器实现文件模板
+模板变量:
+  protocol_name - 分发器名称
+  PROTOCOL_NAME_UPPER - 分发器名称大写
+  namespace - 命名空间名称
+  dispatch_field - 分发字段名称
+  dispatch_cpp_type - 分发字段 C++ 类型
+  dispatch_offset - 分发字段偏移量
+  dispatch_size - 分发字段大小（字节）
+  dispatch_byte_order - 分发字段字节序
+  default_byte_order - 默认字节序枚举值
+  messages - 子协议信息数组
+  has_messages - 是否有子协议
+#}
+/**
+ * {{ protocol_name }} Protocol Dispatcher Implementation
+ * Auto-generated - DO NOT MODIFY
+ */
+
+#include "{{ protocol_name | lower }}_dispatcher.h"
+
+namespace {{ namespace }} {
+
+// ============================================================================
+// Deserialize Function
+// ============================================================================
+DeserializeResult deserialize_{{ protocol_name }}Dispatcher(
+    const uint8_t* data,
+    size_t length,
+    {{ protocol_name }}DispatcherResult& result,
+    ByteOrder byte_order)
+{
+    // Check if data is long enough to read MessageID
+    if (length < {{ dispatch_offset }} + {{ dispatch_size }}) {
+        return DeserializeResult(INSUFFICIENT_DATA,
+            "Data too short to read MessageID at offset {{ dispatch_offset }}",
+            0);
+    }
+
+    // Read MessageID using protocol_common.h utility function
+    // Note: MessageID byte order is fixed by configuration ({{ dispatch_byte_order }}),
+    //       independent of the byte_order parameter used for other fields
+    {{ dispatch_cpp_type }} messageId = read_with_byte_order<{{ dispatch_cpp_type }}>(
+        data + {{ dispatch_offset }}, {{ dispatch_byte_order }});
+    result.{{ dispatch_field }} = messageId;
+
+    // Dispatch to corresponding sub-protocol deserializer based on MessageID
+    switch (messageId) {
+{% for msg in messages %}
+    case {{ msg.id_value }}:  // {{ msg.id_hex }}
+    {
+        result.messageType = {{ msg.enum_name }};
+        auto ptr = std::make_shared<{{ msg.result_type }}>();
+        DeserializeResult res = deserialize_{{ msg.protocol_name }}(data, length, *ptr, byte_order);
+        if (res.is_success()) {
+            result.data = ptr;
+        }
+        return res;
+    }
+
+{% endfor %}
+    default:
+        result.messageType = {{ PROTOCOL_NAME_UPPER }}_MSG_UNKNOWN;
+        result.data = nullptr;
+        return DeserializeResult(INVALID_VALUE,
+            "Unknown MessageID: " + std::to_string(messageId),
+            {{ dispatch_offset }} + {{ dispatch_size }});
+    }
+}
+
+// ============================================================================
+// Serialize Function
+// ============================================================================
+SerializeResult serialize_{{ protocol_name }}Dispatcher(
+    const {{ protocol_name }}DispatcherResult& data,
+    uint8_t* buffer,
+    size_t buffer_size,
+    ByteOrder byte_order)
+{
+    // Check if data pointer is valid
+    if (!data.hasData()) {
+        return SerializeResult(INVALID_VALUE,
+            "Cannot serialize: no data pointer set",
+            0);
+    }
+
+    // Dispatch to corresponding sub-protocol serializer based on messageType
+    switch (data.messageType) {
+{% for msg in messages %}
+    case {{ msg.enum_name }}:
+        return serialize_{{ msg.protocol_name }}(*data.as<{{ msg.result_type }}>(), buffer, buffer_size, byte_order);
+
+{% endfor %}
+    case {{ PROTOCOL_NAME_UPPER }}_MSG_UNKNOWN:
+    default:
+        return SerializeResult(INVALID_VALUE,
+            "Cannot serialize unknown message type",
+            0);
+    }
+}
+
+// ============================================================================
+// Get MessageType Name
+// ============================================================================
+const char* get_{{ protocol_name }}MessageTypeName({{ protocol_name }}MessageType type) {
+    switch (type) {
+{% for msg in messages %}
+    case {{ msg.enum_name }}:
+        return "{{ msg.enum_name }}";
+{% endfor %}
+    case {{ PROTOCOL_NAME_UPPER }}_MSG_UNKNOWN:
+    default:
+        return "UNKNOWN";
+    }
+}
+
+} // namespace {{ namespace }}

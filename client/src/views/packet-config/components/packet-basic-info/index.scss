@@ -1,0 +1,12 @@
+.form-value {
+  min-height: 32px;
+  padding: 6px 8px;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.form-value-textarea {
+  min-height: 72px;
+  white-space: pre-wrap;
+}

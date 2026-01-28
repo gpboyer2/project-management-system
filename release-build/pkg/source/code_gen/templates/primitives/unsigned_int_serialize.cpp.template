@@ -1,0 +1,29 @@
+{#
+UnsignedInt 类型序列化实现
+与 unsigned_int.cpp.template 对称，用于将结构体字段序列化为字节数组
+
+模板变量:
+  field_name - 字段名称
+  byte_length - 字节长度
+#}
+{# 序列化模式：根据 byte_length 选择最合适的底层无符号整数类型。
+   1 -> uint8_t
+   2 -> uint16_t
+   4 -> uint32_t
+   8 -> uint64_t
+   其它情况退化为 uint64_t（协议配置如果写错，就让问题暴露出来）。 #}
+{% set cpp_type = "uint64_t" %}
+{% if byte_length == 1 %}
+{%   set cpp_type = "uint8_t" %}
+{% elif byte_length == 2 %}
+{%   set cpp_type = "uint16_t" %}
+{% elif byte_length == 4 %}
+{%   set cpp_type = "uint32_t" %}
+{% elif byte_length == 8 %}
+{%   set cpp_type = "uint64_t" %}
+{% endif %}
+{
+    {{ cpp_type }} {{ field_name }}_raw = static_cast<{{ cpp_type }}>({{ data_prefix }}.{{ field_name }});
+    SerializeResult res = serialize_unsigned_int_generic<{{ cpp_type }}>(ctx, {{ field_name }}_raw);
+    if (!res.is_success()) return res;
+}

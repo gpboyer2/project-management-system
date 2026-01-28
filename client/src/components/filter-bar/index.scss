@@ -1,0 +1,33 @@
+// 统一筛选栏组件样式
+// 一行展示所有筛选选项，无收起/高级按钮
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: var(--filter-bar-bg);
+  border-radius: 4px;
+  margin-bottom: 16px;
+
+  // 确保筛选栏在一行内显示
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  // 隐藏滚动条但保持滚动功能
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  .filter-bar-search {
+    width: 240px;
+  }
+
+  .filter-bar-select {
+    width: 160px;
+  }
+}
+
+.filter-bar::-webkit-scrollbar {
+  display: none;
+}

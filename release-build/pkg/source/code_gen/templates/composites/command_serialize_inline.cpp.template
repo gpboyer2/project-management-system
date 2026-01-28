@@ -1,0 +1,64 @@
+{#
+Command 类型序列化内联代码模板
+不定义函数，直接生成内联代码用于插入主函数中
+
+模板变量:
+  field_name - 字段名称
+  base_type - 基础类型 (signed/unsigned)
+  byte_length - 字节长度
+  is_reversed - 是否逆序
+  cases - 分支数组，每个包含: value, case_name, case_serialize_code
+  data_prefix - 数据变量前缀（如 "data"）
+#}
+{# 根据 byte_length 选择合适的有符号整数类型 #}
+{% set cpp_type_signed = "int64_t" %}
+{% if byte_length == 1 %}
+{%   set cpp_type_signed = "int8_t" %}
+{% elif byte_length == 2 %}
+{%   set cpp_type_signed = "int16_t" %}
+{% elif byte_length == 4 %}
+{%   set cpp_type_signed = "int32_t" %}
+{% elif byte_length == 8 %}
+{%   set cpp_type_signed = "int64_t" %}
+{% endif %}
+{# 根据 byte_length 选择合适的无符号整数类型 #}
+{% set cpp_type_unsigned = "uint64_t" %}
+{% if byte_length == 1 %}
+{%   set cpp_type_unsigned = "uint8_t" %}
+{% elif byte_length == 2 %}
+{%   set cpp_type_unsigned = "uint16_t" %}
+{% elif byte_length == 4 %}
+{%   set cpp_type_unsigned = "uint32_t" %}
+{% elif byte_length == 8 %}
+{%   set cpp_type_unsigned = "uint64_t" %}
+{% endif %}
+{
+    // 序列化命令字段: {{ field_name }}
+    {% if base_type == "signed" %}
+    {{ cpp_type_signed }} {{ field_name }}_cmd = {{ data_prefix }}.{{ field_name }}_command;
+    {% else %}
+    {{ cpp_type_unsigned }} {{ field_name }}_cmd = {{ data_prefix }}.{{ field_name }}_command;
+    {% endif %}
+    // 序列化命令字
+    {% if base_type == "signed" %}
+    SerializeResult cmd_res = serialize_signed_int_generic<{{ cpp_type_signed }}>(ctx, {{ field_name }}_cmd);
+    {% else %}
+    SerializeResult cmd_res = serialize_unsigned_int_generic<{{ cpp_type_unsigned }}>(ctx, {{ field_name }}_cmd);
+    {% endif %}
+    if (!cmd_res.is_success()) {
+        return cmd_res;
+    }
+    // 根据命令字序列化对应的数据结构
+    bool command_handled = false;
+    {% for case in cases %}
+    if ({{ field_name }}_cmd == {{ case.value }}) {
+        // 命令: {{ case.value }} - {{ case.case_name }}
+        {{ case.case_serialize_code | indent(8) }}
+        command_handled = true;
+    }
+    {% endfor %}
+    if (!command_handled) {
+        return SerializeResult(INVALID_VALUE, "Unknown command: " + std::to_string({{ field_name }}_cmd), ctx.offset);
+    }
+}
+

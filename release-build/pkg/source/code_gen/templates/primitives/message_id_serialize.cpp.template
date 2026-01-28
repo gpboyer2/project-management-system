@@ -1,0 +1,50 @@
+{#
+MessageId 类型序列化实现
+与 message_id.cpp.template 对称，用于将结构体字段序列化为字节数组
+
+模板变量:
+  field_name - 字段名称
+  byte_length - 字节长度
+  value_type - 数据类型 ("UnsignedInt" / "SignedInt")
+  has_compression - 是否使用压缩
+  compression_type - 压缩类型（varint）
+#}
+{# 根据 value_type 和 byte_length 选择 C++ 类型
+   value_type == "SignedInt" -> int8_t/int16_t/int32_t/int64_t
+   value_type == "UnsignedInt" 或未指定 -> uint8_t/uint16_t/uint32_t/uint64_t
+#}
+{% if value_type == "SignedInt" %}
+{%   set is_signed = true %}
+{%   if byte_length == 1 %}
+{%     set cpp_type = "int8_t" %}
+{%   elif byte_length == 2 %}
+{%     set cpp_type = "int16_t" %}
+{%   elif byte_length == 4 %}
+{%     set cpp_type = "int32_t" %}
+{%   elif byte_length == 8 %}
+{%     set cpp_type = "int64_t" %}
+{%   else %}
+{%     set cpp_type = "int64_t" %}
+{%   endif %}
+{% else %}
+{%   set is_signed = false %}
+{%   if byte_length == 1 %}
+{%     set cpp_type = "uint8_t" %}
+{%   elif byte_length == 2 %}
+{%     set cpp_type = "uint16_t" %}
+{%   elif byte_length == 4 %}
+{%     set cpp_type = "uint32_t" %}
+{%   elif byte_length == 8 %}
+{%     set cpp_type = "uint64_t" %}
+{%   else %}
+{%     set cpp_type = "uint64_t" %}
+{%   endif %}
+{% endif %}
+{
+    {% if is_signed %}
+    SerializeResult res = serialize_signed_int_generic<{{ cpp_type }}>(ctx, {{ data_prefix }}.{{ field_name }});
+    {% else %}
+    SerializeResult res = serialize_unsigned_int_generic<{{ cpp_type }}>(ctx, {{ data_prefix }}.{{ field_name }});
+    {% endif %}
+    if (!res.is_success()) return res;
+}

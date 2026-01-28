@@ -1,0 +1,100 @@
+{
+  "name": "EdgeCaseTelemetryProtocol",
+  "description": "边界情况测试协议，侧重于字节序混合、内存对齐、贪婪读取模式及特殊保留字段。",
+  "version": "2.0",
+  "defaultByteOrder": "little",
+  "structAlignment": 1,
+  "fields": [
+    {
+      "type": "Struct",
+      "fieldName": "meta",
+      "description": "元数据头部",
+      "fields": [
+        {
+          "type": "UnsignedInt",
+          "fieldName": "syncWord",
+          "description": "大端序同步字 (0x12345678)，测试局部字节序覆写",
+          "byteLength": 4,
+          "defaultValue": 305419896,
+          "defaultByteOrder": "big"
+        },
+        {
+          "type": "UnsignedInt",
+          "fieldName": "packetSize",
+          "description": "包总长度，用于贪婪读取计算",
+          "byteLength": 2
+        }
+      ]
+    },
+    {
+      "type": "Array",
+      "fieldName": "calibMatrix",
+      "description": "3x3 校准矩阵，测试固定长度数组",
+      "count": 9,
+      "element": {
+        "type": "Float",
+        "fieldName": "val",
+        "precision": "float",
+        "defaultValue": 1.0
+      }
+    },
+    {
+      "type": "Bitfield",
+      "fieldName": "compStatus",
+      "description": "紧凑位域测试",
+      "byteLength": 1,
+      "subFields": [
+        {
+          "name": "errA",
+          "startBit": 0,
+          "endBit": 0
+        },
+        {
+          "name": "errB",
+          "startBit": 1,
+          "endBit": 2
+        },
+        {
+          "name": "mode",
+          "startBit": 3,
+          "endBit": 6
+        },
+        {
+          "name": "flag",
+          "startBit": 7,
+          "endBit": 7
+        }
+      ]
+    },
+    {
+      "type": "Reserved",
+      "fieldName": "rsvd",
+      "description": "保留字段填充测试",
+      "byteLength": 3,
+      "fillValue": "FF"
+    },
+    {
+      "type": "Array",
+      "fieldName": "rawData",
+      "description": "贪婪读取数组：读取直到剩下2个字节（CRC）",
+      "bytesInTrailer": 2,
+      "element": {
+        "type": "UnsignedInt",
+        "fieldName": "byte",
+        "byteLength": 1
+      }
+    },
+    {
+      "type": "Checksum",
+      "fieldName": "crc",
+      "description": "CRC16，测试小端序校验和",
+      "algorithm": "crc16-modbus",
+      "byteLength": 2,
+      "rangeStartRef": "meta",
+      "rangeEndRef": "rawData",
+      "parameters": {
+        "byteOrder": "little"
+      }
+    }
+  ]
+}

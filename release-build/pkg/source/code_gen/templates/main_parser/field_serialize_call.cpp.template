@@ -1,0 +1,12 @@
+{#
+字段序列化调用模板
+与 field_call.cpp.template 对称
+用于生成单个字段的序列化调用代码
+
+模板变量:
+  field_serialize_code - 字段序列化的内联代码
+  field_name - 字段名称
+  field_description - 字段描述
+#}
+    // 序列化字段: {{ field_name }}{% if field_description %} - {{ field_description }}{% endif %}
+{{ field_serialize_code }}

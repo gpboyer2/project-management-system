@@ -1,0 +1,10 @@
+// BasicLayout 布局样式
+// 简化布局：Header + Content + Footer
+// .cssc-layout-main 样式已移至全局样式 index.scss
+
+.cssc-basic-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}

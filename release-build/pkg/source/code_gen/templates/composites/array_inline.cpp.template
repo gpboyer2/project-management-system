@@ -1,0 +1,51 @@
+{#
+Array 类型解析内联代码模板
+不定义函数，直接生成内联代码用于插入主函数中
+
+模板变量:
+  field_name - 字段名称
+  element_type - 元素类型
+  count_type - 计数类型: "fixed" | "from_field" | "trailer"
+  count - 固定数量（如果是 fixed）
+  count_field - 计数字段名（如果是 from_field）
+  trailer_bytes - 尾部字节数（如果是 trailer）
+  element_parse_code - 元素解析代码
+  element_size - [可选] 元素大小（如果是 trailer 类型）
+  result_prefix - 结果变量前缀（如 "result"）
+#}
+{
+    // 解析数组字段: {{ field_name }}
+    std::vector<{{ element_type }}> {{ field_name }}_array;
+
+    {% if count_type == "fixed" %}
+    // 固定长度数组
+    size_t array_count = {{ count }};
+    {% endif %}
+    {% if count_type == "from_field" %}
+    // 从字段获取数组长度
+    size_t array_count = static_cast<size_t>({{ result_prefix }}.{{ count_field }});
+    {% endif %}
+    {% if count_type == "trailer" %}
+    // 计算数组长度（数据长度 - 尾部字节数）
+    if (ctx.remaining_bytes() < {{ trailer_bytes }}) {
+        return DeserializeResult(INSUFFICIENT_DATA, "Not enough bytes for trailer", ctx.offset);
+    }
+    size_t available_bytes = ctx.remaining_bytes() - {{ trailer_bytes }};
+    size_t element_size = {{ element_size }};
+    if (element_size > 1 && available_bytes % element_size != 0) {
+        return DeserializeResult(INVALID_VALUE, "Array data length not aligned with element size", ctx.offset);
+    }
+    size_t array_count = available_bytes / element_size;
+    {% endif %}
+    // 解析数组元素
+    for (size_t i = 0; i < array_count; ++i) {
+        {{ element_type }} element;
+        // 元素解析代码
+        {{ element_parse_code | indent(8) }}
+        {{ field_name }}_array.push_back(element);
+    }
+
+    // 赋值给结果结构体
+    {{ result_prefix }}.{{ field_name }} = {{ field_name }}_array;
+}
+

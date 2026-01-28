@@ -1,0 +1,429 @@
+// 登录页面样式（Ant Design Pro 风格 - 左右分栏布局）
+
+// ==================== 主容器 ====================
+.page-login {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-bg-page);
+}
+
+// ==================== 左侧品牌展示区 ====================
+.page-login .login-brand {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-500) 50%, var(--color-primary-400) 100%);
+  overflow: hidden;
+}
+
+.page-login .login-brand .login-brand__content {
+  position: relative;
+  z-index: 1;
+  max-width: 480px;
+  padding: 48px;
+  color: var(--color-bg-container);
+}
+
+.page-login .login-brand .login-brand__content .login-brand__header {
+  margin-bottom: 48px;
+}
+
+.page-login .login-brand .login-brand__content .login-brand__header .login-brand__logo {
+  width: 72px;
+  height: 72px;
+  background: var(--color-white-alpha-20);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  backdrop-filter: blur(8px);
+}
+
+.page-login .login-brand .login-brand__content .login-brand__header .login-brand__logo i {
+  font-size: 36px;
+  color: var(--color-bg-container);
+}
+
+.page-login .login-brand .login-brand__content .login-brand__header .login-brand__title {
+  font-size: 40px;
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 12px 0;
+  letter-spacing: -0.5px;
+}
+
+.page-login .login-brand .login-brand__content .login-brand__header .login-brand__subtitle {
+  font-size: 18px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+// 产品特性列表
+.page-login .login-brand .login-brand__content .login-brand__features {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-login .login-brand .login-brand__content .login-brand__features .login-brand__feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  background: var(--color-white-alpha-10);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  transition: all var(--transition-normal);
+}
+
+.page-login .login-brand .login-brand__content .login-brand__features .login-brand__feature:hover {
+  background: var(--color-white-alpha-15);
+  transform: translateX(4px);
+}
+
+.page-login .login-brand .login-brand__content .login-brand__features .login-brand__feature i {
+  font-size: 28px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.page-login .login-brand .login-brand__content .login-brand__features .login-brand__feature .login-brand__feature-content h3 {
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 6px 0;
+}
+
+.page-login .login-brand .login-brand__content .login-brand__features .login-brand__feature .login-brand__feature-content p {
+  font-size: 14px;
+  opacity: 0.85;
+  margin: 0;
+  line-height: 1.5;
+}
+
+// 底部文字
+.page-login .login-brand .login-brand__content .login-brand__footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-white-alpha-20);
+}
+
+.page-login .login-brand .login-brand__content .login-brand__footer p {
+  font-size: 14px;
+  opacity: 0.7;
+  margin: 0;
+}
+
+// 背景装饰圆
+.page-login .login-brand .login-brand__bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.page-login .login-brand .login-brand__bg .login-brand__circle {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--color-white-alpha-5);
+}
+
+.page-login .login-brand .login-brand__bg .login-brand__circle--1 {
+  width: 400px;
+  height: 400px;
+  top: -100px;
+  right: -100px;
+}
+
+.page-login .login-brand .login-brand__bg .login-brand__circle--2 {
+  width: 300px;
+  height: 300px;
+  bottom: -50px;
+  left: -50px;
+}
+
+.page-login .login-brand .login-brand__bg .login-brand__circle--3 {
+  width: 200px;
+  height: 200px;
+  bottom: 30%;
+  right: 10%;
+}
+
+// ==================== 右侧登录表单区 ====================
+.page-login .login-form-section {
+  flex: 0 0 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  background: var(--color-bg-container);
+}
+
+.page-login .login-form-section .login-form-wrapper {
+  width: 100%;
+  max-width: 360px;
+}
+
+// 表单头部
+.page-login .login-form-section .login-form-wrapper .login-header {
+  margin-bottom: 40px;
+}
+
+.page-login .login-form-section .login-form-wrapper .login-header .login-title {
+  font-size: 28px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 8px 0;
+}
+
+.page-login .login-form-section .login-form-wrapper .login-header .login-subtitle {
+  font-size: var(--font-size-normal);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+// ==================== 表单样式 ====================
+.page-login .login-form-section .login-form-wrapper .login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .form-field .form-label {
+  font-size: var(--font-size-normal);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+// 输入框容器
+.page-login .login-form-section .login-form-wrapper .login-form .form-field .form-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .form-field .form-input-wrapper .form-input-prefix {
+  position: absolute;
+  left: 12px;
+  font-size: 18px;
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+  transition: color var(--transition-fast);
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .form-field .form-input-wrapper .form-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 44px;
+  font-size: var(--font-size-normal);
+  color: var(--color-text-primary);
+  background: var(--color-bg-container);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-normal);
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .form-field .form-input-wrapper .form-input:hover {
+  border-color: var(--color-primary-400);
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .form-field .form-input-wrapper .form-input:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 2px var(--color-primary-500-alpha-10);
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .form-field .form-input-wrapper .form-input:focus + .form-input-prefix {
+  color: var(--color-primary-500);
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .form-field .form-input-wrapper .form-input:disabled {
+  background: var(--color-bg-secondary);
+  cursor: not-allowed;
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .form-field .form-input-wrapper .form-input::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .form-field .form-input-wrapper .form-input-suffix {
+  position: absolute;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 18px;
+  color: var(--color-text-tertiary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .form-field .form-input-wrapper .form-input-suffix:hover {
+  color: var(--color-text-secondary);
+}
+
+// 记住登录选项
+.page-login .login-form-section .login-form-wrapper .login-form .form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .form-options .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-normal);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .form-options .checkbox-label .form-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--color-primary-500);
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .form-options .checkbox-label .checkbox-text {
+  user-select: none;
+}
+
+// 错误提示
+.page-login .login-form-section .login-form-wrapper .login-form .form-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-size: var(--font-size-normal);
+  color: var(--color-error);
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  border-radius: var(--radius-normal);
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .form-error i {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+// 登录按钮
+.page-login .login-form-section .login-form-wrapper .login-form .login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  font-size: 16px;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-bg-container);
+  background: var(--color-primary-500);
+  border: none;
+  border-radius: var(--radius-normal);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .login-button:hover:not(:disabled) {
+  background: var(--color-primary-600);
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .login-button:active:not(:disabled) {
+  background: var(--color-primary-700);
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .login-button:disabled {
+  background: var(--color-gray-400);
+  cursor: not-allowed;
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .login-button--loading {
+  pointer-events: none;
+}
+
+.page-login .login-form-section .login-form-wrapper .login-form .login-button .loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-white-alpha-30);
+  border-top-color: var(--color-bg-container);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ==================== 底部信息 ====================
+.page-login .login-form-section .login-form-wrapper .login-footer {
+  margin-top: 32px;
+}
+
+.page-login .login-form-section .login-form-wrapper .login-footer .login-footer__divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.page-login .login-form-section .login-form-wrapper .login-footer .login-footer__divider::before {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border-secondary);
+}
+
+.page-login .login-form-section .login-form-wrapper .login-footer .login-footer__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border-secondary);
+}
+
+.page-login .login-form-section .login-form-wrapper .login-footer .login-footer__divider span {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+.page-login .login-form-section .login-form-wrapper .login-footer .login-footer__hint {
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+  padding: 12px 16px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-normal);
+}
+
+// ==================== 暗色主题适配 ====================
+[data-theme="dark"] .page-login .login-brand {
+  background: linear-gradient(135deg, var(--color-primary-700) 0%, var(--color-primary-600) 50%, var(--color-primary-500) 100%);
+}
+
+[data-theme="dark"] .page-login .login-form-section {
+  background: var(--color-bg-container);
+}
+
+[data-theme="dark"] .page-login .login-form-section .login-form-wrapper .login-form .form-field .form-input-wrapper .form-input {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-primary);
+}
+
+[data-theme="dark"] .page-login .login-form-section .login-form-wrapper .login-form .form-field .form-input-wrapper .form-input:focus {
+  box-shadow: 0 0 0 2px var(--color-primary-500-alpha-10);
+}

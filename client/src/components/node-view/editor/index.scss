@@ -1,0 +1,20 @@
+.vis-navigation {
+  position: absolute;
+  z-index: 1000;
+}
+
+.vis-navigation .vis-button {
+  width: 30px;
+  height: 30px;
+  background: var(--color-bg-container);
+  border: 1px solid var(--color-border-primary);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vis-navigation .vis-button:hover {
+  background: var(--color-gray-200);
+}

@@ -1,0 +1,22 @@
+{#
+Padding/Reserved 类型内联实现
+调用 protocol_common.h 中的 skip_padding_generic() 函数
+
+模板变量:
+  field_name - 字段名称
+  byte_length - 字节长度
+  bit_length - 位长度
+#}
+{% if byte_length %}
+{
+    DeserializeResult res = skip_padding_generic(ctx, {{ byte_length }});
+    if (!res.is_success()) return res;
+    // 填充字段不需要赋值给结果结构体
+}
+{% else %}
+{
+    DeserializeResult res = skip_bits_generic(ctx, {{ bit_length }});
+    if (!res.is_success()) return res;
+    // 位级填充 ({{ bit_length }} bits)
+}
+{% endif %}

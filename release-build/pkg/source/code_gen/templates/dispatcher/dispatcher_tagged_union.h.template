@@ -1,0 +1,272 @@
+{#
+分发器头文件模板 (Tagged Union 版本)
+模板变量:
+  protocol_name - 分发器名称
+  PROTOCOL_NAME_UPPER - 分发器名称大写
+  namespace - 命名空间名称
+  dispatch_field - 分发字段名称
+  dispatch_cpp_type - 分发字段 C++ 类型
+  dispatch_offset - 分发字段偏移量
+  dispatch_size - 分发字段大小（字节）
+  dispatch_byte_order - 分发字段字节序
+  default_byte_order - 默认字节序枚举值
+  framework_relative_path - 框架头文件相对路径（默认 './'）
+  messages - 子协议信息数组，每个元素包含：
+     - id_value: MessageID 数值
+     - id_hex: MessageID 十六进制字符串
+     - enum_name: 枚举成员名（如 MSG_LOGIN_REQUEST）
+     - protocol_name: 子协议名称
+     - result_type: 结果结构体类型名
+     - member_name: union 成员名
+     - header_file: 头文件名
+     - is_large: 是否为大协议（使用指针存储）
+  has_messages - 是否有子协议
+#}
+#ifndef {{ PROTOCOL_NAME_UPPER }}_DISPATCHER_H
+#define {{ PROTOCOL_NAME_UPPER }}_DISPATCHER_H
+
+#include "{{ framework_relative_path | default('./') }}protocol_parser_framework/protocol_common.h"
+{% for msg in messages %}
+#include "./{{ msg.header_file }}"
+{% endfor %}
+
+namespace {{ namespace }} {
+
+// ============================================================================
+// MessageType 枚举 - 定义所有支持的报文类型
+// ============================================================================
+enum {{ protocol_name }}MessageType {
+    {{ PROTOCOL_NAME_UPPER }}_MSG_UNKNOWN = 0,
+{% for msg in messages %}
+    {{ msg.enum_name }} = {{ msg.id_value }}{% if not loop.last %},{% endif %}
+
+{% endfor %}
+};
+
+// ============================================================================
+// Tagged Union 分发器结果结构体
+// 架构：enum (标签) + union (数据容器)
+// 优点：零堆分配、Cache 友好、值语义、内存确定性
+// ============================================================================
+struct {{ protocol_name }}DispatcherResult {
+    // 1. 标签 (Tag)：指示当前 Union 中存储的是哪个类型
+    {{ protocol_name }}MessageType messageType;
+    {{ dispatch_cpp_type }} {{ dispatch_field }};  // 原始 MessageID 值
+
+    // 2. 联合体 (Payload)：实际数据存储区
+    // C++11 允许 union 包含带构造/析构函数的类（如 std::string）
+    union {
+{% for msg in messages %}
+{% if msg.is_large %}
+        std::unique_ptr<{{ msg.result_type }}> {{ msg.member_name }};  // 大协议使用指针（优化内存）
+{% else %}
+        {{ msg.result_type }} {{ msg.member_name }};  // 小协议直接存储
+{% endif %}
+{% endfor %}
+    };  // 匿名 union
+
+    // 3. 生命周期管理 (关键！)
+    // 由于 union 包含非 POD 成员，必须手动实现构造/析构函数
+
+    // 默认构造函数
+    {{ protocol_name }}DispatcherResult() : messageType({{ PROTOCOL_NAME_UPPER }}_MSG_UNKNOWN), {{ dispatch_field }}(0) {
+        // 默认状态：什么都不构造
+    }
+
+    // 析构函数
+    ~{{ protocol_name }}DispatcherResult() {
+        destroy_content();
+    }
+
+    // 拷贝构造函数
+    {{ protocol_name }}DispatcherResult(const {{ protocol_name }}DispatcherResult& other)
+        : messageType(other.messageType), {{ dispatch_field }}(other.{{ dispatch_field }}) {
+        switch (other.messageType) {
+{% for msg in messages %}
+        case {{ msg.enum_name }}:
+{% if msg.is_large %}
+            if (other.{{ msg.member_name }}) {
+                new (&{{ msg.member_name }}) std::unique_ptr<{{ msg.result_type }}>(
+                    new {{ msg.result_type }}(*other.{{ msg.member_name }}));
+            } else {
+                new (&{{ msg.member_name }}) std::unique_ptr<{{ msg.result_type }}>();
+            }
+{% else %}
+            new (&{{ msg.member_name }}) {{ msg.result_type }}(other.{{ msg.member_name }});
+{% endif %}
+            break;
+{% endfor %}
+        default:
+            break;
+        }
+    }
+
+    // 拷贝赋值操作符
+    {{ protocol_name }}DispatcherResult& operator=(const {{ protocol_name }}DispatcherResult& other) {
+        if (this != &other) {
+            destroy_content();
+            messageType = other.messageType;
+            {{ dispatch_field }} = other.{{ dispatch_field }};
+            switch (other.messageType) {
+{% for msg in messages %}
+            case {{ msg.enum_name }}:
+{% if msg.is_large %}
+                if (other.{{ msg.member_name }}) {
+                    new (&{{ msg.member_name }}) std::unique_ptr<{{ msg.result_type }}>(
+                        new {{ msg.result_type }}(*other.{{ msg.member_name }}));
+                } else {
+                    new (&{{ msg.member_name }}) std::unique_ptr<{{ msg.result_type }}>();
+                }
+{% else %}
+                new (&{{ msg.member_name }}) {{ msg.result_type }}(other.{{ msg.member_name }});
+{% endif %}
+                break;
+{% endfor %}
+            default:
+                break;
+            }
+        }
+        return *this;
+    }
+
+    // 移动构造函数 (C++11)
+    {{ protocol_name }}DispatcherResult({{ protocol_name }}DispatcherResult&& other) noexcept
+        : messageType(other.messageType), {{ dispatch_field }}(other.{{ dispatch_field }}) {
+        switch (other.messageType) {
+{% for msg in messages %}
+        case {{ msg.enum_name }}:
+{% if msg.is_large %}
+            new (&{{ msg.member_name }}) std::unique_ptr<{{ msg.result_type }}>(std::move(other.{{ msg.member_name }}));
+{% else %}
+            new (&{{ msg.member_name }}) {{ msg.result_type }}(std::move(other.{{ msg.member_name }}));
+{% endif %}
+            break;
+{% endfor %}
+        default:
+            break;
+        }
+        other.messageType = {{ PROTOCOL_NAME_UPPER }}_MSG_UNKNOWN;
+    }
+
+    // 移动赋值操作符 (C++11)
+    {{ protocol_name }}DispatcherResult& operator=({{ protocol_name }}DispatcherResult&& other) noexcept {
+        if (this != &other) {
+            destroy_content();
+            messageType = other.messageType;
+            {{ dispatch_field }} = other.{{ dispatch_field }};
+            switch (other.messageType) {
+{% for msg in messages %}
+            case {{ msg.enum_name }}:
+{% if msg.is_large %}
+                new (&{{ msg.member_name }}) std::unique_ptr<{{ msg.result_type }}>(std::move(other.{{ msg.member_name }}));
+{% else %}
+                new (&{{ msg.member_name }}) {{ msg.result_type }}(std::move(other.{{ msg.member_name }}));
+{% endif %}
+                break;
+{% endfor %}
+            default:
+                break;
+            }
+            other.messageType = {{ PROTOCOL_NAME_UPPER }}_MSG_UNKNOWN;
+        }
+        return *this;
+    }
+
+    // 辅助：根据当前类型，显式调用对应成员的析构函数
+    void destroy_content() {
+        switch (messageType) {
+{% for msg in messages %}
+        case {{ msg.enum_name }}:
+{% if msg.is_large %}
+            {{ msg.member_name }}.~unique_ptr<{{ msg.result_type }}>();
+{% else %}
+            {{ msg.member_name }}.~{{ msg.result_type }}();
+{% endif %}
+            break;
+{% endfor %}
+        default:
+            break;
+        }
+        messageType = {{ PROTOCOL_NAME_UPPER }}_MSG_UNKNOWN;
+    }
+
+    // 辅助：设置新值（构造）
+    // 使用 Placement New 在已分配的 union 内存上构造对象
+{% for msg in messages %}
+    void set_{{ msg.member_name }}(const {{ msg.result_type }}& val) {
+        destroy_content();
+{% if msg.is_large %}
+        new (&{{ msg.member_name }}) std::unique_ptr<{{ msg.result_type }}>(new {{ msg.result_type }}(val));
+{% else %}
+        new (&{{ msg.member_name }}) {{ msg.result_type }}(val);
+{% endif %}
+        messageType = {{ msg.enum_name }};
+    }
+
+    void set_{{ msg.member_name }}({{ msg.result_type }}&& val) {
+        destroy_content();
+{% if msg.is_large %}
+        new (&{{ msg.member_name }}) std::unique_ptr<{{ msg.result_type }}>(new {{ msg.result_type }}(std::move(val)));
+{% else %}
+        new (&{{ msg.member_name }}) {{ msg.result_type }}(std::move(val));
+{% endif %}
+        messageType = {{ msg.enum_name }};
+    }
+
+{% endfor %}
+
+    // 辅助方法：检查是否有数据
+    bool hasData() const {
+        return messageType != {{ PROTOCOL_NAME_UPPER }}_MSG_UNKNOWN;
+    }
+};
+
+// ============================================================================
+// 函数声明
+// ============================================================================
+
+/**
+ * 反序列化函数（二进制 → 结构体）
+ * 自动识别 MessageID 并分发到对应的子协议解析器
+ *
+ * @param data 原始二进制数据
+ * @param length 数据长度
+ * @param result 输出结果结构体
+ * @param byte_order 字节序（默认: {{ default_byte_order }}）
+ * @return 解析结果
+ */
+DeserializeResult deserialize_{{ protocol_name }}Dispatcher(
+    const uint8_t* data,
+    size_t length,
+    {{ protocol_name }}DispatcherResult& result,
+    ByteOrder byte_order = {{ default_byte_order }}
+);
+
+/**
+ * 序列化函数（结构体 → 二进制）
+ * 根据 messageType 选择对应的子协议序列化器
+ *
+ * @param data 输入结构体
+ * @param buffer 输出缓冲区
+ * @param buffer_size 缓冲区大小
+ * @param byte_order 字节序（默认: {{ default_byte_order }}）
+ * @return 序列化结果
+ */
+SerializeResult serialize_{{ protocol_name }}Dispatcher(
+    const {{ protocol_name }}DispatcherResult& data,
+    uint8_t* buffer,
+    size_t buffer_size,
+    ByteOrder byte_order = {{ default_byte_order }}
+);
+
+/**
+ * 获取 MessageType 的字符串表示
+ *
+ * @param type 报文类型枚举值
+ * @return 类型名称字符串
+ */
+const char* get_{{ protocol_name }}MessageTypeName({{ protocol_name }}MessageType type);
+
+} // namespace {{ namespace }}
+
+#endif // {{ PROTOCOL_NAME_UPPER }}_DISPATCHER_H

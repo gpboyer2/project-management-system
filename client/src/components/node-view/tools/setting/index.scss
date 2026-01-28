@@ -1,0 +1,29 @@
+// setting 组件样式
+.nv-setting-panel {
+  padding: 16px;
+}
+
+.setting-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.style-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.style-item {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid var(--color-border-primary);
+  transition: transform 0.2s;
+}
+
+.style-item:hover {
+  transform: scale(1.1);
+}

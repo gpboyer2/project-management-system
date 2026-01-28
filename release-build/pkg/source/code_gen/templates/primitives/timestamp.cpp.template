@@ -1,0 +1,36 @@
+{#
+Timestamp 类型内联实现
+时间戳解析：从协议单位转换为纳秒（内部统一表示）
+
+模板变量:
+  field_name - 字段名称
+  unit - 时间单位
+  parse_function - 单位转换函数名（由注册表提供）
+  byte_length - 字节长度
+#}
+{# Timestamp 解析：底层为无符号整数，根据 byteLength 选择对应的 C++ 类型 #}
+{% if byte_length == 1 %}
+{%   set cpp_type = "uint8_t" %}
+{% elif byte_length == 2 %}
+{%   set cpp_type = "uint16_t" %}
+{% elif byte_length == 4 %}
+{%   set cpp_type = "uint32_t" %}
+{% elif byte_length == 8 %}
+{%   set cpp_type = "uint64_t" %}
+{% else %}
+{%   set cpp_type = "uint64_t" %}
+{% endif %}
+{
+    {{ cpp_type }} {{ field_name }}_raw = 0;
+    DeserializeResult res = deserialize_unsigned_int_generic<{{ cpp_type }}>(ctx, {{ field_name }}_raw);
+    if (!res.is_success()) return res;
+
+    // 时间戳单位转换: {{ unit }} -> nanoseconds
+    if (!{{ parse_function }}({{ field_name }}_raw, {{ result_prefix }}.{{ field_name }})) {
+        return DeserializeResult{
+            ParseError::INVALID_VALUE,
+            "Timestamp value overflow during unit conversion",
+            ctx.offset
+        };
+    }
+}

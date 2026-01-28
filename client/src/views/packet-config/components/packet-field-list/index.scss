@@ -1,0 +1,403 @@
+@use "../../unified-style/index.scss" as *;
+
+// 编辑面板容器
+.packet-field-list {
+  // 从父组件 index.scss 继承样式
+}
+
+// 拖拽区域样式
+.field-list-draggable .field-ghost {
+  opacity: 0.5;
+  background-color: var(--color-primary-100);
+  border: 2px dashed var(--color-primary-500);
+}
+
+.field-list-draggable .field-chosen {
+  background-color: var(--color-primary-50);
+  border-color: var(--color-primary-500);
+}
+
+.field-list-draggable .field-dragging {
+  opacity: 0.8;
+  transform: rotate(2deg);
+}
+
+// 空状态拖拽区域
+.empty-drop-zone {
+  width: 100%;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// 报文协议列表
+.protocol-content-list {
+  width: 100%;
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: var(--color-bg-container);
+}
+
+.protocol-content-list .drag-handle-cell {
+  width: 50px;
+  min-width: 50px;
+  cursor: grab;
+}
+
+.protocol-content-list .drag-handle-cell:active {
+  cursor: grabbing;
+}
+
+.protocol-content-list .action-cell {
+  width: 80px;
+  min-width: 80px;
+}
+
+.protocol-content-list .field-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-disabled);
+  font-size: 14px;
+  padding: 6px;
+  cursor: grab;
+  border-radius: var(--radius-normal);
+  transition: all var(--transition-fast);
+}
+
+.protocol-content-list .field-drag-handle:hover {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-primary-500);
+}
+
+.protocol-content-list .field-drag-handle:active {
+  cursor: grabbing;
+  background-color: var(--color-bg-tertiary);
+}
+
+// 删除按钮样式
+.protocol-content-list .action-cell .el-button {
+  padding: 6px;
+  height: auto;
+  margin: 0;
+  font-size: 16px;
+  color: var(--color-text-tertiary);
+  border-radius: var(--radius-normal);
+  transition: all var(--transition-fast);
+}
+
+.protocol-content-list .action-cell .el-button:hover {
+  background-color: var(--color-bg-secondary);
+}
+
+.protocol-content-list .action-cell .el-button.el-button--danger:hover {
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+// 展开/收起按钮
+.protocol-content-list .field-expand-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  transition: all var(--transition-fast);
+  user-select: none;
+  border-radius: var(--radius-normal);
+}
+
+.protocol-content-list .field-expand-toggle:hover {
+  color: var(--color-primary-500);
+  background-color: var(--color-primary-50);
+}
+
+.protocol-content-list .field-expand-toggle.expanded {
+  color: var(--color-primary-500);
+  background-color: var(--color-primary-50);
+}
+
+// 拖拽区域空状态
+.protocol-drop-zone-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  border: 2px dashed var(--color-border-primary);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, var(--color-bg-secondary) 0%, var(--color-bg-container) 100%);
+  transition: all var(--transition-normal);
+}
+
+.protocol-drop-zone-empty:hover {
+  border-color: var(--color-primary-400);
+  background: linear-gradient(145deg, var(--color-primary-50) 0%, var(--color-bg-container) 100%);
+}
+
+.protocol-drop-zone-empty .drop-zone-hint {
+  text-align: center;
+  color: var(--color-text-tertiary);
+}
+
+.protocol-drop-zone-empty .drop-zone-hint .drop-zone-icon {
+  display: block;
+  font-size: 56px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+  animation: float 3s ease-in-out infinite;
+}
+
+.protocol-drop-zone-empty .drop-zone-hint p {
+  margin: 0 0 8px 0;
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.protocol-drop-zone-empty .drop-zone-hint .drop-zone-subhint {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+// 统一的列表项样式
+.list-item {
+  display: grid;
+  grid-template-columns: 50px 1fr 1fr 1fr 80px;
+  min-height: 44px;
+  border-bottom: 1px solid var(--color-border-secondary);
+  transition: all var(--transition-fast);
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.list-item.list-header {
+  background: var(--color-bg-secondary);
+  font-weight: var(--font-weight-semibold);
+  text-align: left;
+  color: var(--color-text-primary);
+  font-size: 13px;
+}
+
+.list-item.list-header .list-cell.header-cell {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+// 列表单元格
+.list-item .list-cell {
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid var(--color-border-secondary);
+  font-size: var(--font-size-normal);
+}
+
+.list-item .list-cell:last-child {
+  border-right: none;
+}
+
+// 可编辑单元格样式
+.list-item .list-cell.editable-cell {
+  cursor: text;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.list-item .list-cell.editable-cell:hover {
+  background-color: var(--color-primary-50);
+  box-shadow: inset 0 0 0 1px var(--color-primary-200);
+  border-radius: var(--radius-normal);
+}
+
+.list-item .list-cell.editable-cell.name-cell:hover::after {
+  content: '双击编辑';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--color-primary-500);
+  background-color: var(--color-primary-50);
+  padding: 2px 6px;
+  border-radius: 3px;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+// 单元格输入框样式
+.list-item .list-cell .cell-input {
+  width: 80px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-normal);
+  font-size: 13px;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-container);
+  transition: border-color var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.list-item .list-cell .cell-input:hover {
+  border-color: var(--color-primary-400);
+}
+
+.list-item .list-cell .cell-input:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+}
+
+.list-item .list-cell .cell-input::placeholder {
+  color: var(--color-text-placeholder);
+  font-size: 12px;
+}
+
+// 名称单元格的输入框
+.list-item .list-cell.editable-cell.name-cell .cell-input {
+  width: 100%;
+}
+
+// 类型标签样式
+.list-item .list-cell .type-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border-radius: 0;
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  box-shadow: none;
+  background-color: transparent !important;
+}
+
+.list-item .list-cell .type-tag i {
+  font-size: 14px;
+}
+
+// 结构体子字段数量徽标（只读模式展示）
+.list-item .list-cell .struct-child-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: var(--font-weight-normal);
+  color: var(--color-text-tertiary);
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-small);
+  white-space: nowrap;
+}
+
+// 字段项样式
+.protocol-content-list .list-item.field-item {
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background-color: var(--color-bg-container);
+  position: relative;
+}
+
+.protocol-content-list .list-item.field-item:hover {
+  background-color: var(--color-bg-secondary);
+  box-shadow: none;
+}
+
+.protocol-content-list .list-item.field-item.list-item-selected {
+  background: var(--color-info-bg);
+  box-shadow: none;
+  border-left: none;
+}
+
+.protocol-content-list .list-item.field-item.list-item-selected .field-summary {
+  color: var(--color-primary-500);
+  font-weight: var(--font-weight-semibold);
+}
+
+.protocol-content-list .list-item.field-item.list-item-selected .field-drag-handle {
+  color: var(--color-primary-500);
+}
+
+// 占位符样式
+.protocol-content-list .placeholder-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.protocol-content-list .placeholder-row:hover {
+  background-color: var(--color-primary-50);
+}
+
+.protocol-content-list .placeholder-line {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 32px;
+}
+
+.protocol-content-list .placeholder-line::before {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, var(--color-primary-200) 0, var(--color-primary-200) 6px, transparent 6px, transparent 12px);
+  opacity: 0.8;
+  transition: all var(--transition-fast);
+}
+
+.protocol-content-list .placeholder-line::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, var(--color-primary-200) 0, var(--color-primary-200) 6px, transparent 6px, transparent 12px);
+  opacity: 0.8;
+  transition: all var(--transition-fast);
+}
+
+.protocol-content-list .placeholder-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-500);
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  transition: all var(--transition-fast);
+  border: 1px solid var(--color-primary-100);
+}
+
+.protocol-content-list .placeholder-row:hover .placeholder-line::before {
+  background: repeating-linear-gradient(90deg, var(--color-primary-500) 0, var(--color-primary-500) 6px, transparent 6px, transparent 12px);
+  opacity: 0.6;
+}
+
+.protocol-content-list .placeholder-row:hover .placeholder-line::after {
+  background: repeating-linear-gradient(90deg, var(--color-primary-500) 0, var(--color-primary-500) 6px, transparent 6px, transparent 12px);
+  opacity: 0.6;
+}
+
+.protocol-content-list .placeholder-row:hover .placeholder-icon {
+  background-color: var(--color-primary-500);
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 2px 6px rgba(var(--color-primary-500-rgb), 0.2);
+}

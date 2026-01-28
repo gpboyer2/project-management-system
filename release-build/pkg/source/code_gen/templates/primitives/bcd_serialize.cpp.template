@@ -1,0 +1,32 @@
+{#
+BCD 类型序列化实现
+与 bcd.cpp.template 对称
+
+模板变量:
+  field_name - 字段名称
+  byte_length - 字节长度
+  has_range - 是否有范围验证
+  is_single_range - 是否为单范围
+  ranges - 范围数组
+#}
+{
+    {% if has_range and is_single_range %}
+    // 单范围验证
+    if ({{ data_prefix }}.{{ field_name }} < "{{ ranges[0].min }}" || {{ data_prefix }}.{{ field_name }} > "{{ ranges[0].max }}") {
+        return SerializeResult(INVALID_VALUE, "{{ field_name }} BCD out of range", 0);
+    }
+    {% elif has_range %}
+    // 多范围验证（内联范围数据，BCD字符串比较）
+    static const std::vector<std::pair<std::string, std::string>> {{ field_name }}_ranges = {
+        {% for range in ranges %}
+        {"{{ range.min }}", "{{ range.max }}"}{% if not loop.last %},{% endif %}
+        {% endfor %}
+    };
+    if (!validate_multi_range({{ data_prefix }}.{{ field_name }}, {{ field_name }}_ranges)) {
+        return SerializeResult(INVALID_VALUE, "{{ field_name }} BCD out of range", 0);
+    }
+    {% endif %}
+
+    SerializeResult res = serialize_bcd_generic(ctx, {{ data_prefix }}.{{ field_name }}, {{ byte_length }});
+    if (!res.is_success()) return res;
+}
