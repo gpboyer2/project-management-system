@@ -43,291 +43,202 @@
 
 ### 需求管理表 (requirements)
 
-```sql
-CREATE TABLE IF NOT EXISTS requirements (
-    requirement_id BIGINT PRIMARY KEY IDENTITY(1,1),
-    requirement_name VARCHAR(255) NOT NULL COMMENT '需求名称',
-    requirement_type VARCHAR(50) NOT NULL COMMENT '需求类型：业务需求、技术需求、产品需求',
-    description TEXT COMMENT '需求描述',
-    priority VARCHAR(10) NOT NULL COMMENT '优先级：P0, P1, P2, P3',
-    status VARCHAR(50) NOT NULL COMMENT '状态：待设计、待产品评审、待技术评审、开发中、测试中、已上线、已结束',
-    current_assignee_id BIGINT COMMENT '当前负责人用户ID',
-    reporter_id BIGINT NOT NULL COMMENT '提出人用户ID',
-    project_id BIGINT COMMENT '所属项目ID',
-    planned_version VARCHAR(50) COMMENT '规划版本',
-    actual_version VARCHAR(50) COMMENT '实际上线版本',
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 索引
-CREATE INDEX IF NOT EXISTS idx_requirements_status ON requirements(status);
-CREATE INDEX IF NOT EXISTS idx_requirements_priority ON requirements(priority);
-CREATE INDEX IF NOT EXISTS idx_requirements_project_id ON requirements(project_id);
-CREATE INDEX IF NOT EXISTS idx_requirements_current_assignee ON requirements(current_assignee_id);
-```
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| requirement_id | INTEGER | 否 | 主键，自增 |
+| requirement_name | STRING | 否 | 需求名称 |
+| requirement_type | STRING | 否 | 需求类型：业务需求、技术需求、产品需求 |
+| description | TEXT | 是 | 需求描述 |
+| priority | STRING | 否 | 优先级：P0, P1, P2, P3 |
+| status | STRING | 否 | 状态：待设计、待产品评审、待技术评审、开发中、测试中、已上线、已结束 |
+| current_assignee_id | INTEGER | 是 | 当前负责人用户ID |
+| reporter_id | INTEGER | 否 | 提出人用户ID |
+| project_id | INTEGER | 是 | 所属项目ID |
+| planned_version | STRING | 是 | 规划版本 |
+| actual_version | STRING | 是 | 实际上线版本 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
 ### 任务管理表 (tasks)
 
-```sql
-CREATE TABLE IF NOT EXISTS tasks (
-    task_id BIGINT PRIMARY KEY IDENTITY(1,1),
-    task_name VARCHAR(255) NOT NULL COMMENT '任务名称',
-    description TEXT COMMENT '任务描述',
-    priority VARCHAR(10) NOT NULL COMMENT '优先级：P0, P1, P2, P3',
-    status VARCHAR(50) NOT NULL COMMENT '状态：未开始、进行中、已完成、已取消',
-    assignee_id BIGINT COMMENT '负责人用户ID',
-    reporter_id BIGINT NOT NULL COMMENT '创建人用户ID',
-    requirement_id BIGINT COMMENT '关联需求ID',
-    project_id BIGINT COMMENT '所属项目ID',
-    estimated_hours DECIMAL(10,2) COMMENT '预估工时(小时)',
-    actual_hours DECIMAL(10,2) COMMENT '实际工时(小时)',
-    start_time TIMESTAMP COMMENT '开始时间',
-    end_time TIMESTAMP COMMENT '结束时间',
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 索引
-CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
-CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority);
-CREATE INDEX IF NOT EXISTS idx_tasks_assignee ON tasks(assignee_id);
-CREATE INDEX IF NOT EXISTS idx_tasks_requirement ON tasks(requirement_id);
-```
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| task_id | INTEGER | 否 | 主键，自增 |
+| task_name | STRING | 否 | 任务名称 |
+| description | TEXT | 是 | 任务描述 |
+| priority | STRING | 否 | 优先级：P0, P1, P2, P3 |
+| status | STRING | 否 | 状态：未开始、进行中、已完成、已取消 |
+| assignee_id | INTEGER | 是 | 负责人用户ID |
+| reporter_id | INTEGER | 否 | 创建人用户ID |
+| requirement_id | INTEGER | 是 | 关联需求ID |
+| project_id | INTEGER | 是 | 所属项目ID |
+| estimated_hours | DECIMAL(10,2) | 是 | 预估工时(小时) |
+| actual_hours | DECIMAL(10,2) | 是 | 实际工时(小时) |
+| start_time | INTEGER | 是 | 开始时间，Unix时间戳 |
+| end_time | INTEGER | 是 | 结束时间，Unix时间戳 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
 ### 缺陷管理表 (defects)
 
-```sql
-CREATE TABLE IF NOT EXISTS defects (
-    defect_id BIGINT PRIMARY KEY IDENTITY(1,1),
-    defect_name VARCHAR(255) NOT NULL COMMENT '缺陷名称',
-    description TEXT COMMENT '缺陷描述',
-    severity VARCHAR(50) NOT NULL COMMENT '严重程度：致命、严重、一般、轻微',
-    status VARCHAR(50) NOT NULL COMMENT '状态：待修复、修复中、已修复、已验证、已关闭',
-    assignee_id BIGINT COMMENT '负责人用户ID',
-    reporter_id BIGINT NOT NULL COMMENT '报告人用户ID',
-    requirement_id BIGINT COMMENT '关联需求ID',
-    task_id BIGINT COMMENT '关联任务ID',
-    project_id BIGINT COMMENT '所属项目ID',
-    reproduce_steps TEXT COMMENT '复现步骤',
-    fix_version VARCHAR(50) COMMENT '修复版本',
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 索引
-CREATE INDEX IF NOT EXISTS idx_defects_status ON defects(status);
-CREATE INDEX IF NOT EXISTS idx_defects_severity ON defects(severity);
-CREATE INDEX IF NOT EXISTS idx_defects_assignee ON defects(assignee_id);
-```
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| defect_id | INTEGER | 否 | 主键，自增 |
+| defect_name | STRING | 否 | 缺陷名称 |
+| description | TEXT | 是 | 缺陷描述 |
+| severity | STRING | 否 | 严重程度：致命、严重、一般、轻微 |
+| status | STRING | 否 | 状态：待修复、修复中、已修复、已验证、已关闭 |
+| assignee_id | INTEGER | 是 | 负责人用户ID |
+| reporter_id | INTEGER | 否 | 报告人用户ID |
+| requirement_id | INTEGER | 是 | 关联需求ID |
+| task_id | INTEGER | 是 | 关联任务ID |
+| project_id | INTEGER | 是 | 所属项目ID |
+| reproduce_steps | TEXT | 是 | 复现步骤 |
+| fix_version | STRING | 是 | 修复版本 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
 ### 项目管理表 (projects)
 
-```sql
-CREATE TABLE IF NOT EXISTS projects (
-    project_id BIGINT PRIMARY KEY IDENTITY(1,1),
-    project_name VARCHAR(255) NOT NULL COMMENT '项目名称',
-    description TEXT COMMENT '项目描述',
-    status VARCHAR(50) NOT NULL COMMENT '状态：待立项、进行中、已暂停、已完成、已取消',
-    manager_id BIGINT NOT NULL COMMENT '项目负责人用户ID',
-    department_id BIGINT COMMENT '所属部门ID',
-    start_date TIMESTAMP COMMENT '开始日期',
-    end_date TIMESTAMP COMMENT '结束日期',
-    budget DECIMAL(15,2) COMMENT '项目预算',
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 索引
-CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);
-CREATE INDEX IF NOT EXISTS idx_projects_manager ON projects(manager_id);
-```
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| project_id | INTEGER | 否 | 主键，自增 |
+| project_name | STRING | 否 | 项目名称 |
+| description | TEXT | 是 | 项目描述 |
+| status | STRING | 否 | 状态：待立项、进行中、已暂停、已完成、已取消 |
+| manager_id | INTEGER | 否 | 项目负责人用户ID |
+| department_id | INTEGER | 是 | 所属部门ID |
+| start_date | INTEGER | 是 | 开始日期，Unix时间戳 |
+| end_date | INTEGER | 是 | 结束日期，Unix时间戳 |
+| budget | DECIMAL(15,2) | 是 | 项目预算 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
 ### 项目团队表 (project_teams)
 
-```sql
-CREATE TABLE IF NOT EXISTS project_teams (
-    id BIGINT PRIMARY KEY IDENTITY(1,1),
-    project_id BIGINT NOT NULL COMMENT '项目ID',
-    user_id BIGINT NOT NULL COMMENT '用户ID',
-    role VARCHAR(50) NOT NULL COMMENT '角色：项目经理、开发工程师、测试工程师、UI设计师、产品经理',
-    status INTEGER DEFAULT 1 COMMENT '状态：1-正常 0-已移除',
-    join_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 索引
-CREATE INDEX IF NOT EXISTS idx_project_teams_project ON project_teams(project_id);
-CREATE INDEX IF NOT EXISTS idx_project_teams_user ON project_teams(user_id);
-```
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| project_id | INTEGER | 否 | 项目ID |
+| user_id | INTEGER | 否 | 用户ID |
+| role | STRING | 否 | 角色：项目经理、开发工程师、测试工程师、UI设计师、产品经理 |
+| status | INTEGER | 否 | 状态：1-正常 0-已移除，默认1 |
+| join_time | INTEGER | 是 | 加入时间，Unix时间戳 |
 
 ### 流程管理表 (workflows)
 
-```sql
-CREATE TABLE IF NOT EXISTS workflows (
-    workflow_id BIGINT PRIMARY KEY IDENTITY(1,1),
-    workflow_name VARCHAR(255) NOT NULL COMMENT '流程名称',
-    description TEXT COMMENT '流程描述',
-    workflow_type VARCHAR(50) NOT NULL COMMENT '流程类型：需求流程、任务流程、缺陷流程、项目流程',
-    status INTEGER DEFAULT 1 COMMENT '状态：1-启用 0-禁用',
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 索引
-CREATE INDEX IF NOT EXISTS idx_workflows_type ON workflows(workflow_type);
-```
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| workflow_id | INTEGER | 否 | 主键，自增 |
+| workflow_name | STRING | 否 | 流程名称 |
+| description | TEXT | 是 | 流程描述 |
+| workflow_type | STRING | 否 | 流程类型：需求流程、任务流程、缺陷流程、项目流程 |
+| status | INTEGER | 否 | 状态：1-启用 0-禁用，默认1 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
 ### 流程节点表 (workflow_nodes)
 
-```sql
-CREATE TABLE IF NOT EXISTS workflow_nodes (
-    node_id BIGINT PRIMARY KEY IDENTITY(1,1),
-    workflow_id BIGINT NOT NULL COMMENT '流程ID',
-    node_name VARCHAR(255) NOT NULL COMMENT '节点名称',
-    node_type VARCHAR(50) NOT NULL COMMENT '节点类型：开始节点、审批节点、执行节点、结束节点',
-    node_order INTEGER NOT NULL COMMENT '节点顺序',
-    assignee_type VARCHAR(50) COMMENT '负责人类型：固定用户、角色、部门',
-    assignee_id BIGINT COMMENT '负责人ID',
-    duration_limit INTEGER COMMENT '处理时限(小时)',
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 索引
-CREATE INDEX IF NOT EXISTS idx_workflow_nodes_workflow ON workflow_nodes(workflow_id);
-CREATE INDEX IF NOT EXISTS idx_workflow_nodes_order ON workflow_nodes(node_order);
-```
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| node_id | INTEGER | 否 | 主键，自增 |
+| workflow_id | INTEGER | 否 | 流程ID |
+| node_name | STRING | 否 | 节点名称 |
+| node_type | STRING | 否 | 节点类型：开始节点、审批节点、执行节点、结束节点 |
+| node_order | INTEGER | 否 | 节点顺序 |
+| assignee_type | STRING | 是 | 负责人类型：固定用户、角色、部门 |
+| assignee_id | INTEGER | 是 | 负责人ID |
+| duration_limit | INTEGER | 是 | 处理时限(小时) |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
 ### 流程实例表 (workflow_instances)
 
-```sql
-CREATE TABLE IF NOT EXISTS workflow_instances (
-    instance_id BIGINT PRIMARY KEY IDENTITY(1,1),
-    workflow_id BIGINT NOT NULL COMMENT '流程ID',
-    business_type VARCHAR(50) NOT NULL COMMENT '业务类型：需求、任务、缺陷、项目',
-    business_id BIGINT NOT NULL COMMENT '业务ID',
-    current_node_id BIGINT COMMENT '当前节点ID',
-    status VARCHAR(50) NOT NULL COMMENT '状态：运行中、已完成、已取消',
-    create_user_id BIGINT NOT NULL COMMENT '创建人用户ID',
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 索引
-CREATE INDEX IF NOT EXISTS idx_workflow_instances_business ON workflow_instances(business_type, business_id);
-CREATE INDEX IF NOT EXISTS idx_workflow_instances_status ON workflow_instances(status);
-```
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| instance_id | INTEGER | 否 | 主键，自增 |
+| workflow_id | INTEGER | 否 | 流程ID |
+| business_type | STRING | 否 | 业务类型：需求、任务、缺陷、项目 |
+| business_id | INTEGER | 否 | 业务ID |
+| current_node_id | INTEGER | 是 | 当前节点ID |
+| status | STRING | 否 | 状态：运行中、已完成、已取消 |
+| create_user_id | INTEGER | 否 | 创建人用户ID |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
 ### 流程执行记录表 (workflow_executions)
 
-```sql
-CREATE TABLE IF NOT EXISTS workflow_executions (
-    execution_id BIGINT PRIMARY KEY IDENTITY(1,1),
-    instance_id BIGINT NOT NULL COMMENT '流程实例ID',
-    node_id BIGINT NOT NULL COMMENT '节点ID',
-    executor_id BIGINT NOT NULL COMMENT '执行人用户ID',
-    action VARCHAR(50) NOT NULL COMMENT '操作：通过、驳回、转发',
-    comment TEXT COMMENT '审批意见',
-    start_time TIMESTAMP NOT NULL COMMENT '开始时间',
-    end_time TIMESTAMP COMMENT '结束时间',
-    duration INTEGER COMMENT '处理时长(分钟)',
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 索引
-CREATE INDEX IF NOT EXISTS idx_workflow_executions_instance ON workflow_executions(instance_id);
-CREATE INDEX IF NOT EXISTS idx_workflow_executions_node ON workflow_executions(node_id);
-```
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| execution_id | INTEGER | 否 | 主键，自增 |
+| instance_id | INTEGER | 否 | 流程实例ID |
+| node_id | INTEGER | 否 | 节点ID |
+| executor_id | INTEGER | 否 | 执行人用户ID |
+| action | STRING | 否 | 操作：通过、驳回、转发 |
+| comment | TEXT | 是 | 审批意见 |
+| start_time | INTEGER | 否 | 开始时间，Unix时间戳 |
+| end_time | INTEGER | 是 | 结束时间，Unix时间戳 |
+| duration | INTEGER | 是 | 处理时长(分钟) |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 
 ### 标签管理表 (tags)
 
-```sql
-CREATE TABLE IF NOT EXISTS tags (
-    tag_id BIGINT PRIMARY KEY IDENTITY(1,1),
-    tag_name VARCHAR(50) NOT NULL UNIQUE COMMENT '标签名称',
-    tag_color VARCHAR(20) COMMENT '标签颜色',
-    description VARCHAR(255) COMMENT '标签描述',
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 索引
-CREATE INDEX IF NOT EXISTS idx_tags_name ON tags(tag_name);
-```
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| tag_id | INTEGER | 否 | 主键，自增 |
+| tag_name | STRING | 否 | 标签名称 |
+| tag_color | STRING | 是 | 标签颜色 |
+| description | STRING | 是 | 标签描述 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
 ### 需求标签关联表 (requirement_tags)
 
-```sql
-CREATE TABLE IF NOT EXISTS requirement_tags (
-    id BIGINT PRIMARY KEY IDENTITY(1,1),
-    requirement_id BIGINT NOT NULL COMMENT '需求ID',
-    tag_id BIGINT NOT NULL COMMENT '标签ID',
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 索引
-CREATE INDEX IF NOT EXISTS idx_requirement_tags_requirement ON requirement_tags(requirement_id);
-CREATE INDEX IF NOT EXISTS idx_requirement_tags_tag ON requirement_tags(tag_id);
-```
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| requirement_id | INTEGER | 否 | 需求ID |
+| tag_id | INTEGER | 否 | 标签ID |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 
 ### 评论管理表 (comments)
 
-```sql
-CREATE TABLE IF NOT EXISTS comments (
-    comment_id BIGINT PRIMARY KEY IDENTITY(1,1),
-    business_type VARCHAR(50) NOT NULL COMMENT '业务类型：需求、任务、缺陷',
-    business_id BIGINT NOT NULL COMMENT '业务ID',
-    user_id BIGINT NOT NULL COMMENT '评论人用户ID',
-    content TEXT NOT NULL COMMENT '评论内容',
-    parent_comment_id BIGINT COMMENT '父评论ID',
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 索引
-CREATE INDEX IF NOT EXISTS idx_comments_business ON comments(business_type, business_id);
-CREATE INDEX IF NOT EXISTS idx_comments_user ON comments(user_id);
-```
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| comment_id | INTEGER | 否 | 主键，自增 |
+| business_type | STRING | 否 | 业务类型：需求、任务、缺陷 |
+| business_id | INTEGER | 否 | 业务ID |
+| user_id | INTEGER | 否 | 评论人用户ID |
+| content | TEXT | 否 | 评论内容 |
+| parent_comment_id | INTEGER | 是 | 父评论ID |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
 ### 操作记录表 (operation_records)
 
-```sql
-CREATE TABLE IF NOT EXISTS operation_records (
-    record_id BIGINT PRIMARY KEY IDENTITY(1,1),
-    business_type VARCHAR(50) NOT NULL COMMENT '业务类型：需求、任务、缺陷',
-    business_id BIGINT NOT NULL COMMENT '业务ID',
-    user_id BIGINT NOT NULL COMMENT '操作人用户ID',
-    operation_type VARCHAR(50) NOT NULL COMMENT '操作类型：创建、更新、删除、状态变更',
-    operation_detail TEXT COMMENT '操作详情',
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 索引
-CREATE INDEX IF NOT EXISTS idx_operation_records_business ON operation_records(business_type, business_id);
-CREATE INDEX IF NOT EXISTS idx_operation_records_user ON operation_records(user_id);
-CREATE INDEX IF NOT EXISTS idx_operation_records_type ON operation_records(operation_type);
-```
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| record_id | INTEGER | 否 | 主键，自增 |
+| business_type | STRING | 否 | 业务类型：需求、任务、缺陷 |
+| business_id | INTEGER | 否 | 业务ID |
+| user_id | INTEGER | 否 | 操作人用户ID |
+| operation_type | STRING | 否 | 操作类型：创建、更新、删除、状态变更 |
+| operation_detail | TEXT | 是 | 操作详情 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 
 ### 通知管理表 (notifications)
 
-```sql
-CREATE TABLE IF NOT EXISTS notifications (
-    notification_id BIGINT PRIMARY KEY IDENTITY(1,1),
-    user_id BIGINT NOT NULL COMMENT '接收用户ID',
-    title VARCHAR(255) NOT NULL COMMENT '通知标题',
-    content TEXT COMMENT '通知内容',
-    type VARCHAR(50) NOT NULL COMMENT '通知类型：系统通知、业务通知、提醒',
-    status INTEGER DEFAULT 0 COMMENT '阅读状态：0-未读 1-已读',
-    business_type VARCHAR(50) COMMENT '关联业务类型',
-    business_id BIGINT COMMENT '关联业务ID',
-    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- 索引
-CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
-CREATE INDEX IF NOT EXISTS idx_notifications_status ON notifications(status);
-CREATE INDEX IF NOT EXISTS idx_notifications_type ON notifications(type);
-```
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| notification_id | INTEGER | 否 | 主键，自增 |
+| user_id | INTEGER | 否 | 接收用户ID |
+| title | STRING | 否 | 通知标题 |
+| content | TEXT | 是 | 通知内容 |
+| type | STRING | 否 | 通知类型：系统通知、业务通知、提醒 |
+| status | INTEGER | 否 | 阅读状态：0-未读 1-已读，默认0 |
+| business_type | STRING | 是 | 关联业务类型 |
+| business_id | INTEGER | 是 | 关联业务ID |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 
 ## 与现有表的关系
 
