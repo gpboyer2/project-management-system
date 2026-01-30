@@ -1,4 +1,4 @@
-# 项目管理系统数据库设计
+# Ww项目管理系统数据库设计
 
 ## 系统概述
 
@@ -81,7 +81,9 @@ CREATE TABLE IF NOT EXISTS tasks (
     assignee_id INTEGER COMMENT '负责人用户ID',
     reporter_id INTEGER NOT NULL COMMENT '创建人用户ID',
     requirement_id INTEGER COMMENT '关联需求ID',
-    node_id INTEGER COMMENT '流程节点ID，关联process_nodes表',
+    review_id INTEGER COMMENT '关联评审ID',
+    requirement_node_id INTEGER COMMENT '需求管理流程节点ID，关联requirement_process_nodes表',
+    review_node_id INTEGER COMMENT '评审管理流程节点ID，关联review_process_nodes表',
     priority INTEGER NOT NULL COMMENT '优先级：1-P0 2-P1 3-P2 4-P3',
     estimated_hours DECIMAL(10,2) COMMENT '预估工时(小时)',
     actual_hours DECIMAL(10,2) COMMENT '实际工时(小时)',
@@ -101,7 +103,9 @@ CREATE TABLE IF NOT EXISTS tasks (
 | assignee_id | INTEGER | 是 | 负责人用户ID |
 | reporter_id | INTEGER | 否 | 创建人用户ID |
 | requirement_id | INTEGER | 是 | 关联需求ID |
-| node_id | INTEGER | 是 | 流程节点ID，关联process_nodes表 |
+| review_id | INTEGER | 是 | 关联评审ID |
+| requirement_node_id | INTEGER | 是 | 需求管理流程节点ID，关联requirement_process_nodes表 |
+| review_node_id | INTEGER | 是 | 评审管理流程节点ID，关联review_process_nodes表 |
 | priority | INTEGER | 否 | 优先级：1-P0 2-P1 3-P2 4-P3 |
 | estimated_hours | DECIMAL(10,2) | 是 | 预估工时(小时) |
 | actual_hours | DECIMAL(10,2) | 是 | 实际工时(小时) |
@@ -127,43 +131,6 @@ CREATE TABLE IF NOT EXISTS projects (
 );
 ```
 
-### 流程管理表 (process_flows)
-
-```sql
-CREATE TABLE IF NOT EXISTS process_flows (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    requirement_id INTEGER NOT NULL COMMENT '关联需求ID',
-    name STRING NOT NULL COMMENT '流程名称',
-    description TEXT COMMENT '流程描述',
-    status INTEGER DEFAULT 1 COMMENT '状态：1-启用 0-禁用',
-    create_time INTEGER COMMENT '创建时间，Unix时间戳',
-    update_time INTEGER COMMENT '更新时间，Unix时间戳'
-);
-```
-
-| 字段名 | 类型 | 是否允许为空 | 注释 |
-|--------|------|-------------|------|
-| id | INTEGER | 否 | 主键，自增 |
-| requirement_id | INTEGER | 否 | 关联需求ID |
-| name | STRING | 否 | 流程名称 |
-| description | TEXT | 是 | 流程描述 |
-| status | INTEGER | 否 | 状态：1-启用 0-禁用，默认1 |
-| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
-| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
-
-| 字段名 | 类型 | 是否允许为空 | 注释 |
-|--------|------|-------------|------|
-| id | INTEGER | 否 | 主键，自增 |
-| name | STRING | 否 | 项目名称 |
-| description | TEXT | 是 | 项目描述 |
-| status | INTEGER | 否 | 状态：1-待立项 2-进行中 3-已暂停 4-已完成 5-已取消 |
-| manager_id | INTEGER | 否 | 项目负责人用户ID |
-| department_id | INTEGER | 是 | 所属部门ID |
-| start_date | INTEGER | 是 | 开始日期，Unix时间戳 |
-| end_date | INTEGER | 是 | 结束日期，Unix时间戳 |
-| budget | DECIMAL(15,2) | 是 | 项目预算 |
-| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
-| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
 ### 流程节点类型表 (process_node_types)
 
@@ -189,12 +156,12 @@ CREATE TABLE IF NOT EXISTS process_node_types (
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 | update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
-### 流程节点表 (process_nodes)
+### 需求管理流程节点表 (requirement_process_nodes)
 
 ```sql
-CREATE TABLE IF NOT EXISTS process_nodes (
+CREATE TABLE IF NOT EXISTS requirement_process_nodes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    flow_id INTEGER NOT NULL COMMENT '流程ID',
+    requirement_id INTEGER NOT NULL COMMENT '关联需求ID',
     name STRING NOT NULL COMMENT '节点名称',
     node_type_id INTEGER NOT NULL COMMENT '流程节点类型ID，关联process_node_types表',
     parent_node_id INTEGER COMMENT '父节点ID，支持树形结构',
@@ -211,24 +178,23 @@ CREATE TABLE IF NOT EXISTS process_nodes (
 | 字段名 | 类型 | 是否允许为空 | 注释 |
 |--------|------|-------------|------|
 | id | INTEGER | 否 | 主键，自增 |
-| flow_id | INTEGER | 否 | 流程ID |
+| requirement_id | INTEGER | 否 | 关联需求ID |
 | name | STRING | 否 | 节点名称 |
 | node_type_id | INTEGER | 否 | 流程节点类型ID，关联process_node_types表 |
 | parent_node_id | INTEGER | 是 | 父节点ID，支持树形结构 |
 | node_order | INTEGER | 否 | 节点顺序 |
 | assignee_type | INTEGER | 是 | 负责人类型：1-固定用户 2-角色 3-部门 |
 | assignee_id | INTEGER | 是 | 负责人ID |
-| duration_limit | INTEGER | 是 | 处理时限(小时) |
 | status | INTEGER | 否 | 状态：1-启用 0-禁用，默认1 |
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 | update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
-### 流程节点关系表 (process_node_relations)
+### 需求管理流程节点关系表 (requirement_process_node_relations)
 
 ```sql
-CREATE TABLE IF NOT EXISTS process_node_relations (
+CREATE TABLE IF NOT EXISTS requirement_process_node_relations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    flow_id INTEGER NOT NULL COMMENT '流程ID',
+    requirement_id INTEGER NOT NULL COMMENT '关联需求ID',
     source_node_id INTEGER NOT NULL COMMENT '源节点ID',
     target_node_id INTEGER NOT NULL COMMENT '目标节点ID',
     relation_type INTEGER DEFAULT 1 COMMENT '关系类型：1-顺序 2-并行 3-条件',
@@ -240,17 +206,98 @@ CREATE TABLE IF NOT EXISTS process_node_relations (
 | 字段名 | 类型 | 是否允许为空 | 注释 |
 |--------|------|-------------|------|
 | id | INTEGER | 否 | 主键，自增 |
-| flow_id | INTEGER | 否 | 流程ID |
+| requirement_id | INTEGER | 否 | 关联需求ID |
 | source_node_id | INTEGER | 否 | 源节点ID |
 | target_node_id | INTEGER | 否 | 目标节点ID |
 | relation_type | INTEGER | 否 | 关系类型：1-顺序 2-并行 3-条件，默认1 |
 | condition | TEXT | 是 | 条件表达式（如：状态=通过） |
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 
-### 流程节点用户关联表 (process_node_users)
+### 需求管理流程节点用户关联表 (requirement_process_node_users)
 
 ```sql
-CREATE TABLE IF NOT EXISTS process_node_users (
+CREATE TABLE IF NOT EXISTS requirement_process_node_users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    node_id INTEGER NOT NULL COMMENT '流程节点ID',
+    user_id INTEGER NOT NULL COMMENT '用户ID',
+    role_type INTEGER DEFAULT 1 COMMENT '用户角色类型：1-负责人 2-参与者 3-观察者',
+    status INTEGER DEFAULT 1 COMMENT '状态：1-正常 0-已移除',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳',
+    update_time INTEGER COMMENT '更新时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| node_id | INTEGER | 否 | 流程节点ID |
+| user_id | INTEGER | 否 | 用户ID |
+| role_type | INTEGER | 否 | 用户角色类型：1-负责人 2-参与者 3-观察者，默认1 |
+| status | INTEGER | 否 | 状态：1-正常 0-已移除，默认1 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
+### 评审管理流程节点表 (review_process_nodes)
+
+```sql
+CREATE TABLE IF NOT EXISTS review_process_nodes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    review_id INTEGER NOT NULL COMMENT '关联评审ID',
+    name STRING NOT NULL COMMENT '节点名称',
+    node_type_id INTEGER NOT NULL COMMENT '流程节点类型ID，关联process_node_types表',
+    parent_node_id INTEGER COMMENT '父节点ID，支持树形结构',
+    node_order INTEGER NOT NULL COMMENT '节点顺序',
+    assignee_type INTEGER COMMENT '负责人类型：1-固定用户 2-角色 3-部门',
+    assignee_id INTEGER COMMENT '负责人ID',
+    duration_limit INTEGER COMMENT '处理时限(小时)',
+    status INTEGER DEFAULT 1 COMMENT '状态：1-启用 0-禁用',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳',
+    update_time INTEGER COMMENT '更新时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| review_id | INTEGER | 否 | 关联评审ID |
+| name | STRING | 否 | 节点名称 |
+| node_type_id | INTEGER | 否 | 流程节点类型ID，关联process_node_types表 |
+| parent_node_id | INTEGER | 是 | 父节点ID，支持树形结构 |
+| node_order | INTEGER | 否 | 节点顺序 |
+| assignee_type | INTEGER | 是 | 负责人类型：1-固定用户 2-角色 3-部门 |
+| assignee_id | INTEGER | 是 | 负责人ID |
+| status | INTEGER | 否 | 状态：1-启用 0-禁用，默认1 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
+### 评审管理流程节点关系表 (review_process_node_relations)
+
+```sql
+CREATE TABLE IF NOT EXISTS review_process_node_relations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    review_id INTEGER NOT NULL COMMENT '关联评审ID',
+    source_node_id INTEGER NOT NULL COMMENT '源节点ID',
+    target_node_id INTEGER NOT NULL COMMENT '目标节点ID',
+    relation_type INTEGER DEFAULT 1 COMMENT '关系类型：1-顺序 2-并行 3-条件',
+    condition TEXT COMMENT '条件表达式（如：状态=通过）',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| review_id | INTEGER | 否 | 关联评审ID |
+| source_node_id | INTEGER | 否 | 源节点ID |
+| target_node_id | INTEGER | 否 | 目标节点ID |
+| relation_type | INTEGER | 否 | 关系类型：1-顺序 2-并行 3-条件，默认1 |
+| condition | TEXT | 是 | 条件表达式（如：状态=通过） |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+
+### 评审管理流程节点用户关联表 (review_process_node_users)
+
+```sql
+CREATE TABLE IF NOT EXISTS review_process_node_users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     node_id INTEGER NOT NULL COMMENT '流程节点ID',
     user_id INTEGER NOT NULL COMMENT '用户ID',
@@ -375,24 +422,28 @@ CREATE TABLE IF NOT EXISTS comments (
 ```sql
 CREATE TABLE IF NOT EXISTS operation_records (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    business_type INTEGER NOT NULL COMMENT '业务类型：1-需求 2-任务',
-    business_id INTEGER NOT NULL COMMENT '业务ID',
+    business_type INTEGER NOT NULL COMMENT '业务类型：1-需求 2-任务 3-项目 4-流程节点 5-评审维度',
+    business_id INTEGER NOT NULL COMMENT '关联的业务ID',
     user_id INTEGER NOT NULL COMMENT '操作人用户ID',
-    operation_type INTEGER NOT NULL COMMENT '操作类型：1-创建 2-更新 3-删除 4-状态变更',
-    operation_detail TEXT COMMENT '操作详情',
-    create_time INTEGER COMMENT '创建时间，Unix时间戳'
+    operation_type INTEGER NOT NULL COMMENT '操作类型：1-创建 2-更新 3-删除 4-状态变更 5-分配 6-评论 7-审批',
+    operation_detail TEXT COMMENT '操作详情（JSON格式，包含变更前和变更后的数据）',
+    ip_address STRING COMMENT '操作人IP地址',
+    user_agent STRING COMMENT '用户代理（浏览器信息）',
+    create_time INTEGER COMMENT '操作时间，Unix时间戳'
 );
 ```
 
 | 字段名 | 类型 | 是否允许为空 | 注释 |
 |--------|------|-------------|------|
 | id | INTEGER | 否 | 主键，自增 |
-| business_type | INTEGER | 否 | 业务类型：1-需求 2-任务 |
-| business_id | INTEGER | 否 | 业务ID |
+| business_type | INTEGER | 否 | 业务类型：1-需求 2-任务 3-项目 4-流程节点 5-评审维度 |
+| business_id | INTEGER | 否 | 关联的业务ID |
 | user_id | INTEGER | 否 | 操作人用户ID |
-| operation_type | INTEGER | 否 | 操作类型：1-创建 2-更新 3-删除 4-状态变更 |
-| operation_detail | TEXT | 是 | 操作详情 |
-| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| operation_type | INTEGER | 否 | 操作类型：1-创建 2-更新 3-删除 4-状态变更 5-分配 6-评论 7-审批 |
+| operation_detail | TEXT | 是 | 操作详情（JSON格式，包含变更前和变更后的数据） |
+| ip_address | STRING | 是 | 操作人IP地址 |
+| user_agent | STRING | 是 | 用户代理（浏览器信息） |
+| create_time | INTEGER | 是 | 操作时间，Unix时间戳 |
 
 ### 通知管理表 (notifications)
 
@@ -503,6 +554,34 @@ CREATE TABLE IF NOT EXISTS user_sessions (
 );
 ```
 
+#### 项目团队管理表 (project_teams)
+
+```sql
+CREATE TABLE IF NOT EXISTS project_teams (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER NOT NULL COMMENT '所属项目ID',
+    user_id INTEGER NOT NULL COMMENT '用户ID',
+    role_id INTEGER NOT NULL COMMENT '角色ID',
+    status INTEGER DEFAULT 1 COMMENT '状态：1-正常 0-已移除',
+    join_time INTEGER COMMENT '加入时间，Unix时间戳',
+    leave_time INTEGER COMMENT '离开时间，Unix时间戳',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳',
+    update_time INTEGER COMMENT '更新时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| project_id | INTEGER | 否 | 所属项目ID |
+| user_id | INTEGER | 否 | 用户ID |
+| role_id | INTEGER | 否 | 角色ID |
+| status | INTEGER | 否 | 状态：1-正常 0-已移除，默认1 |
+| join_time | INTEGER | 是 | 加入时间，Unix时间戳 |
+| leave_time | INTEGER | 是 | 离开时间，Unix时间戳 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
 #### 操作日志表 (operation_logs)
 
 ```sql
@@ -522,7 +601,6 @@ CREATE TABLE IF NOT EXISTS operation_logs (
 ```sql
 CREATE TABLE IF NOT EXISTS process_executions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    flow_id INTEGER NOT NULL COMMENT '流程ID',
     requirement_id INTEGER NOT NULL COMMENT '关联需求ID',
     node_id INTEGER NOT NULL COMMENT '流程节点ID',
     executor_id INTEGER COMMENT '执行人用户ID',
@@ -538,7 +616,7 @@ CREATE TABLE IF NOT EXISTS process_executions (
 | 字段名 | 类型 | 是否允许为空 | 注释 |
 |--------|------|-------------|------|
 | id | INTEGER | 否 | 主键，自增 |
-| flow_id | INTEGER | 否 | 流程ID |
+| requirement_id | INTEGER | 否 | 关联需求ID |
 | requirement_id | INTEGER | 否 | 关联需求ID |
 | node_id | INTEGER | 否 | 流程节点ID |
 | executor_id | INTEGER | 是 | 执行人用户ID |
@@ -611,6 +689,40 @@ CREATE TABLE IF NOT EXISTS requirement_versions (
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 | update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
+### 评审管理表 (reviews)
+
+```sql
+CREATE TABLE IF NOT EXISTS reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER NOT NULL COMMENT '所属项目ID',
+    name STRING NOT NULL COMMENT '评审名称',
+    description TEXT COMMENT '评审描述',
+    review_type INTEGER NOT NULL DEFAULT 1 COMMENT '评审类型：1-技术评审 2-业务评审 3-产品评审',
+    status INTEGER NOT NULL DEFAULT 1 COMMENT '评审状态：1-待开始 2-进行中 3-已完成 4-已取消',
+    reporter_id INTEGER NOT NULL COMMENT '评审发起人用户ID',
+    reviewer_id INTEGER COMMENT '评审负责人用户ID',
+    start_time INTEGER COMMENT '开始时间，Unix时间戳',
+    end_time INTEGER COMMENT '结束时间，Unix时间戳',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳',
+    update_time INTEGER COMMENT '更新时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| project_id | INTEGER | 否 | 所属项目ID |
+| name | STRING | 否 | 评审名称 |
+| description | TEXT | 是 | 评审描述 |
+| review_type | INTEGER | 否 | 评审类型：1-技术评审 2-业务评审 3-产品评审，默认1 |
+| status | INTEGER | 否 | 评审状态：1-待开始 2-进行中 3-已完成 4-已取消，默认1 |
+| reporter_id | INTEGER | 否 | 评审发起人用户ID |
+| reviewer_id | INTEGER | 是 | 评审负责人用户ID |
+| start_time | INTEGER | 是 | 开始时间，Unix时间戳 |
+| end_time | INTEGER | 是 | 结束时间，Unix时间戳 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
 ### 评审维度管理表 (review_dimensions)
 
 ```sql
@@ -645,12 +757,15 @@ CREATE TABLE IF NOT EXISTS review_dimensions (
 - 所有业务表通过 `user_id` 字段关联到 `users` 表
 - 项目团队表通过 `project_id` 关联到 `projects` 表
 - 需求通过 `project_id` 关联到 `projects` 表，通过 `type_id` 关联到 `requirement_types` 表，通过 `status_id` 关联到 `requirement_statuses` 表
-- 任务通过 `requirement_id` 关联到 `requirements` 表，通过 `status_id` 关联到 `requirement_task_statuses` 表，通过 `node_id` 关联到 `process_nodes` 表
-- 流程通过 `requirement_id` 关联到 `requirements` 表
-- 流程节点通过 `flow_id` 关联到 `process_flows` 表，通过 `node_type_id` 关联到 `process_node_types` 表，通过 `parent_node_id` 实现树形结构
-- 流程节点关系通过 `flow_id` 关联到 `process_flows` 表，通过 `source_node_id` 和 `target_node_id` 关联到 `process_nodes` 表
-- 流程节点用户关联通过 `node_id` 关联到 `process_nodes` 表，通过 `user_id` 关联到 `users` 表
-- 流程执行记录通过 `flow_id` 关联到 `process_flows` 表，通过 `requirement_id` 关联到 `requirements` 表，通过 `node_id` 关联到 `process_nodes` 表
+- 评审通过 `project_id` 关联到 `projects` 表
+- 任务通过 `requirement_id` 关联到 `requirements` 表，通过 `review_id` 关联到 `reviews` 表，通过 `status_id` 关联到 `requirement_task_statuses` 表，通过 `requirement_node_id` 关联到 `requirement_process_nodes` 表，通过 `review_node_id` 关联到 `review_process_nodes` 表
+- 需求管理流程节点通过 `requirement_id` 关联到 `requirements` 表，通过 `node_type_id` 关联到 `process_node_types` 表，通过 `parent_node_id` 实现树形结构
+- 需求管理流程节点关系通过 `requirement_id` 关联到 `requirements` 表，通过 `source_node_id` 和 `target_node_id` 关联到 `requirement_process_nodes` 表
+- 需求管理流程节点用户关联通过 `node_id` 关联到 `requirement_process_nodes` 表，通过 `user_id` 关联到 `users` 表
+- 评审管理流程节点通过 `review_id` 关联到 `reviews` 表，通过 `node_type_id` 关联到 `process_node_types` 表，通过 `parent_node_id` 实现树形结构
+- 评审管理流程节点关系通过 `review_id` 关联到 `reviews` 表，通过 `source_node_id` 和 `target_node_id` 关联到 `review_process_nodes` 表
+- 评审管理流程节点用户关联通过 `node_id` 关联到 `review_process_nodes` 表，通过 `user_id` 关联到 `users` 表
+- 流程执行记录通过 `requirement_id` 关联到 `requirements` 表，通过 `node_id` 关联到 `requirement_process_nodes` 表
 - 需求版本管理通过 `requirement_id` 关联到 `requirements` 表
 - 评审维度管理通过 `project_id` 关联到 `projects` 表
 
@@ -659,7 +774,7 @@ CREATE TABLE IF NOT EXISTS review_dimensions (
 ### 数据安全
 - 所有表都包含 `create_time` 和 `update_time` 字段用于审计
 - 敏感数据字段使用适当的加密存储
-- 外键约束确保数据一致性
+- 开发阶段不使用外键约束，避免增加数据迁移复杂度
 
 ### 索引优化（开发阶段规范）
 - **核心原则**：开发阶段不关注数据库性能，索引会增加数据迁移复杂度
