@@ -5,7 +5,7 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
 const Task = sequelize.define('tasks', {
-  task_id: {
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
@@ -18,11 +18,11 @@ const Task = sequelize.define('tasks', {
     type: DataTypes.TEXT
   },
   priority: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: false
   },
-  status: {
-    type: DataTypes.STRING,
+  task_status_id: {
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   assignee_id: {
@@ -35,7 +35,7 @@ const Task = sequelize.define('tasks', {
   requirement_id: {
     type: DataTypes.INTEGER
   },
-  project_id: {
+  node_id: {
     type: DataTypes.INTEGER
   },
   estimated_hours: {

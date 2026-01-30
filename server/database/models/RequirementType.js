@@ -1,25 +1,25 @@
 /**
- * 角色数据模型
+ * 需求类型数据模型
  */
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
-const Role = sequelize.define('roles', {
+const RequirementType = sequelize.define('requirement_types', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  role_name: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  role_code: {
+  type_name: {
     type: DataTypes.STRING,
     allowNull: false
   },
   description: {
-    type: DataTypes.STRING
+    type: DataTypes.TEXT
+  },
+  sort_order: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   status: {
     type: DataTypes.INTEGER,
@@ -33,4 +33,4 @@ const Role = sequelize.define('roles', {
   }
 });
 
-module.exports = Role;
+module.exports = RequirementType;

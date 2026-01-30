@@ -1,25 +1,25 @@
 /**
- * 流程管理数据模型
+ * 需求任务状态数据模型
  */
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
-const Workflow = sequelize.define('workflows', {
-  workflow_id: {
+const RequirementTaskStatus = sequelize.define('requirement_task_statuses', {
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  workflow_name: {
+  status_name: {
     type: DataTypes.STRING,
     allowNull: false
   },
   description: {
     type: DataTypes.TEXT
   },
-  workflow_type: {
-    type: DataTypes.STRING,
-    allowNull: false
+  sort_order: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   },
   status: {
     type: DataTypes.INTEGER,
@@ -33,4 +33,4 @@ const Workflow = sequelize.define('workflows', {
   }
 });
 
-module.exports = Workflow;
+module.exports = RequirementTaskStatus;

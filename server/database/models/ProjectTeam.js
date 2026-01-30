@@ -19,7 +19,7 @@ const ProjectTeam = sequelize.define('project_teams', {
     allowNull: false
   },
   role: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   status: {

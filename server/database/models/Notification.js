@@ -5,7 +5,7 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
 const Notification = sequelize.define('notifications', {
-  notification_id: {
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
@@ -22,7 +22,7 @@ const Notification = sequelize.define('notifications', {
     type: DataTypes.TEXT
   },
   type: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   status: {
@@ -30,7 +30,7 @@ const Notification = sequelize.define('notifications', {
     defaultValue: 0
   },
   business_type: {
-    type: DataTypes.STRING
+    type: DataTypes.INTEGER
   },
   business_id: {
     type: DataTypes.INTEGER

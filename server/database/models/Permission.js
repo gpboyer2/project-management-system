@@ -5,7 +5,7 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
 const Permission = sequelize.define('permissions', {
-  permission_id: {
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true

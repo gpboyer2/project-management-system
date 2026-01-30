@@ -1,35 +1,39 @@
 /**
- * 流程实例数据模型
+ * 需求版本管理数据模型
  */
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
-const WorkflowInstance = sequelize.define('workflow_instances', {
-  instance_id: {
+const RequirementVersion = sequelize.define('requirement_versions', {
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  workflow_id: {
+  requirement_id: {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  business_type: {
+  version_name: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  business_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false
+  description: {
+    type: DataTypes.TEXT
   },
-  current_node_id: {
+  planned_start_time: {
+    type: DataTypes.INTEGER
+  },
+  planned_end_time: {
+    type: DataTypes.INTEGER
+  },
+  actual_start_time: {
+    type: DataTypes.INTEGER
+  },
+  actual_end_time: {
     type: DataTypes.INTEGER
   },
   status: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  create_user_id: {
     type: DataTypes.INTEGER,
     allowNull: false
   },
@@ -41,4 +45,4 @@ const WorkflowInstance = sequelize.define('workflow_instances', {
   }
 });
 
-module.exports = WorkflowInstance;
+module.exports = RequirementVersion;

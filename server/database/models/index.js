@@ -16,18 +16,22 @@ const UserSession = require('./UserSession');
 const FrontendLog = require('./FrontendLog');
 const Requirement = require('./Requirement');
 const Task = require('./Task');
-const Defect = require('./Defect');
 const Project = require('./Project');
 const ProjectTeam = require('./ProjectTeam');
-const Workflow = require('./Workflow');
-const WorkflowNode = require('./WorkflowNode');
-const WorkflowInstance = require('./WorkflowInstance');
-const WorkflowExecution = require('./WorkflowExecution');
-const Tag = require('./Tag');
-const RequirementTag = require('./RequirementTag');
 const Comment = require('./Comment');
 const OperationRecord = require('./OperationRecord');
 const Notification = require('./Notification');
+const RequirementType = require('./RequirementType');
+const RequirementStatus = require('./RequirementStatus');
+const RequirementTaskStatus = require('./RequirementTaskStatus');
+const ProcessNodeType = require('./ProcessNodeType');
+const ProcessExecution = require('./ProcessExecution');
+const DataImportExport = require('./DataImportExport');
+const RequirementVersion = require('./RequirementVersion');
+const ProcessFlow = require('./ProcessFlow');
+const ProcessNode = require('./ProcessNode');
+const ProcessNodeRelation = require('./ProcessNodeRelation');
+const ProcessNodeUser = require('./ProcessNodeUser');
 
 module.exports = {
   NodeType,
@@ -44,16 +48,20 @@ module.exports = {
   FrontendLog,
   Requirement,
   Task,
-  Defect,
   Project,
   ProjectTeam,
-  Workflow,
-  WorkflowNode,
-  WorkflowInstance,
-  WorkflowExecution,
-  Tag,
-  RequirementTag,
   Comment,
   OperationRecord,
-  Notification
+  Notification,
+  RequirementType,
+  RequirementStatus,
+  RequirementTaskStatus,
+  ProcessNodeType,
+  ProcessExecution,
+  DataImportExport,
+  RequirementVersion,
+  ProcessFlow,
+  ProcessNode,
+  ProcessNodeRelation,
+  ProcessNodeUser
 };

@@ -1,24 +1,29 @@
 /**
- * 标签管理数据模型
+ * 需求状态数据模型
  */
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
-const Tag = sequelize.define('tags', {
-  tag_id: {
+const RequirementStatus = sequelize.define('requirement_statuses', {
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  tag_name: {
+  status_name: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  tag_color: {
-    type: DataTypes.STRING
-  },
   description: {
-    type: DataTypes.STRING
+    type: DataTypes.TEXT
+  },
+  sort_order: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  status: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1
   },
   create_time: {
     type: DataTypes.INTEGER
@@ -28,4 +33,4 @@ const Tag = sequelize.define('tags', {
   }
 });
 
-module.exports = Tag;
+module.exports = RequirementStatus;

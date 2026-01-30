@@ -5,7 +5,7 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
 const FrontendLog = sequelize.define('logs_frontend', {
-  log_id: {
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true

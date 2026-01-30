@@ -5,7 +5,7 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
 const User = sequelize.define('users', {
-  user_id: {
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
@@ -50,5 +50,16 @@ const User = sequelize.define('users', {
     type: DataTypes.STRING
   }
 });
+
+// 定义关联关系
+User.associate = function(models) {
+  // 用户参与多个流程节点（多对多关系）
+  User.belongsToMany(models.ProcessNode, {
+    through: models.ProcessNodeUser,
+    foreignKey: 'user_id',
+    otherKey: 'node_id',
+    as: 'process_nodes'
+  });
+};
 
 module.exports = User;

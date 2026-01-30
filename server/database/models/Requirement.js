@@ -5,7 +5,7 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
 const Requirement = sequelize.define('requirements', {
-  requirement_id: {
+  id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
@@ -14,19 +14,19 @@ const Requirement = sequelize.define('requirements', {
     type: DataTypes.STRING,
     allowNull: false
   },
-  requirement_type: {
-    type: DataTypes.STRING,
+  type_id: {
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   description: {
     type: DataTypes.TEXT
   },
   priority: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: false
   },
-  status: {
-    type: DataTypes.STRING,
+  status_id: {
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   current_assignee_id: {
