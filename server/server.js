@@ -107,6 +107,10 @@ const routeConfigList = [
     { prefix: "/communication-nodes", router: require("./routes/communicationNodeRouter"), desc: "通信节点接口" },
     { prefix: "/ide", router: require("./routes/dataImportExportRouter"), desc: "IDE 数据导入导出接口" },
     { prefix: "/logs", router: require("./routes/logRouter"), desc: "前端日志接口" },
+    { prefix: "/projects", router: require("./routes/projectRouter"), desc: "项目管理接口" },
+    { prefix: "/reviews", router: require("./routes/reviewRouter"), desc: "评审管理接口" },
+    { prefix: "/requirements", router: require("./routes/requirementRouter"), desc: "需求管理接口" },
+    { prefix: "/tasks", router: require("./routes/taskRouter"), desc: "任务管理接口" },
 ];
 
 // 提前注册需要处理文件上传的路由（在 bodyParser 之前，避免 FormData 被错误解析）

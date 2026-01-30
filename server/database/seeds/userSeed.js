@@ -38,7 +38,17 @@ const defaultPermissionList = [
   { permission_name: '流程图', permission_code: 'FLOWCHART', resource_type: 'menu', resource_path: '/flowchart', parent_id: null, sort_order: 4 },
   { permission_name: '查看流程图', permission_code: 'FLOWCHART:VIEW', resource_type: 'button', resource_path: null, parent_id: 21, sort_order: 1 },
   { permission_name: '编辑流程图', permission_code: 'FLOWCHART:EDIT', resource_type: 'button', resource_path: null, parent_id: 21, sort_order: 2 },
-  { permission_name: '生成代码', permission_code: 'FLOWCHART:GENERATE', resource_type: 'button', resource_path: null, parent_id: 21, sort_order: 3 }
+  { permission_name: '生成代码', permission_code: 'FLOWCHART:GENERATE', resource_type: 'button', resource_path: null, parent_id: 21, sort_order: 3 },
+  { permission_name: '项目管理', permission_code: 'PROJECT', resource_type: 'menu', resource_path: '/project', parent_id: null, sort_order: 5 },
+  { permission_name: '查看项目', permission_code: 'PROJECT:VIEW', resource_type: 'button', resource_path: null, parent_id: 22, sort_order: 1 },
+  { permission_name: '创建项目', permission_code: 'PROJECT:CREATE', resource_type: 'button', resource_path: null, parent_id: 22, sort_order: 2 },
+  { permission_name: '编辑项目', permission_code: 'PROJECT:EDIT', resource_type: 'button', resource_path: null, parent_id: 22, sort_order: 3 },
+  { permission_name: '删除项目', permission_code: 'PROJECT:DELETE', resource_type: 'button', resource_path: null, parent_id: 22, sort_order: 4 },
+  { permission_name: '项目团队管理', permission_code: 'PROJECT:TEAM', resource_type: 'menu', resource_path: '/project/team', parent_id: 22, sort_order: 1 },
+  { permission_name: '查看项目团队', permission_code: 'PROJECT:TEAM:VIEW', resource_type: 'button', resource_path: null, parent_id: 26, sort_order: 1 },
+  { permission_name: '添加项目团队成员', permission_code: 'PROJECT:TEAM:ADD', resource_type: 'button', resource_path: null, parent_id: 26, sort_order: 2 },
+  { permission_name: '编辑项目团队成员', permission_code: 'PROJECT:TEAM:EDIT', resource_type: 'button', resource_path: null, parent_id: 26, sort_order: 3 },
+  { permission_name: '删除项目团队成员', permission_code: 'PROJECT:TEAM:DELETE', resource_type: 'button', resource_path: null, parent_id: 26, sort_order: 4 }
 ];
 
 // 默认用户数据
@@ -100,25 +110,25 @@ async function initRolePermissionList() {
       return;
     }
 
-    const permissionList = await Permission.findAll({ attributes: ['permission_id', 'permission_code'], raw: true });
+    const permissionList = await Permission.findAll({ attributes: ['id', 'permission_code'], raw: true });
     const rolePermissionData = [];
 
     // 超级管理员（role_id=1）拥有所有权限
-    permissionList.forEach(p => rolePermissionData.push({ role_id: 1, permission_id: p.permission_id }));
+    permissionList.forEach(p => rolePermissionData.push({ role_id: 1, permission_id: p.id }));
 
     // 系统管理员（role_id=2）拥有除权限管理外的所有权限
-    permissionList.filter(p => ![12, 13].includes(p.permission_id))
-      .forEach(p => rolePermissionData.push({ role_id: 2, permission_id: p.permission_id }));
+    permissionList.filter(p => ![12, 13].includes(p.id))
+      .forEach(p => rolePermissionData.push({ role_id: 2, permission_id: p.id }));
 
     // 普通用户（role_id=3）拥有查看权限
-    const userPermissionCodeList = ['SYSTEM', 'ARCH', 'ARCH:VIEW', 'PACKET', 'PACKET:VIEW', 'FLOWCHART', 'FLOWCHART:VIEW'];
+    const userPermissionCodeList = ['SYSTEM', 'ARCH', 'ARCH:VIEW', 'PACKET', 'PACKET:VIEW', 'FLOWCHART', 'FLOWCHART:VIEW', 'PROJECT', 'PROJECT:VIEW', 'PROJECT:TEAM', 'PROJECT:TEAM:VIEW'];
     permissionList.filter(p => userPermissionCodeList.includes(p.permission_code))
-      .forEach(p => rolePermissionData.push({ role_id: 3, permission_id: p.permission_id }));
+      .forEach(p => rolePermissionData.push({ role_id: 3, permission_id: p.id }));
 
     // 访客（role_id=4）仅有基础查看权限
-    const guestPermissionCodeList = ['ARCH', 'ARCH:VIEW', 'PACKET', 'PACKET:VIEW'];
+    const guestPermissionCodeList = ['ARCH', 'ARCH:VIEW', 'PACKET', 'PACKET:VIEW', 'PROJECT', 'PROJECT:VIEW', 'PROJECT:TEAM', 'PROJECT:TEAM:VIEW'];
     permissionList.filter(p => guestPermissionCodeList.includes(p.permission_code))
-      .forEach(p => rolePermissionData.push({ role_id: 4, permission_id: p.permission_id }));
+      .forEach(p => rolePermissionData.push({ role_id: 4, permission_id: p.id }));
 
     await RolePermission.bulkCreate(rolePermissionData);
     defaultLogger.info('[Seed] 角色权限关联初始化完成');

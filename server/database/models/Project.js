@@ -43,6 +43,24 @@ const Project = sequelize.define('projects', {
   update_time: {
     type: DataTypes.INTEGER
   }
+}, {
+  timestamps: false,
+  tableName: 'projects'
 });
+
+// 定义关联关系
+Project.associate = function(models) {
+  // 项目关联项目团队（一对多关系）
+  Project.hasMany(models.ProjectTeam, {
+    foreignKey: 'project_id',
+    as: 'team'
+  });
+
+  // 项目关联项目经理（一对一关系）
+  Project.belongsTo(models.User, {
+    foreignKey: 'manager_id',
+    as: 'manager'
+  });
+};
 
 module.exports = Project;

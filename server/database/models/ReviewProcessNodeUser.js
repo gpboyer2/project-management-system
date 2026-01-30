@@ -1,10 +1,10 @@
 /**
- * 流程节点用户关联数据模型
+ * 评审管理流程节点用户关联数据模型
  */
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
-const ProcessNodeUser = sequelize.define('process_node_users', {
+const ReviewProcessNodeUser = sequelize.define('review_process_node_users', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -44,22 +44,22 @@ const ProcessNodeUser = sequelize.define('process_node_users', {
   }
 }, {
   timestamps: false,
-  tableName: 'process_node_users'
+  tableName: 'review_process_node_users'
 });
 
 // 定义关联关系
-ProcessNodeUser.associate = function(models) {
+ReviewProcessNodeUser.associate = function(models) {
   // 关联到流程节点
-  ProcessNodeUser.belongsTo(models.ProcessNode, {
+  ReviewProcessNodeUser.belongsTo(models.ReviewProcessNode, {
     foreignKey: 'node_id',
     as: 'node'
   });
 
   // 关联到用户
-  ProcessNodeUser.belongsTo(models.User, {
+  ReviewProcessNodeUser.belongsTo(models.User, {
     foreignKey: 'user_id',
     as: 'user'
   });
 };
 
-module.exports = ProcessNodeUser;
+module.exports = ReviewProcessNodeUser;

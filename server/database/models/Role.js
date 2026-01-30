@@ -31,6 +31,18 @@ const Role = sequelize.define('roles', {
   update_time: {
     type: DataTypes.INTEGER
   }
+}, {
+  timestamps: false,
+  tableName: 'roles'
 });
+
+// 定义关联关系
+Role.associate = function(models) {
+  // 角色关联项目团队（一对多关系）
+  Role.hasMany(models.ProjectTeam, {
+    foreignKey: 'role_id',
+    as: 'project_teams'
+  });
+};
 
 module.exports = Role;

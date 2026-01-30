@@ -1,19 +1,19 @@
 /**
- * 流程节点数据模型
+ * 评审管理流程节点数据模型
  */
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
-const ProcessNode = sequelize.define('process_nodes', {
+const ReviewProcessNode = sequelize.define('review_process_nodes', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  requirement_id: {
+  review_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    comment: '关联需求ID'
+    comment: '关联评审ID'
   },
   name: {
     type: DataTypes.STRING,
@@ -68,66 +68,60 @@ const ProcessNode = sequelize.define('process_nodes', {
   }
 }, {
   timestamps: false,
-  tableName: 'process_nodes'
+  tableName: 'review_process_nodes'
 });
 
 // 定义关联关系
-ProcessNode.associate = function(models) {
-  // 节点属于需求
-  ProcessNode.belongsTo(models.Requirement, {
-    foreignKey: 'requirement_id',
-    as: 'requirement'
+ReviewProcessNode.associate = function(models) {
+  // 节点属于评审
+  ReviewProcessNode.belongsTo(models.Review, {
+    foreignKey: 'review_id',
+    as: 'review'
   });
 
   // 节点属于节点类型
-  ProcessNode.belongsTo(models.ProcessNodeType, {
+  ReviewProcessNode.belongsTo(models.ProcessNodeType, {
     foreignKey: 'node_type_id',
     as: 'node_type'
   });
 
   // 节点有父节点（树形结构）
-  ProcessNode.belongsTo(models.ProcessNode, {
+  ReviewProcessNode.belongsTo(models.ReviewProcessNode, {
     foreignKey: 'parent_node_id',
     as: 'parent_node'
   });
 
   // 节点有子节点
-  ProcessNode.hasMany(models.ProcessNode, {
+  ReviewProcessNode.hasMany(models.ReviewProcessNode, {
     foreignKey: 'parent_node_id',
     as: 'children_nodes'
   });
 
   // 节点作为源节点的关系
-  ProcessNode.hasMany(models.ProcessNodeRelation, {
+  ReviewProcessNode.hasMany(models.ReviewProcessNodeRelation, {
     foreignKey: 'source_node_id',
     as: 'source_relations'
   });
 
   // 节点作为目标节点的关系
-  ProcessNode.hasMany(models.ProcessNodeRelation, {
+  ReviewProcessNode.hasMany(models.ReviewProcessNodeRelation, {
     foreignKey: 'target_node_id',
     as: 'target_relations'
   });
 
   // 节点有多个任务
-  ProcessNode.hasMany(models.Task, {
-    foreignKey: 'node_id',
+  ReviewProcessNode.hasMany(models.Task, {
+    foreignKey: 'review_node_id',
     as: 'tasks'
   });
 
-  // 节点有多个执行记录
-  ProcessNode.hasMany(models.ProcessExecution, {
-    foreignKey: 'node_id',
-    as: 'executions'
-  });
-
   // 节点有多个用户（多对多关系）
-  ProcessNode.belongsToMany(models.User, {
-    through: models.ProcessNodeUser,
+  ReviewProcessNode.belongsToMany(models.User, {
+    through: models.ReviewProcessNodeUser,
     foreignKey: 'node_id',
     otherKey: 'user_id',
     as: 'users'
   });
 };
 
-module.exports = ProcessNode;
+module.exports = ReviewProcessNode;

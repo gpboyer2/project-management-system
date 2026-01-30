@@ -10,13 +10,10 @@ const ProcessExecution = sequelize.define('process_executions', {
     primaryKey: true,
     autoIncrement: true
   },
-  flow_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
   requirement_id: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    comment: '关联需求ID'
   },
   node_id: {
     type: DataTypes.INTEGER,

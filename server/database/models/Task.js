@@ -35,7 +35,13 @@ const Task = sequelize.define('tasks', {
   requirement_id: {
     type: DataTypes.INTEGER
   },
-  node_id: {
+  review_id: {
+    type: DataTypes.INTEGER
+  },
+  requirement_node_id: {
+    type: DataTypes.INTEGER
+  },
+  review_node_id: {
     type: DataTypes.INTEGER
   },
   estimated_hours: {
@@ -57,5 +63,44 @@ const Task = sequelize.define('tasks', {
     type: DataTypes.INTEGER
   }
 });
+
+// 定义关联关系
+Task.associate = function(models) {
+  // 任务属于需求
+  Task.belongsTo(models.Requirement, {
+    foreignKey: 'requirement_id',
+    as: 'requirement'
+  });
+
+  // 任务属于评审
+  Task.belongsTo(models.Review, {
+    foreignKey: 'review_id',
+    as: 'review'
+  });
+
+  // 任务属于需求管理流程节点
+  Task.belongsTo(models.RequirementProcessNode, {
+    foreignKey: 'requirement_node_id',
+    as: 'requirement_node'
+  });
+
+  // 任务属于评审管理流程节点
+  Task.belongsTo(models.ReviewProcessNode, {
+    foreignKey: 'review_node_id',
+    as: 'review_node'
+  });
+
+  // 任务有负责人
+  Task.belongsTo(models.User, {
+    foreignKey: 'assignee_id',
+    as: 'assignee'
+  });
+
+  // 任务有创建人
+  Task.belongsTo(models.User, {
+    foreignKey: 'reporter_id',
+    as: 'reporter'
+  });
+};
 
 module.exports = Task;

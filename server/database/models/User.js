@@ -49,6 +49,9 @@ const User = sequelize.define('users', {
   last_login_ip: {
     type: DataTypes.STRING
   }
+}, {
+  timestamps: false,
+  tableName: 'users'
 });
 
 // 定义关联关系
@@ -59,6 +62,12 @@ User.associate = function(models) {
     foreignKey: 'user_id',
     otherKey: 'node_id',
     as: 'process_nodes'
+  });
+
+  // 用户参与多个项目团队（一对多关系）
+  User.hasMany(models.ProjectTeam, {
+    foreignKey: 'user_id',
+    as: 'project_teams'
   });
 };
 

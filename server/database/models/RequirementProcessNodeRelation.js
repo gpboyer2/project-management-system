@@ -1,10 +1,10 @@
 /**
- * 流程节点关系数据模型
+ * 需求管理流程节点关系数据模型
  */
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
-const ProcessNodeRelation = sequelize.define('process_node_relations', {
+const RequirementProcessNodeRelation = sequelize.define('requirement_process_node_relations', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -43,28 +43,28 @@ const ProcessNodeRelation = sequelize.define('process_node_relations', {
   }
 }, {
   timestamps: false,
-  tableName: 'process_node_relations'
+  tableName: 'requirement_process_node_relations'
 });
 
 // 定义关联关系
-ProcessNodeRelation.associate = function(models) {
+RequirementProcessNodeRelation.associate = function(models) {
   // 关系属于需求
-  ProcessNodeRelation.belongsTo(models.Requirement, {
+  RequirementProcessNodeRelation.belongsTo(models.Requirement, {
     foreignKey: 'requirement_id',
     as: 'requirement'
   });
 
   // 源节点
-  ProcessNodeRelation.belongsTo(models.ProcessNode, {
+  RequirementProcessNodeRelation.belongsTo(models.RequirementProcessNode, {
     foreignKey: 'source_node_id',
     as: 'source_node'
   });
 
   // 目标节点
-  ProcessNodeRelation.belongsTo(models.ProcessNode, {
+  RequirementProcessNodeRelation.belongsTo(models.RequirementProcessNode, {
     foreignKey: 'target_node_id',
     as: 'target_node'
   });
 };
 
-module.exports = ProcessNodeRelation;
+module.exports = RequirementProcessNodeRelation;

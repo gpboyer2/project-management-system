@@ -1,19 +1,19 @@
 /**
- * 流程节点关系数据模型
+ * 评审管理流程节点关系数据模型
  */
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
-const ProcessNodeRelation = sequelize.define('process_node_relations', {
+const ReviewProcessNodeRelation = sequelize.define('review_process_node_relations', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },
-  requirement_id: {
+  review_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    comment: '关联需求ID'
+    comment: '关联评审ID'
   },
   source_node_id: {
     type: DataTypes.INTEGER,
@@ -43,28 +43,28 @@ const ProcessNodeRelation = sequelize.define('process_node_relations', {
   }
 }, {
   timestamps: false,
-  tableName: 'process_node_relations'
+  tableName: 'review_process_node_relations'
 });
 
 // 定义关联关系
-ProcessNodeRelation.associate = function(models) {
-  // 关系属于需求
-  ProcessNodeRelation.belongsTo(models.Requirement, {
-    foreignKey: 'requirement_id',
-    as: 'requirement'
+ReviewProcessNodeRelation.associate = function(models) {
+  // 关系属于评审
+  ReviewProcessNodeRelation.belongsTo(models.Review, {
+    foreignKey: 'review_id',
+    as: 'review'
   });
 
   // 源节点
-  ProcessNodeRelation.belongsTo(models.ProcessNode, {
+  ReviewProcessNodeRelation.belongsTo(models.ReviewProcessNode, {
     foreignKey: 'source_node_id',
     as: 'source_node'
   });
 
   // 目标节点
-  ProcessNodeRelation.belongsTo(models.ProcessNode, {
+  ReviewProcessNodeRelation.belongsTo(models.ReviewProcessNode, {
     foreignKey: 'target_node_id',
     as: 'target_node'
   });
 };
 
-module.exports = ProcessNodeRelation;
+module.exports = ReviewProcessNodeRelation;

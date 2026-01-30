@@ -1,10 +1,10 @@
 /**
- * 流程节点数据模型
+ * 需求管理流程节点数据模型
  */
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
-const ProcessNode = sequelize.define('process_nodes', {
+const RequirementProcessNode = sequelize.define('requirement_process_nodes', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -68,66 +68,66 @@ const ProcessNode = sequelize.define('process_nodes', {
   }
 }, {
   timestamps: false,
-  tableName: 'process_nodes'
+  tableName: 'requirement_process_nodes'
 });
 
 // 定义关联关系
-ProcessNode.associate = function(models) {
+RequirementProcessNode.associate = function(models) {
   // 节点属于需求
-  ProcessNode.belongsTo(models.Requirement, {
+  RequirementProcessNode.belongsTo(models.Requirement, {
     foreignKey: 'requirement_id',
     as: 'requirement'
   });
 
   // 节点属于节点类型
-  ProcessNode.belongsTo(models.ProcessNodeType, {
+  RequirementProcessNode.belongsTo(models.ProcessNodeType, {
     foreignKey: 'node_type_id',
     as: 'node_type'
   });
 
   // 节点有父节点（树形结构）
-  ProcessNode.belongsTo(models.ProcessNode, {
+  RequirementProcessNode.belongsTo(models.RequirementProcessNode, {
     foreignKey: 'parent_node_id',
     as: 'parent_node'
   });
 
   // 节点有子节点
-  ProcessNode.hasMany(models.ProcessNode, {
+  RequirementProcessNode.hasMany(models.RequirementProcessNode, {
     foreignKey: 'parent_node_id',
     as: 'children_nodes'
   });
 
   // 节点作为源节点的关系
-  ProcessNode.hasMany(models.ProcessNodeRelation, {
+  RequirementProcessNode.hasMany(models.RequirementProcessNodeRelation, {
     foreignKey: 'source_node_id',
     as: 'source_relations'
   });
 
   // 节点作为目标节点的关系
-  ProcessNode.hasMany(models.ProcessNodeRelation, {
+  RequirementProcessNode.hasMany(models.RequirementProcessNodeRelation, {
     foreignKey: 'target_node_id',
     as: 'target_relations'
   });
 
   // 节点有多个任务
-  ProcessNode.hasMany(models.Task, {
-    foreignKey: 'node_id',
+  RequirementProcessNode.hasMany(models.Task, {
+    foreignKey: 'requirement_node_id',
     as: 'tasks'
   });
 
   // 节点有多个执行记录
-  ProcessNode.hasMany(models.ProcessExecution, {
+  RequirementProcessNode.hasMany(models.ProcessExecution, {
     foreignKey: 'node_id',
     as: 'executions'
   });
 
   // 节点有多个用户（多对多关系）
-  ProcessNode.belongsToMany(models.User, {
-    through: models.ProcessNodeUser,
+  RequirementProcessNode.belongsToMany(models.User, {
+    through: models.RequirementProcessNodeUser,
     foreignKey: 'node_id',
     otherKey: 'user_id',
     as: 'users'
   });
 };
 
-module.exports = ProcessNode;
+module.exports = RequirementProcessNode;
