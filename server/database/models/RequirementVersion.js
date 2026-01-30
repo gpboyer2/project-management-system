@@ -14,7 +14,7 @@ const RequirementVersion = sequelize.define('requirement_versions', {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  version_name: {
+  name: {
     type: DataTypes.STRING,
     allowNull: false
   },

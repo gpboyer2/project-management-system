@@ -78,7 +78,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       comment: '流程ID'
     },
-    node_name: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
       comment: '节点名称'

@@ -46,7 +46,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       comment: '关联需求ID'
     },
-    flow_name: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
       comment: '流程名称'

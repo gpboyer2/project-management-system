@@ -10,7 +10,7 @@ const Project = sequelize.define('projects', {
     primaryKey: true,
     autoIncrement: true
   },
-  project_name: {
+  name: {
     type: DataTypes.STRING,
     allowNull: false
   },

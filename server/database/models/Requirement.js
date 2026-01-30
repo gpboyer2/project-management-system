@@ -10,7 +10,7 @@ const Requirement = sequelize.define('requirements', {
     primaryKey: true,
     autoIncrement: true
   },
-  requirement_name: {
+  name: {
     type: DataTypes.STRING,
     allowNull: false
   },
