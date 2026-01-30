@@ -32,6 +32,7 @@ const ProcessFlow = require('./ProcessFlow');
 const ProcessNode = require('./ProcessNode');
 const ProcessNodeRelation = require('./ProcessNodeRelation');
 const ProcessNodeUser = require('./ProcessNodeUser');
+const ReviewDimension = require('./ReviewDimension');
 
 module.exports = {
   NodeType,
@@ -63,5 +64,6 @@ module.exports = {
   ProcessFlow,
   ProcessNode,
   ProcessNodeRelation,
-  ProcessNodeUser
+  ProcessNodeUser,
+  ReviewDimension
 };
