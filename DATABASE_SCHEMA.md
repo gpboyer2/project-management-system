@@ -20,13 +20,6 @@
 - 任务依赖关系
 - 任务工时统计
 
-### 缺陷管理模块
-- 缺陷创建与编辑
-- 缺陷状态跟踪
-- 缺陷严重程度管理
-- 缺陷关联需求/任务
-- 缺陷修复过程跟踪
-
 ### 项目管理模块
 - 项目创建与配置
 - 项目团队管理
@@ -45,12 +38,12 @@
 
 ```sql
 CREATE TABLE IF NOT EXISTS requirements (
-    requirement_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     requirement_name STRING NOT NULL COMMENT '需求名称',
-    requirement_type STRING NOT NULL COMMENT '需求类型：业务需求、技术需求、产品需求',
+    type_id INTEGER NOT NULL COMMENT '需求类型ID，关联requirement_types表',
     description TEXT COMMENT '需求描述',
-    priority STRING NOT NULL COMMENT '优先级：P0, P1, P2, P3',
-    status STRING NOT NULL COMMENT '状态：待设计、待产品评审、待技术评审、开发中、测试中、已上线、已结束',
+    priority INTEGER NOT NULL COMMENT '优先级：1-P0 2-P1 3-P2 4-P3',
+    status_id INTEGER NOT NULL COMMENT '需求状态ID，关联requirement_statuses表',
     current_assignee_id INTEGER COMMENT '当前负责人用户ID',
     reporter_id INTEGER NOT NULL COMMENT '提出人用户ID',
     project_id INTEGER COMMENT '所属项目ID',
@@ -63,12 +56,12 @@ CREATE TABLE IF NOT EXISTS requirements (
 
 | 字段名 | 类型 | 是否允许为空 | 注释 |
 |--------|------|-------------|------|
-| requirement_id | INTEGER | 否 | 主键，自增 |
+| id | INTEGER | 否 | 主键，自增 |
 | requirement_name | STRING | 否 | 需求名称 |
-| requirement_type | STRING | 否 | 需求类型：业务需求、技术需求、产品需求 |
+| type_id | INTEGER | 否 | 需求类型ID，关联requirement_types表 |
 | description | TEXT | 是 | 需求描述 |
-| priority | STRING | 否 | 优先级：P0, P1, P2, P3 |
-| status | STRING | 否 | 状态：待设计、待产品评审、待技术评审、开发中、测试中、已上线、已结束 |
+| priority | INTEGER | 否 | 优先级：1-P0 2-P1 3-P2 4-P3 |
+| status_id | INTEGER | 否 | 需求状态ID，关联requirement_statuses表 |
 | current_assignee_id | INTEGER | 是 | 当前负责人用户ID |
 | reporter_id | INTEGER | 否 | 提出人用户ID |
 | project_id | INTEGER | 是 | 所属项目ID |
@@ -81,15 +74,15 @@ CREATE TABLE IF NOT EXISTS requirements (
 
 ```sql
 CREATE TABLE IF NOT EXISTS tasks (
-    task_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     task_name STRING NOT NULL COMMENT '任务名称',
     description TEXT COMMENT '任务描述',
-    priority STRING NOT NULL COMMENT '优先级：P0, P1, P2, P3',
-    status STRING NOT NULL COMMENT '状态：未开始、进行中、已完成、已取消',
+    status_id INTEGER NOT NULL COMMENT '任务状态ID，关联requirement_task_statuses表',
     assignee_id INTEGER COMMENT '负责人用户ID',
     reporter_id INTEGER NOT NULL COMMENT '创建人用户ID',
     requirement_id INTEGER COMMENT '关联需求ID',
-    project_id INTEGER COMMENT '所属项目ID',
+    node_id INTEGER COMMENT '流程节点ID，关联process_nodes表',
+    priority INTEGER NOT NULL COMMENT '优先级：1-P0 2-P1 3-P2 4-P3',
     estimated_hours DECIMAL(10,2) COMMENT '预估工时(小时)',
     actual_hours DECIMAL(10,2) COMMENT '实际工时(小时)',
     start_time INTEGER COMMENT '开始时间，Unix时间戳',
@@ -101,15 +94,15 @@ CREATE TABLE IF NOT EXISTS tasks (
 
 | 字段名 | 类型 | 是否允许为空 | 注释 |
 |--------|------|-------------|------|
-| task_id | INTEGER | 否 | 主键，自增 |
+| id | INTEGER | 否 | 主键，自增 |
 | task_name | STRING | 否 | 任务名称 |
 | description | TEXT | 是 | 任务描述 |
-| priority | STRING | 否 | 优先级：P0, P1, P2, P3 |
-| status | STRING | 否 | 状态：未开始、进行中、已完成、已取消 |
+| status_id | INTEGER | 否 | 任务状态ID，关联requirement_task_statuses表 |
 | assignee_id | INTEGER | 是 | 负责人用户ID |
 | reporter_id | INTEGER | 否 | 创建人用户ID |
 | requirement_id | INTEGER | 是 | 关联需求ID |
-| project_id | INTEGER | 是 | 所属项目ID |
+| node_id | INTEGER | 是 | 流程节点ID，关联process_nodes表 |
+| priority | INTEGER | 否 | 优先级：1-P0 2-P1 3-P2 4-P3 |
 | estimated_hours | DECIMAL(10,2) | 是 | 预估工时(小时) |
 | actual_hours | DECIMAL(10,2) | 是 | 实际工时(小时) |
 | start_time | INTEGER | 是 | 开始时间，Unix时间戳 |
@@ -117,106 +110,31 @@ CREATE TABLE IF NOT EXISTS tasks (
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 | update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
-### 缺陷管理表 (defects)
-
-```sql
-CREATE TABLE IF NOT EXISTS defects (
-    defect_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    defect_name STRING NOT NULL COMMENT '缺陷名称',
-    description TEXT COMMENT '缺陷描述',
-    severity STRING NOT NULL COMMENT '严重程度：致命、严重、一般、轻微',
-    status STRING NOT NULL COMMENT '状态：待修复、修复中、已修复、已验证、已关闭',
-    assignee_id INTEGER COMMENT '负责人用户ID',
-    reporter_id INTEGER NOT NULL COMMENT '报告人用户ID',
-    requirement_id INTEGER COMMENT '关联需求ID',
-    task_id INTEGER COMMENT '关联任务ID',
-    project_id INTEGER COMMENT '所属项目ID',
-    reproduce_steps TEXT COMMENT '复现步骤',
-    fix_version STRING COMMENT '修复版本',
-    create_time INTEGER COMMENT '创建时间，Unix时间戳',
-    update_time INTEGER COMMENT '更新时间，Unix时间戳'
-);
-```
-
-| 字段名 | 类型 | 是否允许为空 | 注释 |
-|--------|------|-------------|------|
-| defect_id | INTEGER | 否 | 主键，自增 |
-| defect_name | STRING | 否 | 缺陷名称 |
-| description | TEXT | 是 | 缺陷描述 |
-| severity | STRING | 否 | 严重程度：致命、严重、一般、轻微 |
-| status | STRING | 否 | 状态：待修复、修复中、已修复、已验证、已关闭 |
-| assignee_id | INTEGER | 是 | 负责人用户ID |
-| reporter_id | INTEGER | 否 | 报告人用户ID |
-| requirement_id | INTEGER | 是 | 关联需求ID |
-| task_id | INTEGER | 是 | 关联任务ID |
-| project_id | INTEGER | 是 | 所属项目ID |
-| reproduce_steps | TEXT | 是 | 复现步骤 |
-| fix_version | STRING | 是 | 修复版本 |
-| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
-| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
 ### 项目管理表 (projects)
 
 ```sql
 CREATE TABLE IF NOT EXISTS projects (
-    project_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     project_name STRING NOT NULL COMMENT '项目名称',
     description TEXT COMMENT '项目描述',
-    status STRING NOT NULL COMMENT '状态：待立项、进行中、已暂停、已完成、已取消',
+    status INTEGER NOT NULL COMMENT '状态：1-待立项 2-进行中 3-已暂停 4-已完成 5-已取消',
     manager_id INTEGER NOT NULL COMMENT '项目负责人用户ID',
-    department_id INTEGER COMMENT '所属部门ID',
     start_date INTEGER COMMENT '开始日期，Unix时间戳',
     end_date INTEGER COMMENT '结束日期，Unix时间戳',
-    budget DECIMAL(15,2) COMMENT '项目预算',
     create_time INTEGER COMMENT '创建时间，Unix时间戳',
     update_time INTEGER COMMENT '更新时间，Unix时间戳'
 );
 ```
 
-| 字段名 | 类型 | 是否允许为空 | 注释 |
-|--------|------|-------------|------|
-| project_id | INTEGER | 否 | 主键，自增 |
-| project_name | STRING | 否 | 项目名称 |
-| description | TEXT | 是 | 项目描述 |
-| status | STRING | 否 | 状态：待立项、进行中、已暂停、已完成、已取消 |
-| manager_id | INTEGER | 否 | 项目负责人用户ID |
-| department_id | INTEGER | 是 | 所属部门ID |
-| start_date | INTEGER | 是 | 开始日期，Unix时间戳 |
-| end_date | INTEGER | 是 | 结束日期，Unix时间戳 |
-| budget | DECIMAL(15,2) | 是 | 项目预算 |
-| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
-| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
-
-### 项目团队表 (project_teams)
+### 流程管理表 (process_flows)
 
 ```sql
-CREATE TABLE IF NOT EXISTS project_teams (
+CREATE TABLE IF NOT EXISTS process_flows (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    project_id INTEGER NOT NULL COMMENT '项目ID',
-    user_id INTEGER NOT NULL COMMENT '用户ID',
-    role STRING NOT NULL COMMENT '角色：项目经理、开发工程师、测试工程师、UI设计师、产品经理',
-    status INTEGER DEFAULT 1 COMMENT '状态：1-正常 0-已移除',
-    join_time INTEGER COMMENT '加入时间，Unix时间戳'
-);
-```
-
-| 字段名 | 类型 | 是否允许为空 | 注释 |
-|--------|------|-------------|------|
-| id | INTEGER | 否 | 主键，自增 |
-| project_id | INTEGER | 否 | 项目ID |
-| user_id | INTEGER | 否 | 用户ID |
-| role | STRING | 否 | 角色：项目经理、开发工程师、测试工程师、UI设计师、产品经理 |
-| status | INTEGER | 否 | 状态：1-正常 0-已移除，默认1 |
-| join_time | INTEGER | 是 | 加入时间，Unix时间戳 |
-
-### 流程管理表 (workflows)
-
-```sql
-CREATE TABLE IF NOT EXISTS workflows (
-    workflow_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    workflow_name STRING NOT NULL COMMENT '流程名称',
+    requirement_id INTEGER NOT NULL COMMENT '关联需求ID',
+    flow_name STRING NOT NULL COMMENT '流程名称',
     description TEXT COMMENT '流程描述',
-    workflow_type STRING NOT NULL COMMENT '流程类型：需求流程、任务流程、缺陷流程、项目流程',
     status INTEGER DEFAULT 1 COMMENT '状态：1-启用 0-禁用',
     create_time INTEGER COMMENT '创建时间，Unix时间戳',
     update_time INTEGER COMMENT '更新时间，Unix时间戳'
@@ -225,26 +143,66 @@ CREATE TABLE IF NOT EXISTS workflows (
 
 | 字段名 | 类型 | 是否允许为空 | 注释 |
 |--------|------|-------------|------|
-| workflow_id | INTEGER | 否 | 主键，自增 |
-| workflow_name | STRING | 否 | 流程名称 |
+| id | INTEGER | 否 | 主键，自增 |
+| requirement_id | INTEGER | 否 | 关联需求ID |
+| flow_name | STRING | 否 | 流程名称 |
 | description | TEXT | 是 | 流程描述 |
-| workflow_type | STRING | 否 | 流程类型：需求流程、任务流程、缺陷流程、项目流程 |
 | status | INTEGER | 否 | 状态：1-启用 0-禁用，默认1 |
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 | update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
-### 流程节点表 (workflow_nodes)
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| project_name | STRING | 否 | 项目名称 |
+| description | TEXT | 是 | 项目描述 |
+| status | INTEGER | 否 | 状态：1-待立项 2-进行中 3-已暂停 4-已完成 5-已取消 |
+| manager_id | INTEGER | 否 | 项目负责人用户ID |
+| department_id | INTEGER | 是 | 所属部门ID |
+| start_date | INTEGER | 是 | 开始日期，Unix时间戳 |
+| end_date | INTEGER | 是 | 结束日期，Unix时间戳 |
+| budget | DECIMAL(15,2) | 是 | 项目预算 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
+### 流程节点类型表 (process_node_types)
 
 ```sql
-CREATE TABLE IF NOT EXISTS workflow_nodes (
-    node_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    workflow_id INTEGER NOT NULL COMMENT '流程ID',
+CREATE TABLE IF NOT EXISTS process_node_types (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    node_type_name STRING NOT NULL COMMENT '流程节点类型名称：需求评审、技术设计、开发、测试、上线',
+    description TEXT COMMENT '流程节点类型描述',
+    sort_order INTEGER DEFAULT 0 COMMENT '排序顺序',
+    status INTEGER DEFAULT 1 COMMENT '状态：1-启用 0-禁用',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳',
+    update_time INTEGER COMMENT '更新时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| node_type_name | STRING | 否 | 流程节点类型名称：需求评审、技术设计、开发、测试、上线 |
+| description | TEXT | 是 | 流程节点类型描述 |
+| sort_order | INTEGER | 否 | 排序顺序，默认0 |
+| status | INTEGER | 否 | 状态：1-启用 0-禁用，默认1 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
+### 流程节点表 (process_nodes)
+
+```sql
+CREATE TABLE IF NOT EXISTS process_nodes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    flow_id INTEGER NOT NULL COMMENT '流程ID',
     node_name STRING NOT NULL COMMENT '节点名称',
-    node_type STRING NOT NULL COMMENT '节点类型：开始节点、审批节点、执行节点、结束节点',
+    node_type_id INTEGER NOT NULL COMMENT '流程节点类型ID，关联process_node_types表',
+    parent_node_id INTEGER COMMENT '父节点ID，支持树形结构',
     node_order INTEGER NOT NULL COMMENT '节点顺序',
-    assignee_type STRING COMMENT '负责人类型：固定用户、角色、部门',
+    assignee_type INTEGER COMMENT '负责人类型：1-固定用户 2-角色 3-部门',
     assignee_id INTEGER COMMENT '负责人ID',
     duration_limit INTEGER COMMENT '处理时限(小时)',
+    status INTEGER DEFAULT 1 COMMENT '状态：1-启用 0-禁用',
     create_time INTEGER COMMENT '创建时间，Unix时间戳',
     update_time INTEGER COMMENT '更新时间，Unix时间戳'
 );
@@ -252,104 +210,29 @@ CREATE TABLE IF NOT EXISTS workflow_nodes (
 
 | 字段名 | 类型 | 是否允许为空 | 注释 |
 |--------|------|-------------|------|
-| node_id | INTEGER | 否 | 主键，自增 |
-| workflow_id | INTEGER | 否 | 流程ID |
+| id | INTEGER | 否 | 主键，自增 |
+| flow_id | INTEGER | 否 | 流程ID |
 | node_name | STRING | 否 | 节点名称 |
-| node_type | STRING | 否 | 节点类型：开始节点、审批节点、执行节点、结束节点 |
+| node_type_id | INTEGER | 否 | 流程节点类型ID，关联process_node_types表 |
+| parent_node_id | INTEGER | 是 | 父节点ID，支持树形结构 |
 | node_order | INTEGER | 否 | 节点顺序 |
-| assignee_type | STRING | 是 | 负责人类型：固定用户、角色、部门 |
+| assignee_type | INTEGER | 是 | 负责人类型：1-固定用户 2-角色 3-部门 |
 | assignee_id | INTEGER | 是 | 负责人ID |
 | duration_limit | INTEGER | 是 | 处理时限(小时) |
+| status | INTEGER | 否 | 状态：1-启用 0-禁用，默认1 |
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 | update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
-### 流程实例表 (workflow_instances)
+### 流程节点关系表 (process_node_relations)
 
 ```sql
-CREATE TABLE IF NOT EXISTS workflow_instances (
-    instance_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    workflow_id INTEGER NOT NULL COMMENT '流程ID',
-    business_type STRING NOT NULL COMMENT '业务类型：需求、任务、缺陷、项目',
-    business_id INTEGER NOT NULL COMMENT '业务ID',
-    current_node_id INTEGER COMMENT '当前节点ID',
-    status STRING NOT NULL COMMENT '状态：运行中、已完成、已取消',
-    create_user_id INTEGER NOT NULL COMMENT '创建人用户ID',
-    create_time INTEGER COMMENT '创建时间，Unix时间戳',
-    update_time INTEGER COMMENT '更新时间，Unix时间戳'
-);
-```
-
-| 字段名 | 类型 | 是否允许为空 | 注释 |
-|--------|------|-------------|------|
-| instance_id | INTEGER | 否 | 主键，自增 |
-| workflow_id | INTEGER | 否 | 流程ID |
-| business_type | STRING | 否 | 业务类型：需求、任务、缺陷、项目 |
-| business_id | INTEGER | 否 | 业务ID |
-| current_node_id | INTEGER | 是 | 当前节点ID |
-| status | STRING | 否 | 状态：运行中、已完成、已取消 |
-| create_user_id | INTEGER | 否 | 创建人用户ID |
-| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
-| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
-
-### 流程执行记录表 (workflow_executions)
-
-```sql
-CREATE TABLE IF NOT EXISTS workflow_executions (
-    execution_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    instance_id INTEGER NOT NULL COMMENT '流程实例ID',
-    node_id INTEGER NOT NULL COMMENT '节点ID',
-    executor_id INTEGER NOT NULL COMMENT '执行人用户ID',
-    action STRING NOT NULL COMMENT '操作：通过、驳回、转发',
-    comment TEXT COMMENT '审批意见',
-    start_time INTEGER NOT NULL COMMENT '开始时间，Unix时间戳',
-    end_time INTEGER COMMENT '结束时间，Unix时间戳',
-    duration INTEGER COMMENT '处理时长(分钟)',
-    create_time INTEGER COMMENT '创建时间，Unix时间戳'
-);
-```
-
-| 字段名 | 类型 | 是否允许为空 | 注释 |
-|--------|------|-------------|------|
-| execution_id | INTEGER | 否 | 主键，自增 |
-| instance_id | INTEGER | 否 | 流程实例ID |
-| node_id | INTEGER | 否 | 节点ID |
-| executor_id | INTEGER | 否 | 执行人用户ID |
-| action | STRING | 否 | 操作：通过、驳回、转发 |
-| comment | TEXT | 是 | 审批意见 |
-| start_time | INTEGER | 否 | 开始时间，Unix时间戳 |
-| end_time | INTEGER | 是 | 结束时间，Unix时间戳 |
-| duration | INTEGER | 是 | 处理时长(分钟) |
-| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
-
-### 标签管理表 (tags)
-
-```sql
-CREATE TABLE IF NOT EXISTS tags (
-    tag_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    tag_name STRING NOT NULL COMMENT '标签名称',
-    tag_color STRING COMMENT '标签颜色',
-    description STRING COMMENT '标签描述',
-    create_time INTEGER COMMENT '创建时间，Unix时间戳',
-    update_time INTEGER COMMENT '更新时间，Unix时间戳'
-);
-```
-
-| 字段名 | 类型 | 是否允许为空 | 注释 |
-|--------|------|-------------|------|
-| tag_id | INTEGER | 否 | 主键，自增 |
-| tag_name | STRING | 否 | 标签名称 |
-| tag_color | STRING | 是 | 标签颜色 |
-| description | STRING | 是 | 标签描述 |
-| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
-| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
-
-### 需求标签关联表 (requirement_tags)
-
-```sql
-CREATE TABLE IF NOT EXISTS requirement_tags (
+CREATE TABLE IF NOT EXISTS process_node_relations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    requirement_id INTEGER NOT NULL COMMENT '需求ID',
-    tag_id INTEGER NOT NULL COMMENT '标签ID',
+    flow_id INTEGER NOT NULL COMMENT '流程ID',
+    source_node_id INTEGER NOT NULL COMMENT '源节点ID',
+    target_node_id INTEGER NOT NULL COMMENT '目标节点ID',
+    relation_type INTEGER DEFAULT 1 COMMENT '关系类型：1-顺序 2-并行 3-条件',
+    condition TEXT COMMENT '条件表达式（如：状态=通过）',
     create_time INTEGER COMMENT '创建时间，Unix时间戳'
 );
 ```
@@ -357,20 +240,22 @@ CREATE TABLE IF NOT EXISTS requirement_tags (
 | 字段名 | 类型 | 是否允许为空 | 注释 |
 |--------|------|-------------|------|
 | id | INTEGER | 否 | 主键，自增 |
-| requirement_id | INTEGER | 否 | 需求ID |
-| tag_id | INTEGER | 否 | 标签ID |
+| flow_id | INTEGER | 否 | 流程ID |
+| source_node_id | INTEGER | 否 | 源节点ID |
+| target_node_id | INTEGER | 否 | 目标节点ID |
+| relation_type | INTEGER | 否 | 关系类型：1-顺序 2-并行 3-条件，默认1 |
+| condition | TEXT | 是 | 条件表达式（如：状态=通过） |
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 
-### 评论管理表 (comments)
+### 流程节点用户关联表 (process_node_users)
 
 ```sql
-CREATE TABLE IF NOT EXISTS comments (
-    comment_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    business_type STRING NOT NULL COMMENT '业务类型：需求、任务、缺陷',
-    business_id INTEGER NOT NULL COMMENT '业务ID',
-    user_id INTEGER NOT NULL COMMENT '评论人用户ID',
-    content TEXT NOT NULL COMMENT '评论内容',
-    parent_comment_id INTEGER COMMENT '父评论ID',
+CREATE TABLE IF NOT EXISTS process_node_users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    node_id INTEGER NOT NULL COMMENT '流程节点ID',
+    user_id INTEGER NOT NULL COMMENT '用户ID',
+    role_type INTEGER DEFAULT 1 COMMENT '用户角色类型：1-负责人 2-参与者 3-观察者',
+    status INTEGER DEFAULT 1 COMMENT '状态：1-正常 0-已移除',
     create_time INTEGER COMMENT '创建时间，Unix时间戳',
     update_time INTEGER COMMENT '更新时间，Unix时间戳'
 );
@@ -378,12 +263,110 @@ CREATE TABLE IF NOT EXISTS comments (
 
 | 字段名 | 类型 | 是否允许为空 | 注释 |
 |--------|------|-------------|------|
-| comment_id | INTEGER | 否 | 主键，自增 |
-| business_type | STRING | 否 | 业务类型：需求、任务、缺陷 |
+| id | INTEGER | 否 | 主键，自增 |
+| node_id | INTEGER | 否 | 流程节点ID |
+| user_id | INTEGER | 否 | 用户ID |
+| role_type | INTEGER | 否 | 用户角色类型：1-负责人 2-参与者 3-观察者，默认1 |
+| status | INTEGER | 否 | 状态：1-正常 0-已移除，默认1 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
+### 需求类型表 (requirement_types)
+
+```sql
+CREATE TABLE IF NOT EXISTS requirement_types (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type_name STRING NOT NULL COMMENT '需求类型名称：业务需求、技术需求、产品需求',
+    description TEXT COMMENT '需求类型描述',
+    sort_order INTEGER DEFAULT 0 COMMENT '排序顺序',
+    status INTEGER DEFAULT 1 COMMENT '状态：1-启用 0-禁用',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳',
+    update_time INTEGER COMMENT '更新时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| type_name | STRING | 否 | 需求类型名称：业务需求、技术需求、产品需求 |
+| description | TEXT | 是 | 需求类型描述 |
+| sort_order | INTEGER | 否 | 排序顺序，默认0 |
+| status | INTEGER | 否 | 状态：1-启用 0-禁用，默认1 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
+### 需求状态表 (requirement_statuses)
+
+```sql
+CREATE TABLE IF NOT EXISTS requirement_statuses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    status_name STRING NOT NULL COMMENT '需求状态名称：待设计、待产品评审、待技术评审、开发中、测试中、已上线、已结束',
+    description TEXT COMMENT '需求状态描述',
+    sort_order INTEGER DEFAULT 0 COMMENT '排序顺序',
+    status INTEGER DEFAULT 1 COMMENT '状态：1-启用 0-禁用',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳',
+    update_time INTEGER COMMENT '更新时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| status_name | STRING | 否 | 需求状态名称：待设计、待产品评审、待技术评审、开发中、测试中、已上线、已结束 |
+| description | TEXT | 是 | 需求状态描述 |
+| sort_order | INTEGER | 否 | 排序顺序，默认0 |
+| status | INTEGER | 否 | 状态：1-启用 0-禁用，默认1 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
+### 需求任务状态表 (requirement_task_statuses)
+
+```sql
+CREATE TABLE IF NOT EXISTS requirement_task_statuses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    status_name STRING NOT NULL COMMENT '任务状态名称：未开始、进行中、已完成、已取消',
+    description TEXT COMMENT '任务状态描述',
+    sort_order INTEGER DEFAULT 0 COMMENT '排序顺序',
+    status INTEGER DEFAULT 1 COMMENT '状态：1-启用 0-禁用',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳',
+    update_time INTEGER COMMENT '更新时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| status_name | STRING | 否 | 任务状态名称：未开始、进行中、已完成、已取消 |
+| description | TEXT | 是 | 任务状态描述 |
+| sort_order | INTEGER | 否 | 排序顺序，默认0 |
+| status | INTEGER | 否 | 状态：1-启用 0-禁用，默认1 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
+
+### 评论管理表 (comments)
+
+```sql
+CREATE TABLE IF NOT EXISTS comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    business_type INTEGER NOT NULL COMMENT '业务类型：1-需求 2-任务',
+    business_id INTEGER NOT NULL COMMENT '业务ID',
+    user_id INTEGER NOT NULL COMMENT '评论人用户ID',
+    content TEXT NOT NULL COMMENT '评论内容',
+    parent_id INTEGER COMMENT '父评论ID',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳',
+    update_time INTEGER COMMENT '更新时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| business_type | INTEGER | 否 | 业务类型：1-需求 2-任务 |
 | business_id | INTEGER | 否 | 业务ID |
 | user_id | INTEGER | 否 | 评论人用户ID |
 | content | TEXT | 否 | 评论内容 |
-| parent_comment_id | INTEGER | 是 | 父评论ID |
+| parent_id | INTEGER | 是 | 父评论ID |
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 | update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
@@ -391,11 +374,11 @@ CREATE TABLE IF NOT EXISTS comments (
 
 ```sql
 CREATE TABLE IF NOT EXISTS operation_records (
-    record_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    business_type STRING NOT NULL COMMENT '业务类型：需求、任务、缺陷',
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    business_type INTEGER NOT NULL COMMENT '业务类型：1-需求 2-任务',
     business_id INTEGER NOT NULL COMMENT '业务ID',
     user_id INTEGER NOT NULL COMMENT '操作人用户ID',
-    operation_type STRING NOT NULL COMMENT '操作类型：创建、更新、删除、状态变更',
+    operation_type INTEGER NOT NULL COMMENT '操作类型：1-创建 2-更新 3-删除 4-状态变更',
     operation_detail TEXT COMMENT '操作详情',
     create_time INTEGER COMMENT '创建时间，Unix时间戳'
 );
@@ -403,11 +386,11 @@ CREATE TABLE IF NOT EXISTS operation_records (
 
 | 字段名 | 类型 | 是否允许为空 | 注释 |
 |--------|------|-------------|------|
-| record_id | INTEGER | 否 | 主键，自增 |
-| business_type | STRING | 否 | 业务类型：需求、任务、缺陷 |
+| id | INTEGER | 否 | 主键，自增 |
+| business_type | INTEGER | 否 | 业务类型：1-需求 2-任务 |
 | business_id | INTEGER | 否 | 业务ID |
 | user_id | INTEGER | 否 | 操作人用户ID |
-| operation_type | STRING | 否 | 操作类型：创建、更新、删除、状态变更 |
+| operation_type | INTEGER | 否 | 操作类型：1-创建 2-更新 3-删除 4-状态变更 |
 | operation_detail | TEXT | 是 | 操作详情 |
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 
@@ -415,13 +398,13 @@ CREATE TABLE IF NOT EXISTS operation_records (
 
 ```sql
 CREATE TABLE IF NOT EXISTS notifications (
-    notification_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL COMMENT '接收用户ID',
     title STRING NOT NULL COMMENT '通知标题',
     content TEXT COMMENT '通知内容',
-    type STRING NOT NULL COMMENT '通知类型：系统通知、业务通知、提醒',
+    type INTEGER NOT NULL COMMENT '通知类型：1-系统通知 2-业务通知 3-提醒',
     status INTEGER DEFAULT 0 COMMENT '阅读状态：0-未读 1-已读',
-    business_type STRING COMMENT '关联业务类型',
+    business_type INTEGER COMMENT '关联业务类型',
     business_id INTEGER COMMENT '关联业务ID',
     create_time INTEGER COMMENT '创建时间，Unix时间戳'
 );
@@ -429,13 +412,13 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 | 字段名 | 类型 | 是否允许为空 | 注释 |
 |--------|------|-------------|------|
-| notification_id | INTEGER | 否 | 主键，自增 |
+| id | INTEGER | 否 | 主键，自增 |
 | user_id | INTEGER | 否 | 接收用户ID |
 | title | STRING | 否 | 通知标题 |
 | content | TEXT | 是 | 通知内容 |
-| type | STRING | 否 | 通知类型：系统通知、业务通知、提醒 |
+| type | INTEGER | 否 | 通知类型：1-系统通知 2-业务通知 3-提醒 |
 | status | INTEGER | 否 | 阅读状态：0-未读 1-已读，默认0 |
-| business_type | STRING | 是 | 关联业务类型 |
+| business_type | INTEGER | 是 | 关联业务类型 |
 | business_id | INTEGER | 是 | 关联业务ID |
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 
@@ -447,7 +430,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 ```sql
 CREATE TABLE IF NOT EXISTS users (
-    user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_name STRING NOT NULL COMMENT '用户名',
     password STRING NOT NULL COMMENT '密码',
     real_name STRING COMMENT '真实姓名',
@@ -467,7 +450,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 ```sql
 CREATE TABLE IF NOT EXISTS roles (
-    role_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     role_name STRING NOT NULL COMMENT '角色名称',
     role_code STRING NOT NULL COMMENT '角色代码',
     description STRING COMMENT '角色描述',
@@ -481,7 +464,7 @@ CREATE TABLE IF NOT EXISTS roles (
 
 ```sql
 CREATE TABLE IF NOT EXISTS permissions (
-    permission_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     permission_name STRING NOT NULL COMMENT '权限名称',
     permission_code STRING NOT NULL COMMENT '权限代码',
     resource_type STRING COMMENT '资源类型',
@@ -524,7 +507,7 @@ CREATE TABLE IF NOT EXISTS user_sessions (
 
 ```sql
 CREATE TABLE IF NOT EXISTS operation_logs (
-    log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER COMMENT '用户ID',
     operation_type STRING NOT NULL COMMENT '操作类型',
     operation_detail TEXT COMMENT '操作详情',
@@ -534,13 +517,111 @@ CREATE TABLE IF NOT EXISTS operation_logs (
 );
 ```
 
+### 流程执行记录表 (process_executions)
+
+```sql
+CREATE TABLE IF NOT EXISTS process_executions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    flow_id INTEGER NOT NULL COMMENT '流程ID',
+    requirement_id INTEGER NOT NULL COMMENT '关联需求ID',
+    node_id INTEGER NOT NULL COMMENT '流程节点ID',
+    executor_id INTEGER COMMENT '执行人用户ID',
+    action INTEGER NOT NULL COMMENT '操作：1-通过 2-驳回 3-转发',
+    comment TEXT COMMENT '审批意见',
+    start_time INTEGER NOT NULL COMMENT '开始时间，Unix时间戳',
+    end_time INTEGER COMMENT '结束时间，Unix时间戳',
+    duration INTEGER COMMENT '处理时长(分钟)',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| flow_id | INTEGER | 否 | 流程ID |
+| requirement_id | INTEGER | 否 | 关联需求ID |
+| node_id | INTEGER | 否 | 流程节点ID |
+| executor_id | INTEGER | 是 | 执行人用户ID |
+| action | INTEGER | 否 | 操作：1-通过 2-驳回 3-转发 |
+| comment | TEXT | 是 | 审批意见 |
+| start_time | INTEGER | 否 | 开始时间，Unix时间戳 |
+| end_time | INTEGER | 是 | 结束时间，Unix时间戳 |
+| duration | INTEGER | 是 | 处理时长(分钟) |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+
+### 数据导入导出记录表 (data_import_exports)
+
+```sql
+CREATE TABLE IF NOT EXISTS data_import_exports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL COMMENT '操作人用户ID',
+    operation_type INTEGER NOT NULL COMMENT '操作类型：1-导入 2-导出',
+    data_type INTEGER NOT NULL COMMENT '数据类型：1-需求 2-任务 3-项目',
+    file_name STRING COMMENT '文件名',
+    file_size INTEGER COMMENT '文件大小(字节)',
+    status INTEGER NOT NULL COMMENT '状态：1-成功 0-失败',
+    error_message TEXT COMMENT '错误信息',
+    record_count INTEGER COMMENT '处理记录数',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| user_id | INTEGER | 否 | 操作人用户ID |
+| operation_type | INTEGER | 否 | 操作类型：1-导入 2-导出 |
+| data_type | INTEGER | 否 | 数据类型：1-需求 2-任务 3-项目 |
+| file_name | STRING | 是 | 文件名 |
+| file_size | INTEGER | 是 | 文件大小(字节) |
+| status | INTEGER | 否 | 状态：1-成功 0-失败 |
+| error_message | TEXT | 是 | 错误信息 |
+| record_count | INTEGER | 是 | 处理记录数 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+
+### 需求版本管理表 (requirement_versions)
+
+```sql
+CREATE TABLE IF NOT EXISTS requirement_versions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    requirement_id INTEGER NOT NULL COMMENT '关联需求ID',
+    version_name STRING NOT NULL COMMENT '版本名称',
+    description TEXT COMMENT '版本描述',
+    planned_start_time INTEGER COMMENT '计划开始时间，Unix时间戳',
+    planned_end_time INTEGER COMMENT '计划结束时间，Unix时间戳',
+    actual_start_time INTEGER COMMENT '实际开始时间，Unix时间戳',
+    actual_end_time INTEGER COMMENT '实际结束时间，Unix时间戳',
+    status INTEGER NOT NULL COMMENT '状态：1-规划中 2-进行中 3-已完成 4-已取消',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳',
+    update_time INTEGER COMMENT '更新时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| requirement_id | INTEGER | 否 | 关联需求ID |
+| version_name | STRING | 否 | 版本名称 |
+| description | TEXT | 是 | 版本描述 |
+| planned_start_time | INTEGER | 是 | 计划开始时间，Unix时间戳 |
+| planned_end_time | INTEGER | 是 | 计划结束时间，Unix时间戳 |
+| actual_start_time | INTEGER | 是 | 实际开始时间，Unix时间戳 |
+| actual_end_time | INTEGER | 是 | 实际结束时间，Unix时间戳 |
+| status | INTEGER | 否 | 状态：1-规划中 2-进行中 3-已完成 4-已取消 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
 ### 关联关系
 - 所有业务表通过 `user_id` 字段关联到 `users` 表
 - 项目团队表通过 `project_id` 关联到 `projects` 表
-- 需求、任务、缺陷通过 `project_id` 关联到 `projects` 表
-- 任务、缺陷通过 `requirement_id` 关联到 `requirements` 表
-- 缺陷通过 `task_id` 关联到 `tasks` 表
-- 流程相关表通过 `workflow_id` 和 `node_id` 建立关联关系
+- 需求通过 `project_id` 关联到 `projects` 表，通过 `type_id` 关联到 `requirement_types` 表，通过 `status_id` 关联到 `requirement_statuses` 表
+- 任务通过 `requirement_id` 关联到 `requirements` 表，通过 `status_id` 关联到 `requirement_task_statuses` 表，通过 `node_id` 关联到 `process_nodes` 表
+- 流程通过 `requirement_id` 关联到 `requirements` 表
+- 流程节点通过 `flow_id` 关联到 `process_flows` 表，通过 `node_type_id` 关联到 `process_node_types` 表，通过 `parent_node_id` 实现树形结构
+- 流程节点关系通过 `flow_id` 关联到 `process_flows` 表，通过 `source_node_id` 和 `target_node_id` 关联到 `process_nodes` 表
+- 流程节点用户关联通过 `node_id` 关联到 `process_nodes` 表，通过 `user_id` 关联到 `users` 表
+- 流程执行记录通过 `flow_id` 关联到 `process_flows` 表，通过 `requirement_id` 关联到 `requirements` 表，通过 `node_id` 关联到 `process_nodes` 表
+- 需求版本管理通过 `requirement_id` 关联到 `requirements` 表
 
 ## 数据安全与索引优化
 
