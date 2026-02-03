@@ -17,7 +17,7 @@ class ProcessManager {
     this.backendCommand = options.backendCommand || 'node';
     this.backendArgs = options.backendArgs || ['server.js'];
     this.backendProcess = null;
-    this.healthCheckPath = options.healthCheckPath || '/api/test/health';
+    this.healthCheckPath = options.healthCheckPath || '/api/health';
     this.healthCheckTimeout = options.healthCheckTimeout || 30000;
     this.backendLogFile = null;
     this.backendLogWriteStream = null;
@@ -73,8 +73,17 @@ class ProcessManager {
    */
   async findBackendProcess() {
     return new Promise((resolve, reject) => {
-      // 在 macOS 上使用 lsof 命令
-      exec(`lsof -i :${this.port} -t`, (error, stdout) => {
+      // 在 Windows 上使用 netstat 命令，其他系统使用 lsof
+      const isWindows = process.platform === 'win32';
+      let command;
+
+      if (isWindows) {
+        command = `netstat -ano | findstr :${this.port}`;
+      } else {
+        command = `lsof -i :${this.port} -t`;
+      }
+
+      exec(command, (error, stdout) => {
         if (error) {
           // 没有找到进程，端口未被占用
           if (stdout.trim() === '') {
@@ -85,12 +94,35 @@ class ProcessManager {
           return;
         }
 
-        const pids = stdout.trim().split('\n').filter(pid => pid);
-        if (pids.length === 0) {
-          resolve(null);
+        if (isWindows) {
+          // 解析 netstat 输出，找到 PID
+          const lines = stdout.trim().split('\n');
+          const pids = [];
+          lines.forEach(line => {
+            const parts = line.trim().split(/\s+/);
+            if (parts.length > 4) {
+              const pid = parseInt(parts[parts.length - 1], 10);
+              if (!isNaN(pid) && pid > 0) {
+                pids.push(pid);
+              }
+            }
+          });
+
+          if (pids.length === 0) {
+            resolve(null);
+          } else {
+            // 返回找到的第一个 PID
+            resolve(pids[0]);
+          }
         } else {
-          // 返回找到的第一个 PID
-          resolve(parseInt(pids[0], 10));
+          // 解析 lsof 输出
+          const pids = stdout.trim().split('\n').filter(pid => pid);
+          if (pids.length === 0) {
+            resolve(null);
+          } else {
+            // 返回找到的第一个 PID
+            resolve(parseInt(pids[0], 10));
+          }
         }
       });
     });
@@ -109,20 +141,42 @@ class ProcessManager {
 
     return new Promise((resolve, reject) => {
       const startTime = Date.now();
+      const isWindows = process.platform === 'win32';
 
       const checkProcess = () => {
-        exec(`kill -0 ${pid} 2>/dev/null`, (error) => {
+        let command;
+        if (isWindows) {
+          command = `tasklist /FI "PID eq ${pid}"`;
+        } else {
+          command = `kill -0 ${pid} 2>/dev/null`;
+        }
+
+        exec(command, (error, stdout) => {
           // 如果命令返回错误，说明进程已经不存在
-          if (error !== null) {
-            resolve();
-            return;
+          if (isWindows) {
+            if (error || !stdout.includes(`${pid}`)) {
+              resolve();
+              return;
+            }
+          } else {
+            if (error !== null) {
+              resolve();
+              return;
+            }
           }
 
           // 进程还在运行
           if (Date.now() - startTime > timeout) {
             // 超时，强制杀死
             if (force) {
-              exec(`kill -9 ${pid}`, (err) => {
+              let killCommand;
+              if (isWindows) {
+                killCommand = `taskkill /F /PID ${pid}`;
+              } else {
+                killCommand = `kill -9 ${pid}`;
+              }
+
+              exec(killCommand, (err) => {
                 if (err) {
                   reject(new Error(`强制终止进程失败: ${err.message}`));
                 } else {
@@ -142,9 +196,35 @@ class ProcessManager {
       };
 
       // 先尝试优雅退出
-      exec(`kill ${pid}`, (error) => {
+      let killCommand;
+      if (isWindows) {
+        killCommand = `taskkill /PID ${pid}`;
+      } else {
+        killCommand = `kill ${pid}`;
+      }
+
+      exec(killCommand, (error) => {
         if (error) {
-          reject(new Error(`终止进程失败: ${error.message}`));
+          // 如果优雅退出失败，尝试强制终止
+          if (force) {
+            let forceKillCommand;
+            if (isWindows) {
+              forceKillCommand = `taskkill /F /PID ${pid}`;
+            } else {
+              forceKillCommand = `kill -9 ${pid}`;
+            }
+
+            exec(forceKillCommand, (err) => {
+              if (err) {
+                reject(new Error(`终止进程失败: ${err.message}`));
+              } else {
+                console.log(`已强制终止进程 ${pid}`);
+                resolve();
+              }
+            });
+          } else {
+            reject(new Error(`终止进程失败: ${error.message}`));
+          }
           return;
         }
 
@@ -166,7 +246,7 @@ class ProcessManager {
 
       this.backendProcess = spawn(this.backendCommand, this.backendArgs, {
         cwd: this.backendPath,
-        env: { ...process.env, NODE_ENV: 'test' },
+        env: { ...process.env, NODE_ENV: 'test', BYPASS_AUTH: 'false' },
         stdio: ['ignore', 'pipe', 'pipe']
       });
 

@@ -120,6 +120,10 @@ const TEST_MODULES = {
   communicationNode: './modules/communication-node/index',
   systemLevelDesign: './modules/system-level-design/index',
   build: './modules/build/index',
+  projects: './modules/projects/index',
+  requirements: './modules/requirements/index',
+  reviews: './modules/reviews/index',
+  tasks: './modules/tasks/index',
 
   // 跨模块边界测试
   businessBoundary: './modules/business-boundary',
