@@ -52,7 +52,9 @@ async function ensurePortAvailable(port) {
 // 初始化数据库
 const { testConnection, syncDatabase } = require("./database/sequelize");
 require("./database/models"); // 加载模型定义
-const { runSeed } = require("./database/seeds/userSeed");
+const { runSeed: runUserSeed } = require("./database/seeds/userSeed");
+const { runSeed: runProcessNodeTypeSeed } = require("./database/seeds/processNodeTypeSeed");
+const { runSeed: runRequirementSeed } = require("./database/seeds/requirementSeed");
 
 const swaggerUi = require("swagger-ui-express")
 const swaggerJsDoc = require('swagger-jsdoc');
@@ -165,7 +167,9 @@ app.use('/api-docs', swaggerUi.serve, (req, res, n) => swaggerUi.setup(getDoc(re
         await testConnection();
         await syncDatabase();
         // 初始化用户管理模块种子数据 - 同步加载确保数据准备好
-        await runSeed();
+        await runUserSeed();
+        await runProcessNodeTypeSeed();
+        await runRequirementSeed();
         logger.info('种子数据初始化完成');
 
         // 种子数据加载完成后，启动服务器

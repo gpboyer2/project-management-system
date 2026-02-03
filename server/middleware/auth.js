@@ -84,10 +84,10 @@ const authenticateToken = async (req, res, next) => {
         }
 
         // 获取用户权限
-        const permissions = await getUserPermissions(user.user_id);
+        const permissions = await getUserPermissions(user.id);
 
         req.user = {
-            id: user.user_id,
+            id: user.id,
             username: user.user_name,
             realName: user.real_name,
             email: user.email,
