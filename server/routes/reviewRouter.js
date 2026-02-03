@@ -5,6 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const reviewController = require('../mvc/controllers/review');
+const { authenticateToken } = require("../middleware/auth");
 
 /**
  * @swagger
@@ -71,7 +72,7 @@ const reviewController = require('../mvc/controllers/review');
  *                         total:
  *                           type: integer
  */
-router.get('/query', reviewController.getReviewList);
+router.get('/query', authenticateToken, reviewController.getReviewList);
 
 /**
  * @swagger
@@ -132,7 +133,7 @@ router.get('/query', reviewController.getReviewList);
  *                 datum:
  *                   $ref: '#/components/schemas/Review'
  */
-router.post('/create', reviewController.createReview);
+router.post('/create', authenticateToken, reviewController.createReview);
 
 /**
  * @swagger
@@ -194,7 +195,7 @@ router.post('/create', reviewController.createReview);
  *                 datum:
  *                   $ref: '#/components/schemas/Review'
  */
-router.post('/update', reviewController.updateReview);
+router.post('/update', authenticateToken, reviewController.updateReview);
 
 /**
  * @swagger
@@ -229,7 +230,7 @@ router.post('/update', reviewController.updateReview);
  *                 message:
  *                   type: string
  */
-router.post('/delete', reviewController.deleteReviews);
+router.post('/delete', authenticateToken, reviewController.deleteReviews);
 
 /**
  * @swagger
@@ -259,7 +260,7 @@ router.post('/delete', reviewController.deleteReviews);
  *                 datum:
  *                   $ref: '#/components/schemas/Review'
  */
-router.get('/detail', reviewController.getReviewDetail);
+router.get('/detail', authenticateToken, reviewController.getReviewDetail);
 
 /**
  * @swagger
@@ -291,7 +292,7 @@ router.get('/detail', reviewController.getReviewDetail);
  *                   items:
  *                     $ref: '#/components/schemas/ReviewProcessNode'
  */
-router.get('/process-nodes/query', reviewController.getReviewProcessNodes);
+router.get('/process-nodes/query', authenticateToken, reviewController.getReviewProcessNodes);
 
 /**
  * @swagger
@@ -353,7 +354,7 @@ router.get('/process-nodes/query', reviewController.getReviewProcessNodes);
  *                 datum:
  *                   $ref: '#/components/schemas/ReviewProcessNode'
  */
-router.post('/process-nodes/create', reviewController.createReviewProcessNode);
+router.post('/process-nodes/create', authenticateToken, reviewController.createReviewProcessNode);
 
 /**
  * @swagger
@@ -412,7 +413,7 @@ router.post('/process-nodes/create', reviewController.createReviewProcessNode);
  *                 datum:
  *                   $ref: '#/components/schemas/ReviewProcessNode'
  */
-router.post('/process-nodes/update', reviewController.updateReviewProcessNode);
+router.post('/process-nodes/update', authenticateToken, reviewController.updateReviewProcessNode);
 
 /**
  * @swagger
@@ -447,7 +448,7 @@ router.post('/process-nodes/update', reviewController.updateReviewProcessNode);
  *                 message:
  *                   type: string
  */
-router.post('/process-nodes/delete', reviewController.deleteReviewProcessNodes);
+router.post('/process-nodes/delete', authenticateToken, reviewController.deleteReviewProcessNodes);
 
 module.exports = router;
 

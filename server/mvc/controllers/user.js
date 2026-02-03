@@ -57,6 +57,12 @@ class UserController {
 
             const resultList = [];
             for (const item of data) {
+                // 禁止传入 user_id 字段（应该由数据库自动生成）
+                if (item.user_id !== undefined && item.user_id !== null) {
+                    resultList.push({ success: false, user_name: item.user_name, message: '不能传入 user_id 字段' });
+                    continue;
+                }
+
                 // 验证必填字段
                 if (!item.user_name || !item.password) {
                     resultList.push({ success: false, user_name: item.user_name, message: '用户名和密码不能为空' });
@@ -165,7 +171,7 @@ class UserController {
                 }
                 // 创建用户
                 const created = await UserModel.create(item);
-                resultList.push({ success: true, user_id: created.user_id, user_name: item.user_name });
+                resultList.push({ success: true, user_id: created.id, user_name: item.user_name });
             }
 
             const successCount = resultList.filter(r => r.success).length;

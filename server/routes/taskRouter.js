@@ -5,6 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const taskController = require('../mvc/controllers/task');
+const { authenticateToken } = require("../middleware/auth");
 
 /**
  * @swagger
@@ -76,7 +77,7 @@ const taskController = require('../mvc/controllers/task');
  *                         total:
  *                           type: integer
  */
-router.get('/query', taskController.getTaskList);
+router.get('/query', authenticateToken, taskController.getTaskList);
 
 /**
  * @swagger
@@ -100,7 +101,7 @@ router.get('/query', taskController.getTaskList);
  *               priority:
  *                 type: integer
  *                 description: 优先级（1-P0 2-P1 3-P2 4-P3）
- *               task_status_id:
+ *               status_id:
  *                 type: integer
  *                 description: 任务状态ID
  *               assignee_id:
@@ -136,7 +137,7 @@ router.get('/query', taskController.getTaskList);
  *             required:
  *               - name
  *               - priority
- *               - task_status_id
+ *               - status_id
  *               - reporter_id
  *     responses:
  *       200:
@@ -153,7 +154,7 @@ router.get('/query', taskController.getTaskList);
  *                 datum:
  *                   $ref: '#/components/schemas/Task'
  */
-router.post('/create', taskController.createTask);
+router.post('/create', authenticateToken, taskController.createTask);
 
 /**
  * @swagger
@@ -180,7 +181,7 @@ router.post('/create', taskController.createTask);
  *               priority:
  *                 type: integer
  *                 description: 优先级（1-P0 2-P1 3-P2 4-P3）
- *               task_status_id:
+ *               status_id:
  *                 type: integer
  *                 description: 任务状态ID
  *               assignee_id:
@@ -230,7 +231,7 @@ router.post('/create', taskController.createTask);
  *                 datum:
  *                   $ref: '#/components/schemas/Task'
  */
-router.post('/update', taskController.updateTask);
+router.post('/update', authenticateToken, taskController.updateTask);
 
 /**
  * @swagger
@@ -265,7 +266,7 @@ router.post('/update', taskController.updateTask);
  *                 message:
  *                   type: string
  */
-router.post('/delete', taskController.deleteTasks);
+router.post('/delete', authenticateToken, taskController.deleteTasks);
 
 /**
  * @swagger
@@ -295,7 +296,7 @@ router.post('/delete', taskController.deleteTasks);
  *                 datum:
  *                   $ref: '#/components/schemas/Task'
  */
-router.get('/detail', taskController.getTaskDetail);
+router.get('/detail', authenticateToken, taskController.getTaskDetail);
 
 module.exports = router;
 
@@ -318,7 +319,7 @@ module.exports = router;
  *         priority:
  *           type: integer
  *           description: 优先级（1-P0 2-P1 3-P2 4-P3）
- *         task_status_id:
+ *         status_id:
  *           type: integer
  *           description: 任务状态ID
  *         assignee_id:

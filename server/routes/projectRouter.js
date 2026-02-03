@@ -5,6 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const projectController = require('../mvc/controllers/project');
+const { authenticateToken } = require("../middleware/auth");
 
 /**
  * @swagger
@@ -66,7 +67,7 @@ const projectController = require('../mvc/controllers/project');
  *                         total:
  *                           type: integer
  */
-router.get('/query', projectController.getProjectList);
+router.get('/query', authenticateToken, projectController.getProjectList);
 
 /**
  * @swagger
@@ -123,7 +124,7 @@ router.get('/query', projectController.getProjectList);
  *                 datum:
  *                   $ref: '#/components/schemas/Project'
  */
-router.post('/create', projectController.createProject);
+router.post('/create', authenticateToken, projectController.createProject);
 
 /**
  * @swagger
@@ -182,7 +183,7 @@ router.post('/create', projectController.createProject);
  *                 datum:
  *                   $ref: '#/components/schemas/Project'
  */
-router.post('/update', projectController.updateProject);
+router.post('/update', authenticateToken, projectController.updateProject);
 
 /**
  * @swagger
@@ -217,7 +218,7 @@ router.post('/update', projectController.updateProject);
  *                 message:
  *                   type: string
  */
-router.post('/delete', projectController.deleteProjects);
+router.post('/delete', authenticateToken, projectController.deleteProjects);
 
 /**
  * @swagger
@@ -266,7 +267,7 @@ router.post('/delete', projectController.deleteProjects);
  *                       role:
  *                         $ref: '#/components/schemas/Role'
  */
-router.get('/team/query', projectController.getProjectTeamList);
+router.get('/team/query', authenticateToken, projectController.getProjectTeamList);
 
 /**
  * @swagger
@@ -309,7 +310,7 @@ router.get('/team/query', projectController.getProjectTeamList);
  *                 datum:
  *                   $ref: '#/components/schemas/ProjectTeam'
  */
-router.post('/team/create', projectController.addProjectTeamMember);
+router.post('/team/create', authenticateToken, projectController.addProjectTeamMember);
 
 /**
  * @swagger
@@ -347,7 +348,7 @@ router.post('/team/create', projectController.addProjectTeamMember);
  *                 datum:
  *                   $ref: '#/components/schemas/ProjectTeam'
  */
-router.post('/team/update', projectController.updateProjectTeamMember);
+router.post('/team/update', authenticateToken, projectController.updateProjectTeamMember);
 
 /**
  * @swagger
@@ -382,7 +383,7 @@ router.post('/team/update', projectController.updateProjectTeamMember);
  *                 message:
  *                   type: string
  */
-router.post('/team/delete', projectController.deleteProjectTeamMembers);
+router.post('/team/delete', authenticateToken, projectController.deleteProjectTeamMembers);
 
 module.exports = router;
 

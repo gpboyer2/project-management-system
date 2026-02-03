@@ -122,7 +122,7 @@ class RoleController {
                     continue;
                 }
                 const created = await RoleModel.create(item);
-                resultList.push({ success: true, role_id: created.role_id, role_code: item.role_code });
+                resultList.push({ success: true, role_id: created.id, role_code: item.role_code });
             }
 
             const successCount = resultList.filter(r => r.success).length;

@@ -5,6 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const requirementController = require('../mvc/controllers/requirement');
+const { authenticateToken } = require("../middleware/auth");
 
 /**
  * @swagger
@@ -71,7 +72,7 @@ const requirementController = require('../mvc/controllers/requirement');
  *                         total:
  *                           type: integer
  */
-router.get('/query', requirementController.getRequirementList);
+router.get('/query', authenticateToken, requirementController.getRequirementList);
 
 /**
  * @swagger
@@ -137,7 +138,7 @@ router.get('/query', requirementController.getRequirementList);
  *                 datum:
  *                   $ref: '#/components/schemas/Requirement'
  */
-router.post('/create', requirementController.createRequirement);
+router.post('/create', authenticateToken, requirementController.createRequirement);
 
 /**
  * @swagger
@@ -202,7 +203,7 @@ router.post('/create', requirementController.createRequirement);
  *                 datum:
  *                   $ref: '#/components/schemas/Requirement'
  */
-router.post('/update', requirementController.updateRequirement);
+router.post('/update', authenticateToken, requirementController.updateRequirement);
 
 /**
  * @swagger
@@ -237,7 +238,7 @@ router.post('/update', requirementController.updateRequirement);
  *                 message:
  *                   type: string
  */
-router.post('/delete', requirementController.deleteRequirements);
+router.post('/delete', authenticateToken, requirementController.deleteRequirements);
 
 /**
  * @swagger
@@ -267,7 +268,7 @@ router.post('/delete', requirementController.deleteRequirements);
  *                 datum:
  *                   $ref: '#/components/schemas/Requirement'
  */
-router.get('/detail', requirementController.getRequirementDetail);
+router.get('/detail', authenticateToken, requirementController.getRequirementDetail);
 
 /**
  * @swagger
@@ -299,7 +300,7 @@ router.get('/detail', requirementController.getRequirementDetail);
  *                   items:
  *                     $ref: '#/components/schemas/RequirementProcessNode'
  */
-router.get('/process-nodes/query', requirementController.getRequirementProcessNodes);
+router.get('/process-nodes/query', authenticateToken, requirementController.getRequirementProcessNodes);
 
 /**
  * @swagger
@@ -361,7 +362,7 @@ router.get('/process-nodes/query', requirementController.getRequirementProcessNo
  *                 datum:
  *                   $ref: '#/components/schemas/RequirementProcessNode'
  */
-router.post('/process-nodes/create', requirementController.createRequirementProcessNode);
+router.post('/process-nodes/create', authenticateToken, requirementController.createRequirementProcessNode);
 
 /**
  * @swagger
@@ -420,7 +421,7 @@ router.post('/process-nodes/create', requirementController.createRequirementProc
  *                 datum:
  *                   $ref: '#/components/schemas/RequirementProcessNode'
  */
-router.post('/process-nodes/update', requirementController.updateRequirementProcessNode);
+router.post('/process-nodes/update', authenticateToken, requirementController.updateRequirementProcessNode);
 
 /**
  * @swagger
@@ -455,7 +456,7 @@ router.post('/process-nodes/update', requirementController.updateRequirementProc
  *                 message:
  *                   type: string
  */
-router.post('/process-nodes/delete', requirementController.deleteRequirementProcessNodes);
+router.post('/process-nodes/delete', authenticateToken, requirementController.deleteRequirementProcessNodes);
 
 module.exports = router;
 
