@@ -15,20 +15,20 @@ class UserModel {
   static async findAll(current_page = 1, page_size = 10, keyword = '', role = null, status = null, currentUser = null) {
     try {
       const where = {};
-      
+
       // 核心安全逻辑：永远不返回超级管理员用户
       where.role_id = { [Op.ne]: this.SUPER_ADMIN_ROLE_ID };
-      
+
       // 权限过滤：只能看到比自己角色级别低的用户
       if (currentUser && currentUser.role_id) {
-        where.role_id = { 
+        where.role_id = {
           [Op.and]: [
             { [Op.ne]: this.SUPER_ADMIN_ROLE_ID },
             { [Op.gt]: currentUser.role_id }
           ]
         };
       }
-      
+
       if (keyword) {
         where[Op.or] = [
           { user_name: { [Op.like]: `%${keyword}%` } },
@@ -36,7 +36,7 @@ class UserModel {
           { email: { [Op.like]: `%${keyword}%` } }
         ];
       }
-      
+
       if (role) {
         // 如果筛选的角色是超级管理员，直接返回空
         if (role === this.SUPER_ADMIN_ROLE_ID) {
@@ -44,7 +44,7 @@ class UserModel {
         }
         where.role_id = role;
       }
-      
+
       if (status !== null) {
         where.status = status;
       }
@@ -59,8 +59,8 @@ class UserModel {
 
       // 单独查询角色信息
       const roleIdList = [...new Set(rows.map(row => row.role_id).filter(Boolean))];
-      const roleList = roleIdList.length > 0 ? await Role.findAll({ where: { role_id: roleIdList }, raw: true }) : [];
-      const roleMap = Object.fromEntries(roleList.map(r => [r.role_id, r]));
+      const roleList = roleIdList.length > 0 ? await Role.findAll({ where: { id: roleIdList }, raw: true }) : [];
+      const roleMap = Object.fromEntries(roleList.map(r => [r.id, r]));
 
       return {
         list: rows.map(row => ({
@@ -79,19 +79,19 @@ class UserModel {
   // 根据用户ID获取用户详情
   static async findByUserId(userId) {
     try {
-      const user = await User.findByPk(userId, { raw: true });
+      const user = await User.findOne({ where: { id: userId }, raw: true });
       if (!user) return null;
-      
+
       // 单独查询角色信息
       let roleInfo = null;
       if (user.role_id) {
-        roleInfo = await Role.findByPk(user.role_id, { raw: true });
+        roleInfo = await Role.findOne({ where: { id: user.role_id }, raw: true });
       }
-      
-      return { 
-        ...user, 
-        role_name: roleInfo?.role_name, 
-        role_code: roleInfo?.role_code 
+
+      return {
+        ...user,
+        role_name: roleInfo?.role_name,
+        role_code: roleInfo?.role_code
       };
     } catch (error) {
       logger.error("获取用户详情失败:", error);
@@ -130,7 +130,7 @@ class UserModel {
     try {
       console.log('[UserModel.login] 查找用户 - Username:', username);
       const user = await User.findOne({ where: { user_name: username, status: 1 }, raw: true });
-      console.log('[UserModel.login] 查找用户结果:', user ? `找到用户 user_id=${user.user_id}, has_password=${!!user.password}` : '用户不存在');
+      console.log('[UserModel.login] 查找用户结果:', user ? `找到用户 id=${user.id}, has_password=${!!user.password}` : '用户不存在');
       if (!user || !user.password) throw new Error("账户或密码不正确");
 
       console.log('[UserModel.login] 开始验证密码 - 输入密码长度:', password?.length, '数据库密码前缀:', user.password.substring(0, 10) + '...');
@@ -138,8 +138,8 @@ class UserModel {
       console.log('[UserModel.login] 密码验证结果:', isValid);
       if (!isValid) throw new Error("账户或密码不正确");
 
-      await User.update({ last_login_time: Date.now() }, { where: { user_id: user.user_id } });
-      console.log('[UserModel.login] 登录成功 - user_id:', user.user_id);
+      await User.update({ last_login_time: Date.now() }, { where: { id: user.id } });
+      console.log('[UserModel.login] 登录成功 - id:', user.id);
       return user;
     } catch (error) {
       throw error;
@@ -153,7 +153,7 @@ class UserModel {
         updateData.password = await bcrypt.hash(updateData.password, 10);
       }
       updateData.update_time = Date.now();
-      return await User.update(updateData, { where: { user_id: userId } });
+      return await User.update(updateData, { where: { id: userId } });
     } catch (error) {
       logger.error("更新用户失败:", error);
       throw error;
@@ -163,7 +163,7 @@ class UserModel {
   // 删除用户
   static async delete(userId) {
     try {
-      return await User.destroy({ where: { user_id: userId } });
+      return await User.destroy({ where: { id: userId } });
     } catch (error) {
       logger.error("删除用户失败:", error);
       throw error;
@@ -177,7 +177,7 @@ class UserModel {
    */
   static async updateStatusList(userIdList, status) {
     try {
-      return await User.update({ status: status, update_time: Date.now() }, { where: { user_id: { [Op.in]: userIdList } } });
+      return await User.update({ status: status, update_time: Date.now() }, { where: { id: { [Op.in]: userIdList } } });
     } catch (error) {
       logger.error("更新用户状态失败:", error);
       throw error;
@@ -190,7 +190,7 @@ class UserModel {
    */
   static async deleteList(userIdList) {
     try {
-      return await User.destroy({ where: { user_id: { [Op.in]: userIdList } } });
+      return await User.destroy({ where: { id: { [Op.in]: userIdList } } });
     } catch (error) {
       logger.error("删除用户失败:", error);
       throw error;
@@ -207,7 +207,7 @@ class UserModel {
       if (!isValid) throw new Error("原密码错误");
       
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      return await User.update({ password: hashedPassword, update_time: Date.now() }, { where: { user_id: userId } });
+      return await User.update({ password: hashedPassword, update_time: Date.now() }, { where: { id: userId } });
     } catch (error) {
       logger.error("修改密码失败:", error);
       throw error;
@@ -218,7 +218,7 @@ class UserModel {
   static async resetPassword(userId, newPassword = '123456') {
     try {
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      return await User.update({ password: hashedPassword, update_time: Date.now() }, { where: { user_id: userId } });
+      return await User.update({ password: hashedPassword, update_time: Date.now() }, { where: { id: userId } });
     } catch (error) {
       logger.error("重置密码失败:", error);
       throw error;

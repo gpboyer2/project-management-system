@@ -7,14 +7,14 @@ const { Requirement, RequirementProcessNode, RequirementProcessNodeRelation, Req
 /**
  * 获取需求列表
  * @param {Object} params 查询参数
- * @param {number} params.page 页码
- * @param {number} params.pageSize 每页数量
+ * @param {number} params.current_page 页码
+ * @param {number} params.page_size 每页数量
  * @param {number} params.projectId 项目ID
  * @param {number} params.status 需求状态
  * @returns {Object} 需求列表和分页信息
  */
 exports.getRequirementList = async (params) => {
-  const { page = 1, pageSize = 20, projectId, status } = params;
+  const { current_page = 1, page_size = 20, projectId, status } = params;
   const where = {};
 
   if (projectId) {
@@ -27,21 +27,16 @@ exports.getRequirementList = async (params) => {
 
   const { count, rows } = await Requirement.findAndCountAll({
     where,
-    offset: (page - 1) * pageSize,
-    limit: parseInt(pageSize),
-    order: [['create_time', 'DESC']],
-    include: [
-      { model: User, as: 'current_assignee' },
-      { model: User, as: 'reporter' },
-      { model: Project, as: 'project' }
-    ]
+    offset: (current_page - 1) * page_size,
+    limit: parseInt(page_size),
+    order: [['create_time', 'DESC']]
   });
 
   return {
     list: rows,
     pagination: {
-      current_page: parseInt(page),
-      page_size: parseInt(pageSize),
+      current_page: parseInt(current_page),
+      page_size: parseInt(page_size),
       total: count
     }
   };
@@ -64,6 +59,14 @@ exports.getRequirementList = async (params) => {
  */
 exports.createRequirement = async (requirementData) => {
   const { name, description, type_id, priority, status_id, current_assignee_id, reporter_id, project_id, planned_version, actual_version } = requirementData;
+
+  // 检查项目是否存在
+  if (project_id) {
+    const project = await Project.findByPk(project_id);
+    if (!project) {
+      throw new Error('项目不存在');
+    }
+  }
 
   return await Requirement.create({
     name,
@@ -112,14 +115,13 @@ exports.deleteRequirements = async (ids) => {
  * @returns {Object} 需求详情
  */
 exports.getRequirementDetail = async (id) => {
-  return await Requirement.findByPk(id, {
-    include: [
-      { model: User, as: 'current_assignee' },
-      { model: User, as: 'reporter' },
-      { model: Project, as: 'project' },
-      { model: RequirementProcessNode, as: 'process_nodes' }
-    ]
-  });
+  const requirement = await Requirement.findByPk(id);
+
+  if (!requirement) {
+    throw new Error('需求不存在');
+  }
+
+  return requirement;
 };
 
 /**

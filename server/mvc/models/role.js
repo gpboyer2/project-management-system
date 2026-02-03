@@ -17,14 +17,14 @@ class RoleModel {
       const where = {};
       
       // 核心安全逻辑：永远不返回超级管理员角色
-      where.role_id = { [Op.ne]: this.SUPER_ADMIN_ROLE_ID };
+      where.id = { [Op.ne]: this.SUPER_ADMIN_ROLE_ID };
       
       // 权限过滤：只能看到比自己角色级别低的角色
-      if (currentUser && currentUser.role_id) {
-        where.role_id = { 
+      if (currentUser && currentUser.id) {
+        where.id = { 
           [Op.and]: [
             { [Op.ne]: this.SUPER_ADMIN_ROLE_ID },
-            { [Op.gt]: currentUser.role_id }
+            { [Op.gt]: currentUser.id }
           ]
         };
       }
@@ -40,7 +40,7 @@ class RoleModel {
       });
       
       for (const role of roleList) {
-        const userCount = await User.count({ where: { role_id: role.role_id } });
+        const userCount = await User.count({ where: { id: role.id } });
         role.user_count = userCount;
       }
       
@@ -89,7 +89,7 @@ class RoleModel {
   static async update(roleId, updateData) {
     try {
       updateData.update_time = Date.now();
-      return await Role.update(updateData, { where: { role_id: roleId } });
+      return await Role.update(updateData, { where: { id: roleId } });
     } catch (error) {
       logger.error("更新角色失败:", error);
       throw error;
@@ -99,8 +99,8 @@ class RoleModel {
   // 删除角色
   static async delete(roleId) {
     try {
-      await RolePermission.destroy({ where: { role_id: roleId } });
-      return await Role.destroy({ where: { role_id: roleId } });
+      await RolePermission.destroy({ where: { id: roleId } });
+      return await Role.destroy({ where: { id: roleId } });
     } catch (error) {
       logger.error("删除角色失败:", error);
       throw error;
@@ -112,7 +112,7 @@ class RoleModel {
     try {
       // 通过关联表查询权限ID列表
       const rolePermissionList = await RolePermission.findAll({ 
-        where: { role_id: roleId }, 
+        where: { id: roleId }, 
         raw: true 
       });
       
@@ -138,10 +138,10 @@ class RoleModel {
   // 设置角色权限
   static async setPermissions(roleId, permissionIdList) {
     try {
-      await RolePermission.destroy({ where: { role_id: roleId } });
+      await RolePermission.destroy({ where: { id: roleId } });
       
       const insertData = permissionIdList.map(permissionId => ({
-        role_id: roleId,
+        id: roleId,
         permission_id: permissionId
       }));
       
@@ -159,7 +159,7 @@ class RoleModel {
   // 检查角色是否有用户关联
   static async hasUsers(roleId) {
     try {
-      const count = await User.count({ where: { role_id: roleId } });
+      const count = await User.count({ where: { id: roleId } });
       return count > 0;
     } catch (error) {
       logger.error("检查角色用户关联失败:", error);

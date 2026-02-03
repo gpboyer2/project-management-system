@@ -30,7 +30,7 @@ class AuthService {
 
             // 生成JWT令牌
             const payload = {
-                userId: user.user_id,
+                userId: user.id,
                 username: user.user_name,
                 roleId: user.role_id
             };
@@ -43,7 +43,7 @@ class AuthService {
             // 保存用户会话
             await SessionModel.create({
                 session_id: require('crypto').randomUUID(),
-                user_id: user.user_id,
+                user_id: user.id,
                 token: accessToken,
                 refresh_token: refreshToken,
                 expires_at: expiresAt,
@@ -54,11 +54,11 @@ class AuthService {
             });
 
             // 获取用户权限
-            const permissions = await getUserPermissions(user.user_id);
+            const permissions = await getUserPermissions(user.id);
 
             // 返回用户信息（排除密码）
             const userInfo = {
-                id: user.user_id,
+                id: user.id,
                 username: user.user_name,
                 realName: user.real_name,
                 email: user.email,
@@ -115,7 +115,7 @@ throw error;
 
             // 生成新的访问令牌
             const payload = {
-                userId: user.user_id,
+                userId: user.id,
                 username: user.user_name,
                 roleId: user.role_id
             };
@@ -127,7 +127,7 @@ throw error;
 
             await SessionModel.create({
                 session_id: require('crypto').randomUUID(),
-                user_id: user.user_id,
+                user_id: user.id,
                 token: newAccessToken,
                 refresh_token: refreshToken,
                 expires_at: expiresAt,
@@ -160,7 +160,7 @@ throw error;
             const permissions = await getUserPermissions(userId);
 
             return {
-                id: user.user_id,
+                id: user.id,
                 username: user.user_name,
                 realName: user.real_name,
                 email: user.email,

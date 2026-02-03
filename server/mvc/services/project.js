@@ -7,27 +7,27 @@ const { Project, ProjectTeam, User, Role } = require('../../database/models');
 /**
  * 获取项目列表
  * @param {Object} params 查询参数
- * @param {number} params.page 页码
- * @param {number} params.pageSize 每页数量
+ * @param {number} params.current_page 页码
+ * @param {number} params.page_size 每页数量
  * @param {number} params.status 项目状态
  * @returns {Object} 项目列表和分页信息
  */
 exports.getProjectList = async (params) => {
-  const { page = 1, pageSize = 20, status } = params;
+  const { current_page = 1, page_size = 20, status } = params;
   const where = status ? { status } : {};
 
   const { count, rows } = await Project.findAndCountAll({
     where,
-    offset: (page - 1) * pageSize,
-    limit: parseInt(pageSize),
+    offset: (current_page - 1) * page_size,
+    limit: parseInt(page_size),
     order: [['create_time', 'DESC']]
   });
 
   return {
     list: rows,
     pagination: {
-      current_page: parseInt(page),
-      page_size: parseInt(pageSize),
+      current_page: parseInt(current_page),
+      page_size: parseInt(page_size),
       total: count
     }
   };
@@ -94,6 +94,12 @@ exports.deleteProjects = async (ids) => {
  * @returns {Array} 项目团队成员列表
  */
 exports.getProjectTeamList = async (projectId) => {
+  // 检查项目是否存在
+  const project = await Project.findByPk(projectId);
+  if (!project) {
+    throw new Error('项目不存在');
+  }
+
   return await ProjectTeam.findAll({
     where: { project_id: projectId, status: 1 },
     include: [

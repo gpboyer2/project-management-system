@@ -7,14 +7,14 @@ const { Review, ReviewProcessNode, ReviewProcessNodeRelation, ReviewProcessNodeU
 /**
  * 获取评审列表
  * @param {Object} params 查询参数
- * @param {number} params.page 页码
- * @param {number} params.pageSize 每页数量
+ * @param {number} params.current_page 页码
+ * @param {number} params.page_size 每页数量
  * @param {number} params.projectId 项目ID
  * @param {number} params.status 评审状态
  * @returns {Object} 评审列表和分页信息
  */
 exports.getReviewList = async (params) => {
-  const { page = 1, pageSize = 20, projectId, status } = params;
+  const { current_page = 1, page_size = 20, projectId, status } = params;
   const where = {};
 
   if (projectId) {
@@ -27,8 +27,8 @@ exports.getReviewList = async (params) => {
 
   const { count, rows } = await Review.findAndCountAll({
     where,
-    offset: (page - 1) * pageSize,
-    limit: parseInt(pageSize),
+    offset: (current_page - 1) * page_size,
+    limit: parseInt(page_size),
     order: [['create_time', 'DESC']],
     include: [
       { model: User, as: 'reporter' },
@@ -40,8 +40,8 @@ exports.getReviewList = async (params) => {
   return {
     list: rows,
     pagination: {
-      current_page: parseInt(page),
-      page_size: parseInt(pageSize),
+      current_page: parseInt(current_page),
+      page_size: parseInt(page_size),
       total: count
     }
   };
@@ -63,6 +63,14 @@ exports.getReviewList = async (params) => {
  */
 exports.createReview = async (reviewData) => {
   const { name, description, review_type = 1, status = 1, reporter_id, reviewer_id, project_id, start_time, end_time } = reviewData;
+
+  // 检查项目是否存在
+  if (project_id) {
+    const project = await Project.findByPk(project_id);
+    if (!project) {
+      throw new Error('项目不存在');
+    }
+  }
 
   return await Review.create({
     name,
@@ -110,7 +118,7 @@ exports.deleteReviews = async (ids) => {
  * @returns {Object} 评审详情
  */
 exports.getReviewDetail = async (id) => {
-  return await Review.findByPk(id, {
+  const review = await Review.findByPk(id, {
     include: [
       { model: User, as: 'reporter' },
       { model: User, as: 'reviewer' },
@@ -118,6 +126,12 @@ exports.getReviewDetail = async (id) => {
       { model: ReviewProcessNode, as: 'process_nodes' }
     ]
   });
+
+  if (!review) {
+    throw new Error('评审不存在');
+  }
+
+  return review;
 };
 
 /**
@@ -138,6 +152,16 @@ exports.getReviewProcessNodes = async (reviewId) => {
  * @returns {Object} 新创建的节点
  */
 exports.createReviewProcessNode = async (nodeData) => {
+  const { review_id } = nodeData;
+
+  // 检查评审是否存在
+  if (review_id) {
+    const review = await Review.findByPk(review_id);
+    if (!review) {
+      throw new Error('评审不存在');
+    }
+  }
+
   nodeData.create_time = Date.now();
   nodeData.update_time = Date.now();
   return await ReviewProcessNode.create(nodeData);

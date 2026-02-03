@@ -60,7 +60,7 @@ class PermissionModel {
   // 更新权限
   static async update(permissionId, updateData) {
     try {
-      return await Permission.update(updateData, { where: { permission_id: permissionId } });
+      return await Permission.update(updateData, { where: { id: permissionId } });
     } catch (error) {
       logger.error("更新权限失败:", error);
       throw error;
@@ -70,8 +70,8 @@ class PermissionModel {
   // 删除权限
   static async delete(permissionId) {
     try {
-      await RolePermission.destroy({ where: { permission_id: permissionId } });
-      return await Permission.destroy({ where: { permission_id: permissionId } });
+      await RolePermission.destroy({ where: { id: permissionId } });
+      return await Permission.destroy({ where: { id: permissionId } });
     } catch (error) {
       logger.error("删除权限失败:", error);
       throw error;
@@ -95,16 +95,16 @@ class PermissionModel {
     const roots = [];
 
     permissionList.forEach(p => {
-      map[p.permission_id] = { ...p, children: [] };
+      map[p.id] = { ...p, children: [] };
     });
 
     permissionList.forEach(p => {
       if (p.parent_id === null || p.parent_id === 0) {
-        roots.push(map[p.permission_id]);
+        roots.push(map[p.id]);
       } else {
         const parent = map[p.parent_id];
         if (parent) {
-          parent.children.push(map[p.permission_id]);
+          parent.children.push(map[p.id]);
         }
       }
     });
@@ -121,8 +121,8 @@ class PermissionModel {
       const findChildren = (parentId) => {
         allPermissionList.forEach(p => {
           if (p.parent_id === parentId) {
-            idList.push(p.permission_id);
-            findChildren(p.permission_id);
+            idList.push(p.id);
+            findChildren(p.id);
           }
         });
       };
@@ -158,9 +158,9 @@ class PermissionModel {
       const result = await sequelize.query(`
         SELECT DISTINCT p.permission_code
         FROM permissions p
-        INNER JOIN role_permissions rp ON p.permission_id = rp.permission_id
+        INNER JOIN role_permissions rp ON p.id = rp.id
         INNER JOIN users u ON u.role_id = rp.role_id
-        WHERE u.user_id = ? AND p.status = 1 AND u.status = 1
+        WHERE u.id = ? AND p.status = 1 AND u.status = 1
       `, { replacements: [userId], type: QueryTypes.SELECT });
       return result.map(item => item.permission_code);
     } catch (error) {
