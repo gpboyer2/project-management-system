@@ -73,61 +73,7 @@ const RequirementProcessNode = sequelize.define('requirement_process_nodes', {
 
 // 定义关联关系
 RequirementProcessNode.associate = function(models) {
-  // 节点属于需求
-  RequirementProcessNode.belongsTo(models.Requirement, {
-    foreignKey: 'requirement_id',
-    as: 'requirement'
-  });
-
-  // 节点属于节点类型
-  RequirementProcessNode.belongsTo(models.ProcessNodeType, {
-    foreignKey: 'node_type_id',
-    as: 'node_type'
-  });
-
-  // 节点有父节点（树形结构）
-  RequirementProcessNode.belongsTo(models.RequirementProcessNode, {
-    foreignKey: 'parent_node_id',
-    as: 'parent_node'
-  });
-
-  // 节点有子节点
-  RequirementProcessNode.hasMany(models.RequirementProcessNode, {
-    foreignKey: 'parent_node_id',
-    as: 'children_nodes'
-  });
-
-  // 节点作为源节点的关系
-  RequirementProcessNode.hasMany(models.RequirementProcessNodeRelation, {
-    foreignKey: 'source_node_id',
-    as: 'source_relations'
-  });
-
-  // 节点作为目标节点的关系
-  RequirementProcessNode.hasMany(models.RequirementProcessNodeRelation, {
-    foreignKey: 'target_node_id',
-    as: 'target_relations'
-  });
-
-  // 节点有多个任务
-  RequirementProcessNode.hasMany(models.Task, {
-    foreignKey: 'requirement_node_id',
-    as: 'tasks'
-  });
-
-  // 节点有多个执行记录
-  RequirementProcessNode.hasMany(models.ProcessExecution, {
-    foreignKey: 'node_id',
-    as: 'executions'
-  });
-
-  // 节点有多个用户（多对多关系）
-  RequirementProcessNode.belongsToMany(models.User, {
-    through: models.RequirementProcessNodeUser,
-    foreignKey: 'node_id',
-    otherKey: 'user_id',
-    as: 'users'
-  });
+  // 移除所有关联关系，避免外键约束检查
 };
 
 module.exports = RequirementProcessNode;

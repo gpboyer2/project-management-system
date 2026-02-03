@@ -25,6 +25,9 @@ const RequirementType = require('./RequirementType');
 const RequirementStatus = require('./RequirementStatus');
 const RequirementTaskStatus = require('./RequirementTaskStatus');
 const ProcessNodeType = require('./ProcessNodeType');
+const ProcessNode = require('./ProcessNode');
+const ProcessNodeRelation = require('./ProcessNodeRelation');
+const ProcessNodeUser = require('./ProcessNodeUser');
 const ProcessExecution = require('./ProcessExecution');
 const DataImportExport = require('./DataImportExport');
 const RequirementVersion = require('./RequirementVersion');
@@ -62,6 +65,9 @@ const models = {
   RequirementStatus,
   RequirementTaskStatus,
   ProcessNodeType,
+  ProcessNode,
+  ProcessNodeRelation,
+  ProcessNodeUser,
   ProcessExecution,
   DataImportExport,
   RequirementVersion,

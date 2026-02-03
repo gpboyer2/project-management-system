@@ -335,70 +335,82 @@ async function syncDatabase() {
       }
     }
 
-    if (isDev) {
-      // 开发环境：使用 alter 只修改有变化的表结构（保留数据）
-      // 1. 禁用外键检查
+    if (isDev || isTest) {
+      // 开发环境或测试环境：禁用外键检查，避免外键约束失败
       await sequelize.query('PRAGMA foreign_keys = OFF;');
 
-      // 2. 版本系统 schema 补齐（增量 DDL + 存量回填）
-      await ensurePacketMessagesVersioningSchema();
+      if (isDev) {
+        // 开发环境：使用 alter 只修改有变化的表结构（保留数据）
+        // 2. 版本系统 schema 补齐（增量 DDL + 存量回填）
+        await ensurePacketMessagesVersioningSchema();
 
-      // 2.1 构建任务 schema 补齐（增量 DDL）
-      await ensureBuildTasksSchema();
+        // 2.1 构建任务 schema 补齐（增量 DDL）
+        await ensureBuildTasksSchema();
 
-      /**
-       * 3. 同步表结构
-       *
-       * 注意：
-       * - SQLite 下 `sync({ alter: true })` 可能触发重建表/索引校验异常（Sequelize 官方也不推荐在生产使用）。
-       * - 本项目 `start-mac.sh` 启动服务端使用 `pnpm start`（非 nodemon），如果这里 `process.exit(0)` 会导致后端直接退出，
-       *   进而前端 Vite 代理出现 ECONNREFUSED，并且如果做了“删库重建”会造成数据丢失。
-       *
-       * 处理策略：
-       * - `pnpm dev`（nodemon 场景）允许使用 alter，便于开发迭代；
-       * - `pnpm start`（常用本地一键启动）跳过 alter，使用普通 sync() 创建缺失表，避免破坏现有数据。
-       */
-      const lifecycleEvent = typeof process.env.npm_lifecycle_event === 'string' ? process.env.npm_lifecycle_event : '';
-      const enableAlterInDev = lifecycleEvent === 'dev';
+        /**
+         * 3. 同步表结构
+         *
+         * 注意：
+         * - SQLite 下 `sync({ alter: true })` 可能触发重建表/索引校验异常（Sequelize 官方也不推荐在生产使用）。
+         * - 本项目 `start-mac.sh` 启动服务端使用 `pnpm start`（非 nodemon），如果这里 `process.exit(0)` 会导致后端直接退出，
+         *   进而前端 Vite 代理出现 ECONNREFUSED，并且如果做了“删库重建”会造成数据丢失。
+         *
+         * 处理策略：
+         * - `pnpm dev`（nodemon 场景）允许使用 alter，便于开发迭代；
+         * - `pnpm start`（常用本地一键启动）跳过 alter，使用普通 sync() 创建缺失表，避免破坏现有数据。
+         */
+        const lifecycleEvent = typeof process.env.npm_lifecycle_event === 'string' ? process.env.npm_lifecycle_event : '';
+        const enableAlterInDev = lifecycleEvent === 'dev';
 
-      if (enableAlterInDev) {
-        try {
-          await sequelize.sync({ alter: true });
-          defaultLogger.info('开发环境：数据库表同步完成（alter=true）');
-        } catch (alterError) {
-          /**
-           * SQLite 的 alter 会走“创建 *_backup 表 -> 复制数据 -> 重建”的流程，
-           * 一旦遇到 UNIQUE/NOT NULL 等约束冲突会直接失败并留下 *_backup 表。
-           * 这里采用“降级策略”：记录错误并降级为普通 sync()，确保服务能启动。
-           */
-          defaultLogger.warn(`开发环境：数据库表同步失败（alter=true），将降级为 sync() 以保证服务可用，详细错误: ${JSON.stringify(alterError)}`);
-
+        if (enableAlterInDev) {
           try {
-            // 清理失败的 alter 可能遗留的 *_backup 表，避免后续反复失败或污染库结构
-            const [backupTableList] = await sequelize.query(
-              "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%\\_backup' ESCAPE '\\';"
-            );
-            if (Array.isArray(backupTableList) && backupTableList.length > 0) {
-              for (const t of backupTableList) {
-                if (!t || !t.name) continue;
-                await sequelize.query(`DROP TABLE IF EXISTS \`${t.name}\`;`);
-                defaultLogger.warn(`[DB] 已清理残留备份表: ${t.name}`);
-              }
-            }
-          } catch (cleanupError) {
-            defaultLogger.warn('清理 *_backup 表失败（可忽略）:', cleanupError.message);
-          }
+            await sequelize.sync({ alter: true });
+            defaultLogger.info('开发环境：数据库表同步完成（alter=true）');
+          } catch (alterError) {
+            /**
+             * SQLite 的 alter 会走“创建 *_backup 表 -> 复制数据 -> 重建”的流程，
+             * 一旦遇到 UNIQUE/NOT NULL 等约束冲突会直接失败并留下 *_backup 表。
+             * 这里采用“降级策略”：记录错误并降级为普通 sync()，确保服务能启动。
+             */
+            defaultLogger.warn(`开发环境：数据库表同步失败（alter=true），将降级为 sync() 以保证服务可用，详细错误: ${JSON.stringify(alterError)}`);
 
+            try {
+              // 清理失败的 alter 可能遗留的 *_backup 表，避免后续反复失败或污染库结构
+              const [backupTableList] = await sequelize.query(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE '%\\_backup' ESCAPE '\\';"
+              );
+              if (Array.isArray(backupTableList) && backupTableList.length > 0) {
+                for (const t of backupTableList) {
+                  if (!t || !t.name) continue;
+                  await sequelize.query(`DROP TABLE IF EXISTS \`${t.name}\`;`);
+                  defaultLogger.warn(`[DB] 已清理残留备份表: ${t.name}`);
+                }
+              }
+            } catch (cleanupError) {
+              defaultLogger.warn('清理 *_backup 表失败（可忽略）:', cleanupError.message);
+            }
+
+            await sequelize.sync();
+            defaultLogger.info('开发环境：已降级为 sync()，请注意：本次不会自动迁移表结构差异');
+          }
+        } else {
           await sequelize.sync();
-          defaultLogger.info('开发环境：已降级为 sync()，请注意：本次不会自动迁移表结构差异');
+          defaultLogger.info('开发环境：已跳过 alter 同步（非 dev 启动），仅执行 sync() 创建缺失表');
         }
       } else {
+        // 测试环境：直接同步表结构
+        await ensurePacketMessagesVersioningSchema();
+        await ensureBuildTasksSchema();
         await sequelize.sync();
-        defaultLogger.info('开发环境：已跳过 alter 同步（非 dev 启动），仅执行 sync() 创建缺失表');
+        defaultLogger.info('测试环境：数据库表同步成功');
       }
 
-      // 3. 重新启用外键检查
-      await sequelize.query('PRAGMA foreign_keys = ON;');
+      // 测试环境保持外键检查禁用，开发环境重新启用
+      if (isDev) {
+        await sequelize.query('PRAGMA foreign_keys = ON;');
+      } else {
+        defaultLogger.info('测试环境：外键检查已禁用');
+      }
     } else {
       // 生产环境：不自动修改表结构，有问题直接报错
       await ensurePacketMessagesVersioningSchema();

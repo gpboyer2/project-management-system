@@ -83,12 +83,14 @@ Review.associate = function(models) {
   // 评审有发起人
   Review.belongsTo(models.User, {
     foreignKey: 'reporter_id',
+    targetKey: 'id',
     as: 'reporter'
   });
 
   // 评审有负责人
   Review.belongsTo(models.User, {
     foreignKey: 'reviewer_id',
+    targetKey: 'id',
     as: 'reviewer'
   });
 
