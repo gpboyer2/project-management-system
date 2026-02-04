@@ -12,7 +12,7 @@ const Review = sequelize.define('reviews', {
   },
   project_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
     comment: '所属项目ID'
   },
   name: {

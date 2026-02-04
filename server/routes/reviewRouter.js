@@ -448,7 +448,230 @@ router.post('/process-nodes/update', authenticateToken, reviewController.updateR
  *                 message:
  *                   type: string
  */
+router.get('/process-nodes/relations/query', authenticateToken, reviewController.getReviewProcessNodeRelations);
+
 router.post('/process-nodes/delete', authenticateToken, reviewController.deleteReviewProcessNodes);
+
+/**
+ * @swagger
+ * /api/reviews/process-nodes/detail:
+ *   get:
+ *     summary: 获取评审流程节点详情
+ *     tags: [评审管理]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: 节点ID
+ *     responses:
+ *       200:
+ *         description: 成功获取节点详情
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                 datum:
+ *                   $ref: '#/components/schemas/ReviewProcessNode'
+ */
+router.get('/process-nodes/detail', authenticateToken, reviewController.getReviewProcessNodeDetail);
+
+/**
+ * @swagger
+ * /api/reviews/process-nodes/users/query:
+ *   get:
+ *     summary: 获取评审流程节点用户列表
+ *     tags: [评审管理]
+ *     parameters:
+ *       - in: query
+ *         name: nodeId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: 节点ID
+ *     responses:
+ *       200:
+ *         description: 成功获取节点用户列表
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                 datum:
+ *                   type: object
+ *                   properties:
+ *                     list:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/ReviewProcessNodeUser'
+ *                     pagination:
+ *                       $ref: '#/components/schemas/Pagination'
+ */
+router.get('/process-nodes/users/query', authenticateToken, reviewController.getReviewProcessNodeUsers);
+
+/**
+ * @swagger
+ * /api/reviews/process-nodes/users/create:
+ *   post:
+ *     summary: 创建评审流程节点用户
+ *     tags: [评审管理]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               node_id:
+ *                 type: integer
+ *                 description: 节点ID
+ *               user_id:
+ *                 type: integer
+ *                 description: 用户ID
+ *               role_type:
+ *                 type: integer
+ *                 description: 角色类型（1-负责人 2-参与者 3-观察者）
+ *             required:
+ *               - node_id
+ *               - user_id
+ *               - role_type
+ *     responses:
+ *       200:
+ *         description: 用户创建成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                 datum:
+ *                   $ref: '#/components/schemas/ReviewProcessNodeUser'
+ */
+router.post('/process-nodes/users/create', authenticateToken, reviewController.createReviewProcessNodeUser);
+
+/**
+ * @swagger
+ * /api/reviews/process-nodes/users/delete:
+ *   post:
+ *     summary: 删除评审流程节点用户
+ *     tags: [评审管理]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               data:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 description: 用户ID列表
+ *             required:
+ *               - data
+ *     responses:
+ *       200:
+ *         description: 用户删除成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ */
+router.post('/process-nodes/users/delete', authenticateToken, reviewController.deleteReviewProcessNodeUsers);
+
+/**
+ * @swagger
+ * /api/reviews/process-nodes/relations/delete:
+ *   post:
+ *     summary: 删除评审流程节点关系
+ *     tags: [评审管理]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               data:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 description: 关系ID列表
+ *             required:
+ *               - data
+ *     responses:
+ *       200:
+ *         description: 关系删除成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ */
+router.post('/process-nodes/relations/delete', authenticateToken, reviewController.deleteReviewProcessNodeRelations);
+
+/**
+ * @swagger
+ * /api/reviews/process/save:
+ *   post:
+ *     summary: 保存评审流程（批量保存节点和关系）
+ *     tags: [评审管理]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nodes:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/ReviewProcessNode'
+ *                 description: 节点列表
+ *               relations:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/ReviewProcessNodeRelation'
+ *                 description: 关系列表
+ *             required:
+ *               - nodes
+ *               - relations
+ *     responses:
+ *       200:
+ *         description: 流程保存成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ */
+router.post('/process/save', authenticateToken, reviewController.saveReviewProcess);
 
 module.exports = router;
 

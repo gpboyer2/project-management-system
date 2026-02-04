@@ -55,6 +55,8 @@ require("./database/models"); // 加载模型定义
 const { runSeed: runUserSeed } = require("./database/seeds/userSeed");
 const { runSeed: runProcessNodeTypeSeed } = require("./database/seeds/processNodeTypeSeed");
 const { runSeed: runRequirementSeed } = require("./database/seeds/requirementSeed");
+const { runSeed: runRequirementTypeSeed } = require("./database/seeds/requirementTypeSeed");
+const { runSeed: runRequirementStatusSeed } = require("./database/seeds/requirementStatusSeed");
 
 const swaggerUi = require("swagger-ui-express")
 const swaggerJsDoc = require('swagger-jsdoc');
@@ -113,6 +115,9 @@ const routeConfigList = [
     { prefix: "/reviews", router: require("./routes/reviewRouter"), desc: "评审管理接口" },
     { prefix: "/requirements", router: require("./routes/requirementRouter"), desc: "需求管理接口" },
     { prefix: "/tasks", router: require("./routes/taskRouter"), desc: "任务管理接口" },
+    { prefix: "/process-node-types", router: require("./routes/processNodeTypeRouter"), desc: "流程节点类型管理接口" },
+    { prefix: "/requirement-types", router: require("./routes/requirementTypeRouter"), desc: "需求类型管理接口" },
+    { prefix: "/requirement-statuses", router: require("./routes/requirementStatusRouter"), desc: "需求状态管理接口" },
 ];
 
 // 提前注册需要处理文件上传的路由（在 bodyParser 之前，避免 FormData 被错误解析）
@@ -120,7 +125,8 @@ const dataImportExportRouter = require("./routes/dataImportExportRouter");
 app.use(apiPrefix + "/ide", responseFormatMiddleware, accessHandler, dataImportExportRouter);
 
 // 全局中间件（用于其他路由）
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb', type: 'application/json' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb', parameterLimit: 1000000 }));
 app.use(responseFormatMiddleware);
 app.use(accessHandler);
 
@@ -170,6 +176,8 @@ app.use('/api-docs', swaggerUi.serve, (req, res, n) => swaggerUi.setup(getDoc(re
         await runUserSeed();
         await runProcessNodeTypeSeed();
         await runRequirementSeed();
+        await runRequirementTypeSeed();
+        await runRequirementStatusSeed();
         logger.info('种子数据初始化完成');
 
         // 种子数据加载完成后，启动服务器

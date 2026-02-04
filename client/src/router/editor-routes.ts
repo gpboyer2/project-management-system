@@ -13,13 +13,12 @@ import type { RouteRecordRaw } from 'vue-router';
  * 包含欢迎页、IDE 编辑器主路由及其子路由
  */
 export const editorRoutes: RouteRecordRaw[] = [
-  // 欢迎页/空状态（不使用 IdeLayout）
+  // 首页重定向到项目管理
   {
     path: '/',
-    name: 'Welcome',
-    component: () => import('@/views/editor/welcome-page/index.vue'),
+    redirect: '/project-management',
     meta: {
-      title: '灵枢 IDE',
+      title: '项目流程评审管理',
       cache: false,
     }
   },

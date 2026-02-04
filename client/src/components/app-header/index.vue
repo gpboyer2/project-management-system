@@ -21,51 +21,55 @@
 
       <!-- 菜单栏 -->
       <nav class="ide-header-menu">
-        <!-- 操作菜单 -->
-        <el-dropdown trigger="hover" @command="handleActionMenuCommand">
-          <button class="ide-header-menu-item">
-            操作
-          </button>
-
-          <template #dropdown>
-            <el-dropdown-menu class="ide-header-dropdown">
-              <el-dropdown-item command="save">
-                <el-icon class="ide-header-dropdown-icon"><ArrowRight /></el-icon>
-                保存
-              </el-dropdown-item>
-
-              <el-dropdown-item command="publish">
-                <el-icon class="ide-header-dropdown-icon"><Upload /></el-icon>
-                发布
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-
-        <!-- 视图菜单 -->
-        <el-dropdown trigger="hover" @command="handleViewMenuCommand">
-          <button class="ide-header-menu-item">
-            视图
-          </button>
-
-          <template #dropdown>
-            <el-dropdown-menu class="ide-header-dropdown">
-              <el-dropdown-item command="topology">
-                <el-icon class="ide-header-dropdown-icon"><Share /></el-icon>
-                拓扑展示
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-
-        <!-- 体系层级与协议管理 -->
-        <router-link 
-          to="/editor/ide/dashboard" 
+        <!-- 项目管理 -->
+        <router-link
+          to="/project-management"
           class="ide-header-menu-item"
-          :class="{ 'is-active': isDashboardActive }"
+          :class="{ 'is-active': isProjectManagementActive }"
         >
-          体系层级与协议管理
+          项目管理
         </router-link>
+
+        <!-- 需求管理 -->
+        <router-link
+          to="/requirement-management"
+          class="ide-header-menu-item"
+          :class="{ 'is-active': isRequirementManagementActive }"
+        >
+          需求管理
+        </router-link>
+
+        <!-- 评审管理 -->
+        <router-link
+          to="/review-management"
+          class="ide-header-menu-item"
+          :class="{ 'is-active': isReviewManagementActive }"
+        >
+          评审管理
+        </router-link>
+
+        <!-- 管理菜单 -->
+        <el-dropdown trigger="hover" @command="handleManageMenuCommand">
+          <button class="ide-header-menu-item">
+            管理
+          </button>
+          <template #dropdown>
+            <el-dropdown-menu class="ide-header-dropdown">
+              <el-dropdown-item command="requirement-type">
+                <el-icon class="ide-header-dropdown-icon"><Document /></el-icon>
+                需求类型管理
+              </el-dropdown-item>
+              <el-dropdown-item command="requirement-status">
+                <el-icon class="ide-header-dropdown-icon"><Check /></el-icon>
+                需求状态管理
+              </el-dropdown-item>
+              <el-dropdown-item command="process-node-type">
+                <el-icon class="ide-header-dropdown-icon"><Setting /></el-icon>
+                流程节点类型管理
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </nav>
     </div>
 
@@ -145,16 +149,14 @@ import { ElMessage } from 'element-plus';
 import {
   Search,
   User,
-  ArrowRight,
-  Upload,
-  Share
+  Document,
+  Check,
+  Setting
 } from '@element-plus/icons-vue';
 import { useUserStore } from '@/stores/user';
 
 const emit = defineEmits<{
   (e: 'open-build'): void
-  (e: 'action-save'): void
-  (e: 'action-publish'): void
 }>();
 
 const router = useRouter();
@@ -171,9 +173,19 @@ const systemName = ref('系统1_v1.0');
 // 用户名称
 const userName = computed(() => userStore.userInfo?.username || '未登录');
 
-// 判断是否在 dashboard 或 editor/ide 相关页面
-const isDashboardActive = computed(() => {
-  return route.path === '/editor/ide/dashboard' || route.path === '/editor/ide';
+// 判断是否在项目管理页面
+const isProjectManagementActive = computed(() => {
+  return route.path === '/project-management';
+});
+
+// 判断是否在需求管理页面
+const isRequirementManagementActive = computed(() => {
+  return route.path === '/requirement-management';
+});
+
+// 判断是否在评审管理页面
+const isReviewManagementActive = computed(() => {
+  return route.path === '/review-management';
 });
 
 // 仅在 IDE 路由下显示构建入口
@@ -181,32 +193,6 @@ const showBuild = computed(() => {
   return route.path.startsWith('/editor/ide');
 });
 
-/**
- * 处理操作菜单命令
- * @param {string} command - 菜单命令
- */
-function handleActionMenuCommand(command: string) {
-  switch (command) {
-    case 'save':
-      emit('action-save');
-      break;
-    case 'publish':
-      emit('action-publish');
-      break;
-  }
-}
-
-/**
- * 处理视图菜单命令
- * @param {string} command - 菜单命令
- */
-function handleViewMenuCommand(command: string) {
-  switch (command) {
-    case 'topology':
-      router.push('/topology-display');
-      break;
-  }
-}
 
 /**
  * 处理搜索
@@ -223,6 +209,24 @@ function handleSearch() {
  */
 function handleOpenBuild() {
   emit('open-build');
+}
+
+/**
+ * 处理管理菜单命令
+ * @param {string} command - 菜单命令
+ */
+function handleManageMenuCommand(command: string) {
+  switch (command) {
+    case 'requirement-type':
+      router.push('/requirement-type-management');
+      break;
+    case 'requirement-status':
+      router.push('/requirement-status-management');
+      break;
+    case 'process-node-type':
+      router.push('/process-node-type-management');
+      break;
+  }
 }
 
 /**

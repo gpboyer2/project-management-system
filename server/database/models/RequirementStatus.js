@@ -10,7 +10,7 @@ const RequirementStatus = sequelize.define('requirement_statuses', {
     primaryKey: true,
     autoIncrement: true
   },
-  status_name: {
+  name: {
     type: DataTypes.STRING,
     allowNull: false
   },
@@ -24,6 +24,9 @@ const RequirementStatus = sequelize.define('requirement_statuses', {
   status: {
     type: DataTypes.INTEGER,
     defaultValue: 1
+  },
+  config: {
+    type: DataTypes.JSON
   },
   create_time: {
     type: DataTypes.INTEGER

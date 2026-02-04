@@ -277,8 +277,8 @@ async function handleLogin() {
       time: new Date().toLocaleTimeString()
     });
 
-    // 跳转到首页
-    router.push('/');
+    // 跳转到需求管理页面
+    router.push('/requirement-management');
   } else {
     console.error('[登录] 登录失败:', response.message);
     errorMessage.value = response.message || '登录失败，请检查用户名和密码';

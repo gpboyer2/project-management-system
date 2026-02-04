@@ -10,9 +10,13 @@ const ProcessNodeType = sequelize.define('process_node_types', {
     primaryKey: true,
     autoIncrement: true
   },
-  node_type_name: {
+  name: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  type: {
+    type: DataTypes.INTEGER,
+    defaultValue: 99
   },
   description: {
     type: DataTypes.TEXT
@@ -20,6 +24,9 @@ const ProcessNodeType = sequelize.define('process_node_types', {
   sort_order: {
     type: DataTypes.INTEGER,
     defaultValue: 0
+  },
+  config: {
+    type: DataTypes.JSON
   },
   status: {
     type: DataTypes.INTEGER,

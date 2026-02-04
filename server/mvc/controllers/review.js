@@ -122,6 +122,21 @@ exports.updateReviewProcessNode = async (req, res) => {
 };
 
 /**
+ * 获取评审流程节点关系列表
+ * @param {Object} req Express请求对象
+ * @param {Object} res Express响应对象
+ */
+exports.getReviewProcessNodeRelations = async (req, res) => {
+  try {
+    const { reviewId } = req.query;
+    const result = await reviewService.getReviewProcessNodeRelations(reviewId);
+    res.apiSuccess(result);
+  } catch (error) {
+    res.apiError(null, error.message);
+  }
+};
+
+/**
  * 删除评审流程节点
  * @param {Object} req Express请求对象
  * @param {Object} res Express响应对象
@@ -131,6 +146,94 @@ exports.deleteReviewProcessNodes = async (req, res) => {
     const { data } = req.body;
     await reviewService.deleteReviewProcessNodes(data);
     res.apiSuccess(null, '节点删除成功');
+  } catch (error) {
+    res.apiError(null, error.message);
+  }
+};
+
+/**
+ * 获取评审流程节点详情
+ * @param {Object} req Express请求对象
+ * @param {Object} res Express响应对象
+ */
+exports.getReviewProcessNodeDetail = async (req, res) => {
+  try {
+    const { id } = req.query;
+    const result = await reviewService.getReviewProcessNodeDetail(id);
+    res.apiSuccess(result);
+  } catch (error) {
+    res.apiError(null, error.message);
+  }
+};
+
+/**
+ * 获取评审流程节点用户列表
+ * @param {Object} req Express请求对象
+ * @param {Object} res Express响应对象
+ */
+exports.getReviewProcessNodeUsers = async (req, res) => {
+  try {
+    const { nodeId } = req.query;
+    const result = await reviewService.getReviewProcessNodeUsers(nodeId);
+    res.apiSuccess(result);
+  } catch (error) {
+    res.apiError(null, error.message);
+  }
+};
+
+/**
+ * 创建评审流程节点用户
+ * @param {Object} req Express请求对象
+ * @param {Object} res Express响应对象
+ */
+exports.createReviewProcessNodeUser = async (req, res) => {
+  try {
+    const result = await reviewService.createReviewProcessNodeUser(req.body);
+    res.apiSuccess(result);
+  } catch (error) {
+    res.apiError(null, error.message);
+  }
+};
+
+/**
+ * 删除评审流程节点用户
+ * @param {Object} req Express请求对象
+ * @param {Object} res Express响应对象
+ */
+exports.deleteReviewProcessNodeUsers = async (req, res) => {
+  try {
+    const { data } = req.body;
+    await reviewService.deleteReviewProcessNodeUsers(data);
+    res.apiSuccess(null, '用户删除成功');
+  } catch (error) {
+    res.apiError(null, error.message);
+  }
+};
+
+/**
+ * 删除评审流程节点关系
+ * @param {Object} req Express请求对象
+ * @param {Object} res Express响应对象
+ */
+exports.deleteReviewProcessNodeRelations = async (req, res) => {
+  try {
+    const { data } = req.body;
+    await reviewService.deleteReviewProcessNodeRelations(data);
+    res.apiSuccess(null, '关系删除成功');
+  } catch (error) {
+    res.apiError(null, error.message);
+  }
+};
+
+/**
+ * 保存评审流程（批量保存节点和关系）
+ * @param {Object} req Express请求对象
+ * @param {Object} res Express响应对象
+ */
+exports.saveReviewProcess = async (req, res) => {
+  try {
+    await reviewService.saveReviewProcess(req.body);
+    res.apiSuccess(null, '流程保存成功');
   } catch (error) {
     res.apiError(null, error.message);
   }

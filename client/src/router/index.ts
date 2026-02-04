@@ -128,6 +128,90 @@ const routes: RouteRecordRaw[] = [
     ]
   },
 
+  // 项目管理
+  {
+    path: '/project-management',
+    name: 'ProjectManagement',
+    component: () => import('@/views/project-management/index.vue'),
+    meta: {
+      title: '项目管理',
+      icon: 'FolderOpened',
+      cache: true,
+    }
+  },
+
+  // 需求管理
+  {
+    path: '/requirement-management',
+    name: 'RequirementManagement',
+    component: () => import('@/views/requirement-management/index.vue'),
+    meta: {
+      title: '需求管理',
+      icon: 'Document',
+      cache: true,
+    }
+  },
+
+  // 任务管理
+  {
+    path: '/task-management',
+    name: 'TaskManagement',
+    component: () => import('@/views/task-management/index.vue'),
+    meta: {
+      title: '任务管理',
+      icon: 'List',
+      cache: true,
+    }
+  },
+
+  // 评审管理
+  {
+    path: '/review-management',
+    name: 'ReviewManagement',
+    component: () => import('@/views/review-management/index.vue'),
+    meta: {
+      title: '评审管理',
+      icon: 'Star',
+      cache: true,
+    }
+  },
+
+  // 流程节点类型管理
+  {
+    path: '/process-node-type-management',
+    name: 'ProcessNodeTypeManagement',
+    component: () => import('@/views/process-node-type-management/index.vue'),
+    meta: {
+      title: '流程节点类型管理',
+      icon: 'Setting',
+      cache: true,
+    }
+  },
+
+  // 需求类型管理
+  {
+    path: '/requirement-type-management',
+    name: 'RequirementTypeManagement',
+    component: () => import('@/views/requirement-type-management/index.vue'),
+    meta: {
+      title: '需求类型管理',
+      icon: 'Document',
+      cache: true,
+    }
+  },
+
+  // 需求状态管理
+  {
+    path: '/requirement-status-management',
+    name: 'RequirementStatusManagement',
+    component: () => import('@/views/requirement-status-management/index.vue'),
+    meta: {
+      title: '需求状态管理',
+      icon: 'Check',
+      cache: true,
+    }
+  },
+
   // 404 页面
   {
     path: '/:pathMatch(.*)*',

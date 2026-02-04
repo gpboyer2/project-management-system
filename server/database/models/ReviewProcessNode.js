@@ -50,6 +50,16 @@ const ReviewProcessNode = sequelize.define('review_process_nodes', {
     allowNull: true,
     comment: '处理时限(小时)'
   },
+  x: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+    comment: '节点X坐标'
+  },
+  y: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+    comment: '节点Y坐标'
+  },
   status: {
     type: DataTypes.INTEGER,
     allowNull: false,

@@ -137,13 +137,22 @@ exports.getReviewDetail = async (id) => {
 /**
  * 获取评审流程节点列表
  * @param {number} reviewId 评审ID
- * @returns {Array} 评审流程节点列表
+ * @returns {Object} 评审流程节点列表和分页信息
  */
 exports.getReviewProcessNodes = async (reviewId) => {
-  return await ReviewProcessNode.findAll({
+  const nodes = await ReviewProcessNode.findAll({
     where: { review_id: reviewId },
     order: [['node_order', 'ASC']]
   });
+
+  return {
+    list: nodes,
+    pagination: {
+      current_page: 1,
+      page_size: nodes.length,
+      total: nodes.length
+    }
+  };
 };
 
 /**
@@ -184,10 +193,164 @@ exports.updateReviewProcessNode = async (id, updateData) => {
 };
 
 /**
+ * 获取评审流程节点关系列表
+ * @param {number} reviewId 评审ID
+ * @returns {Object} 评审流程节点关系列表和分页信息
+ */
+exports.getReviewProcessNodeRelations = async (reviewId) => {
+  const relations = await ReviewProcessNodeRelation.findAll({
+    where: { review_id: reviewId }
+  });
+
+  return {
+    list: relations,
+    pagination: {
+      current_page: 1,
+      page_size: relations.length,
+      total: relations.length
+    }
+  };
+};
+
+/**
  * 删除评审流程节点
  * @param {Array<number>} ids 节点ID列表
  * @returns {void}
  */
 exports.deleteReviewProcessNodes = async (ids) => {
   await ReviewProcessNode.destroy({ where: { id: ids } });
+};
+
+/**
+ * 获取评审流程节点详情
+ * @param {number} nodeId 节点ID
+ * @returns {Object} 节点详情
+ */
+exports.getReviewProcessNodeDetail = async (nodeId) => {
+  const node = await ReviewProcessNode.findByPk(nodeId);
+  if (!node) {
+    throw new Error('节点不存在');
+  }
+  return node;
+};
+
+/**
+ * 获取评审流程节点用户列表
+ * @param {number} nodeId 节点ID
+ * @returns {Object} 节点用户列表
+ */
+exports.getReviewProcessNodeUsers = async (nodeId) => {
+  const users = await ReviewProcessNodeUser.findAll({
+    where: { node_id: nodeId }
+  });
+  return {
+    list: users,
+    pagination: {
+      current_page: 1,
+      page_size: users.length,
+      total: users.length
+    }
+  };
+};
+
+/**
+ * 创建评审流程节点用户
+ * @param {Object} userData 用户数据
+ * @returns {Object} 新创建的用户
+ */
+exports.createReviewProcessNodeUser = async (userData) => {
+  userData.create_time = Date.now();
+  userData.update_time = Date.now();
+  return await ReviewProcessNodeUser.create(userData);
+};
+
+/**
+ * 删除评审流程节点用户
+ * @param {Array<number>} ids 用户ID列表
+ * @returns {void}
+ */
+exports.deleteReviewProcessNodeUsers = async (ids) => {
+  await ReviewProcessNodeUser.destroy({ where: { id: ids } });
+};
+
+/**
+ * 删除评审流程节点关系
+ * @param {Array<number>} ids 关系ID列表
+ * @returns {void}
+ */
+exports.deleteReviewProcessNodeRelations = async (ids) => {
+  await ReviewProcessNodeRelation.destroy({ where: { id: ids } });
+};
+
+/**
+ * 保存评审流程（批量保存节点和关系）
+ * @param {Object} processData 流程数据
+ * @param {Array} processData.nodes 节点列表
+ * @param {Array} processData.relations 关系列表
+ * @returns {void}
+ */
+exports.saveReviewProcess = async (processData) => {
+  const { nodes, relations } = processData;
+
+  // 获取评审ID
+  const reviewId = nodes[0]?.review_id || relations[0]?.review_id;
+  if (!reviewId) {
+    throw new Error('评审ID不能为空');
+  }
+
+  // 获取数据库中现有的节点和关系
+  const existingNodes = await ReviewProcessNode.findAll({
+    where: { review_id: reviewId }
+  });
+  const existingRelations = await ReviewProcessNodeRelation.findAll({
+    where: { review_id: reviewId }
+  });
+
+  // 保存节点
+  for (const node of nodes) {
+    if (node.id) {
+      // 更新现有节点
+      await exports.updateReviewProcessNode(node.id, node);
+    } else {
+      // 创建新节点
+      await exports.createReviewProcessNode(node);
+    }
+  }
+
+  // 保存关系
+  for (const relation of relations) {
+    if (relation.id) {
+      // 更新现有关系
+      const existingRelation = await ReviewProcessNodeRelation.findByPk(relation.id);
+      if (existingRelation) {
+        await existingRelation.update({
+          ...relation,
+          update_time: Date.now()
+        });
+      }
+    } else {
+      // 创建新关系
+      await ReviewProcessNodeRelation.create({
+        ...relation,
+        create_time: Date.now(),
+        update_time: Date.now()
+      });
+    }
+  }
+
+  // 删除不存在的节点
+  const nodeIds = nodes.map(node => node.id);
+  for (const existingNode of existingNodes) {
+    if (!nodeIds.includes(existingNode.id)) {
+      await exports.deleteReviewProcessNodes([existingNode.id]);
+    }
+  }
+
+  // 删除不存在的关系
+  const relationIds = relations.map(relation => relation.id);
+  for (const existingRelation of existingRelations) {
+    if (!relationIds.includes(existingRelation.id)) {
+      await exports.deleteReviewProcessNodeRelations([existingRelation.id]);
+    }
+  }
 };

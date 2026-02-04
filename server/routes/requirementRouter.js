@@ -458,6 +458,362 @@ router.post('/process-nodes/update', authenticateToken, requirementController.up
  */
 router.post('/process-nodes/delete', authenticateToken, requirementController.deleteRequirementProcessNodes);
 
+/**
+ * @swagger
+ * /api/requirements/process-nodes/detail:
+ *   get:
+ *     summary: 获取需求流程节点详情
+ *     tags: [需求管理]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: 节点ID
+ *     responses:
+ *       200:
+ *         description: 成功获取节点详情
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                 datum:
+ *                   $ref: '#/components/schemas/RequirementProcessNode'
+ */
+router.get('/process-nodes/detail', authenticateToken, requirementController.getRequirementProcessNodeDetail);
+
+/**
+ * @swagger
+ * /api/requirements/process-nodes/users/query:
+ *   get:
+ *     summary: 获取需求流程节点用户列表
+ *     tags: [需求管理]
+ *     parameters:
+ *       - in: query
+ *         name: nodeId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: 节点ID
+ *     responses:
+ *       200:
+ *         description: 成功获取节点用户列表
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                 datum:
+ *                   type: object
+ *                   properties:
+ *                     list:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/RequirementProcessNodeUser'
+ */
+router.get('/process-nodes/users/query', authenticateToken, requirementController.getRequirementProcessNodeUsers);
+
+/**
+ * @swagger
+ * /api/requirements/process-nodes/users/create:
+ *   post:
+ *     summary: 创建需求流程节点用户关联
+ *     tags: [需求管理]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               node_id:
+ *                 type: integer
+ *                 description: 节点ID
+ *               user_id:
+ *                 type: integer
+ *                 description: 用户ID
+ *               role_type:
+ *                 type: integer
+ *                 description: 角色类型（1-负责人 2-参与者 3-观察者）
+ *             required:
+ *               - node_id
+ *               - user_id
+ *               - role_type
+ *     responses:
+ *       200:
+ *         description: 用户关联创建成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                 datum:
+ *                   $ref: '#/components/schemas/RequirementProcessNodeUser'
+ */
+router.post('/process-nodes/users/create', authenticateToken, requirementController.createRequirementProcessNodeUser);
+
+/**
+ * @swagger
+ * /api/requirements/process-nodes/users/delete:
+ *   post:
+ *     summary: 删除需求流程节点用户关联
+ *     tags: [需求管理]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               data:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 description: 用户关联ID列表
+ *             required:
+ *               - data
+ *     responses:
+ *       200:
+ *         description: 用户关联删除成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ */
+router.post('/process-nodes/users/delete', authenticateToken, requirementController.deleteRequirementProcessNodeUsers);
+
+/**
+ * @swagger
+ * /api/requirements/process-nodes/relations/query:
+ *   get:
+ *     summary: 获取需求流程节点关系列表
+ *     tags: [需求管理]
+ *     parameters:
+ *       - in: query
+ *         name: requirementId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: 需求ID
+ *     responses:
+ *       200:
+ *         description: 成功获取节点关系列表
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                 datum:
+ *                   type: object
+ *                   properties:
+ *                     list:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/RequirementProcessNodeRelation'
+ */
+router.get('/process-nodes/relations/query', authenticateToken, requirementController.getRequirementProcessNodeRelations);
+
+/**
+ * @swagger
+ * /api/requirements/process-nodes/relations/create:
+ *   post:
+ *     summary: 创建需求流程节点关系
+ *     tags: [需求管理]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               requirement_id:
+ *                 type: integer
+ *                 description: 需求ID
+ *               source_node_id:
+ *                 type: integer
+ *                 description: 源节点ID
+ *               target_node_id:
+ *                 type: integer
+ *                 description: 目标节点ID
+ *               relation_type:
+ *                 type: integer
+ *                 description: 关系类型（1-顺序 2-并行 3-条件）
+ *               condition:
+ *                 type: string
+ *                 description: 条件表达式
+ *             required:
+ *               - requirement_id
+ *               - source_node_id
+ *               - target_node_id
+ *               - relation_type
+ *     responses:
+ *       200:
+ *         description: 关系创建成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                 datum:
+ *                   $ref: '#/components/schemas/RequirementProcessNodeRelation'
+ */
+router.post('/process-nodes/relations/create', authenticateToken, requirementController.createRequirementProcessNodeRelation);
+
+/**
+ * @swagger
+ * /api/requirements/process-nodes/relations/update:
+ *   post:
+ *     summary: 更新需求流程节点关系
+ *     tags: [需求管理]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 description: 关系ID
+ *               relation_type:
+ *                 type: integer
+ *                 description: 关系类型（1-顺序 2-并行 3-条件）
+ *               condition:
+ *                 type: string
+ *                 description: 条件表达式
+ *             required:
+ *               - id
+ *     responses:
+ *       200:
+ *         description: 关系更新成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                 datum:
+ *                   $ref: '#/components/schemas/RequirementProcessNodeRelation'
+ */
+router.post('/process-nodes/relations/update', authenticateToken, requirementController.updateRequirementProcessNodeRelation);
+
+/**
+ * @swagger
+ * /api/requirements/process-nodes/relations/delete:
+ *   post:
+ *     summary: 删除需求流程节点关系
+ *     tags: [需求管理]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               data:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 description: 关系ID列表
+ *             required:
+ *               - data
+ *     responses:
+ *       200:
+ *         description: 关系删除成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ */
+router.post('/process-nodes/relations/delete', authenticateToken, requirementController.deleteRequirementProcessNodeRelations);
+
+/**
+ * @swagger
+ * /api/requirements/process/save:
+ *   post:
+ *     summary: 保存需求流程
+ *     tags: [需求管理]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nodes:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/RequirementProcessNode'
+ *                 description: 节点列表
+ *               relations:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/RequirementProcessNodeRelation'
+ *                 description: 关系列表
+ *             required:
+ *               - nodes
+ *               - relations
+ *     responses:
+ *       200:
+ *         description: 流程保存成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                 datum:
+ *                   type: object
+ *                   properties:
+ *                     nodes:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/RequirementProcessNode'
+ *                     relations:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/RequirementProcessNodeRelation'
+ */
+router.post('/process/save', authenticateToken, requirementController.saveRequirementProcess);
+
 module.exports = router;
 
 /**

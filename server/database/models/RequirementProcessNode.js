@@ -50,6 +50,26 @@ const RequirementProcessNode = sequelize.define('requirement_process_nodes', {
     allowNull: true,
     comment: '处理时限(小时)'
   },
+  x: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+    comment: '节点X坐标'
+  },
+  y: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+    comment: '节点Y坐标'
+  },
+  expected_start_time: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    comment: '预计开始时间，Unix时间戳'
+  },
+  expected_end_time: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    comment: '预计结束时间，Unix时间戳'
+  },
   status: {
     type: DataTypes.INTEGER,
     allowNull: false,

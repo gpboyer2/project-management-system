@@ -171,3 +171,161 @@ exports.updateRequirementProcessNode = async (id, updateData) => {
 exports.deleteRequirementProcessNodes = async (ids) => {
   await RequirementProcessNode.destroy({ where: { id: ids } });
 };
+
+/**
+ * 获取需求流程节点详情
+ * @param {number} id 节点ID
+ * @returns {Object} 节点详情
+ */
+exports.getRequirementProcessNodeDetail = async (id) => {
+  const node = await RequirementProcessNode.findByPk(id);
+  if (!node) {
+    throw new Error('节点不存在');
+  }
+  return node;
+};
+
+/**
+ * 获取需求流程节点用户列表
+ * @param {number} nodeId 节点ID
+ * @returns {Array} 节点用户列表
+ */
+exports.getRequirementProcessNodeUsers = async (nodeId) => {
+  return await RequirementProcessNodeUser.findAll({
+    where: { node_id: nodeId, status: 1 }
+  });
+};
+
+/**
+ * 创建需求流程节点用户关联
+ * @param {Object} userData 用户关联数据
+ * @returns {Object} 新创建的用户关联
+ */
+exports.createRequirementProcessNodeUser = async (userData) => {
+  userData.create_time = Date.now();
+  userData.update_time = Date.now();
+  userData.status = 1;
+  return await RequirementProcessNodeUser.create(userData);
+};
+
+/**
+ * 删除需求流程节点用户关联
+ * @param {Array<number>} ids 用户关联ID列表
+ * @returns {void}
+ */
+exports.deleteRequirementProcessNodeUsers = async (ids) => {
+  await RequirementProcessNodeUser.destroy({ where: { id: ids } });
+};
+
+/**
+ * 获取需求流程节点关系列表
+ * @param {number} requirementId 需求ID
+ * @returns {Array} 节点关系列表
+ */
+exports.getRequirementProcessNodeRelations = async (requirementId) => {
+  return await RequirementProcessNodeRelation.findAll({
+    where: { requirement_id: requirementId }
+  });
+};
+
+/**
+ * 创建需求流程节点关系
+ * @param {Object} relationData 关系数据
+ * @returns {Object} 新创建的关系
+ */
+exports.createRequirementProcessNodeRelation = async (relationData) => {
+  relationData.create_time = Date.now();
+  return await RequirementProcessNodeRelation.create(relationData);
+};
+
+/**
+ * 更新需求流程节点关系
+ * @param {number} id 关系ID
+ * @param {Object} updateData 更新数据
+ * @returns {Object} 更新后的关系
+ */
+exports.updateRequirementProcessNodeRelation = async (id, updateData) => {
+  const relation = await RequirementProcessNodeRelation.findByPk(id);
+  if (!relation) {
+    throw new Error('关系不存在');
+  }
+  return await relation.update(updateData);
+};
+
+/**
+ * 删除需求流程节点关系
+ * @param {Array<number>} ids 关系ID列表
+ * @returns {void}
+ */
+exports.deleteRequirementProcessNodeRelations = async (ids) => {
+  await RequirementProcessNodeRelation.destroy({ where: { id: ids } });
+};
+
+/**
+ * 保存需求流程（批量保存节点和关系）
+ * @param {Object} processData 流程数据
+ * @param {Array} processData.nodes 节点列表
+ * @param {Array} processData.relations 关系列表
+ * @returns {Object} 保存结果
+ */
+exports.saveRequirementProcess = async (processData) => {
+  const { nodes, relations } = processData;
+
+  // 获取需求ID
+  const requirementId = nodes[0]?.requirement_id || relations[0]?.requirement_id;
+  if (!requirementId) {
+    throw new Error('需求ID不能为空');
+  }
+
+  // 获取数据库中现有的节点和关系
+  const existingNodes = await RequirementProcessNode.findAll({
+    where: { requirement_id: requirementId }
+  });
+  const existingRelations = await RequirementProcessNodeRelation.findAll({
+    where: { requirement_id: requirementId }
+  });
+
+  // 保存节点
+  for (const node of nodes) {
+    if (node.id) {
+      // 更新现有节点
+      await exports.updateRequirementProcessNode(node.id, node);
+    } else {
+      // 创建新节点
+      await exports.createRequirementProcessNode(node);
+    }
+  }
+
+  // 保存关系
+  for (const relation of relations) {
+    if (relation.id) {
+      // 更新现有关系
+      await exports.updateRequirementProcessNodeRelation(relation.id, relation);
+    } else {
+      // 创建新关系
+      await exports.createRequirementProcessNodeRelation(relation);
+    }
+  }
+
+  // 删除不存在的节点
+  const nodeIds = nodes.map(node => node.id);
+  for (const existingNode of existingNodes) {
+    if (!nodeIds.includes(existingNode.id)) {
+      await exports.deleteRequirementProcessNodes([existingNode.id]);
+    }
+  }
+
+  // 删除不存在的关系
+  const relationIds = relations.map(relation => relation.id);
+  for (const existingRelation of existingRelations) {
+    if (!relationIds.includes(existingRelation.id)) {
+      await exports.deleteRequirementProcessNodeRelations([existingRelation.id]);
+    }
+  }
+
+  return {
+    message: '流程保存成功',
+    nodes,
+    relations
+  };
+};
