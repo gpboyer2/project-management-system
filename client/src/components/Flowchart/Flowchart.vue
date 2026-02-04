@@ -372,9 +372,6 @@ const initLogicFlow = async () => {
 
   // 加载流程数据
   await loadProcessData();
-
-  // 渲染流程图
-  lf.value.render();
 };
 
 // 加载流程数据
@@ -492,33 +489,36 @@ const handleSave = async () => {
 
     // 保存节点
     const nodes = graphData.nodes.map(node => ({
-      id: parseInt(node.id) < 0 ? null : parseInt(node.id), // 处理临时 ID
+      id: parseInt(node.id) > 0 ? parseInt(node.id) : null, // 只保留正整数 ID，新节点不设置 ID，让数据库自增
       [props.requirementId ? 'requirement_id' : 'review_id']: props.requirementId || props.reviewId,
-      name: node.text,
+      name: typeof node.text === 'string' ? node.text : (node.text?.value || '未命名节点'),
       node_type_id: getNodeTypeId(node.type),
       x: node.x,
       y: node.y,
       node_order: 0,
       status: 1,
-      ...node.properties?.nodeData
+      // 只保留需要的属性，避免覆盖新的位置信息
+      assignee_type: node.properties?.nodeData?.assignee_type,
+      assignee_id: node.properties?.nodeData?.assignee_id,
+      duration_limit: node.properties?.nodeData?.duration_limit
     }));
 
     // 保存节点关系
     const relations = graphData.edges.map(edge => ({
-      id: edge.id && parseInt(edge.id) < 0 ? null : parseInt(edge.id), // 处理临时 ID
+      id: edge.id && parseInt(edge.id) > 0 ? parseInt(edge.id) : null, // 只保留正整数 ID，新关系不设置 ID，让数据库自增
       [props.requirementId ? 'requirement_id' : 'review_id']: props.requirementId || props.reviewId,
-      source_node_id: parseInt(edge.sourceNodeId) < 0 ? null : parseInt(edge.sourceNodeId), // 处理临时 ID
-      target_node_id: parseInt(edge.targetNodeId) < 0 ? null : parseInt(edge.targetNodeId), // 处理临时 ID
+      source_node_id: parseInt(edge.sourceNodeId), // 直接使用节点的 ID，不处理临时 ID
+      target_node_id: parseInt(edge.targetNodeId), // 直接使用节点的 ID，不处理临时 ID
       relation_type: edge.properties?.relationType || 1,
       condition: edge.properties?.condition
     }));
 
+    // 保存流程
     if (props.requirementId) {
       const response = await requirementApi.saveRequirementProcess({
         nodes,
         relations
       });
-      // 保存成功后，重新加载流程数据，确保画布显示最新的节点和关系
       if (response.status === 'success') {
         await loadProcessData();
         ElMessage.success('流程保存成功');
@@ -528,7 +528,6 @@ const handleSave = async () => {
         nodes,
         relations
       });
-      // 保存成功后，重新加载流程数据，确保画布显示最新的节点和关系
       if (response.status === 'success') {
         await loadProcessData();
         ElMessage.success('流程保存成功');
@@ -565,6 +564,7 @@ const handleAddNode = () => {
     inputErrorMessage: '节点名称不能为空'
   }).then(({ value }) => {
     // 生成临时的唯一标识符（负数，避免与数据库生成的正整数ID冲突）
+    // LogicFlow 要求节点必须有 ID，所以我们需要生成一个临时 ID
     const tempId = -Date.now();
     // 添加新节点
     const newNode = {
@@ -795,10 +795,9 @@ const handleZoomOut = () => {
 };
 
 const handleFitView = () => {
-  // 适配视图时禁止调整节点尺寸，保持节点原有大小
+  // 适配视图
   lf.value.fitView({
-    padding: 20,
-    nodeScale: 1 // 保持节点原始比例
+    padding: 20
   });
 };
 
@@ -864,6 +863,9 @@ onMounted(async () => {
   border-bottom: 1px solid #e2e8f0;
   flex-wrap: wrap;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .flowchart-canvas {

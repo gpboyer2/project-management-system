@@ -287,7 +287,7 @@ exports.deleteReviewProcessNodeRelations = async (ids) => {
  * @param {Object} processData 流程数据
  * @param {Array} processData.nodes 节点列表
  * @param {Array} processData.relations 关系列表
- * @returns {void}
+ * @returns {Object} 保存后的节点和关系
  */
 exports.saveReviewProcess = async (processData) => {
   const { nodes, relations } = processData;
@@ -307,34 +307,47 @@ exports.saveReviewProcess = async (processData) => {
   });
 
   // 保存节点
+  const savedNodes = [];
   for (const node of nodes) {
     if (node.id) {
       // 更新现有节点
-      await exports.updateReviewProcessNode(node.id, node);
+      const updatedNode = await exports.updateReviewProcessNode(node.id, node);
+      savedNodes.push(updatedNode);
     } else {
       // 创建新节点
-      await exports.createReviewProcessNode(node);
+      const newNode = await exports.createReviewProcessNode(node);
+      savedNodes.push(newNode);
     }
   }
 
-  // 保存关系
-  for (const relation of relations) {
-    if (relation.id) {
-      // 更新现有关系
-      const existingRelation = await ReviewProcessNodeRelation.findByPk(relation.id);
-      if (existingRelation) {
-        await existingRelation.update({
-          ...relation,
-          update_time: Date.now()
-        });
+  // 保存关系（如果关系数组不为空）
+  const savedRelations = [];
+  if (relations.length > 0) {
+    for (const relation of relations) {
+      if (relation.id) {
+        // 更新现有关系
+        const existingRelation = await ReviewProcessNodeRelation.findByPk(relation.id);
+        if (existingRelation) {
+          const updatedRelation = await existingRelation.update({
+            ...relation,
+            update_time: Date.now()
+          });
+          savedRelations.push(updatedRelation);
+        }
+      } else {
+        // 检查源节点和目标节点是否存在
+        const sourceNodeExists = savedNodes.some(node => node.id === relation.source_node_id);
+        const targetNodeExists = savedNodes.some(node => node.id === relation.target_node_id);
+        if (sourceNodeExists && targetNodeExists) {
+          // 创建新关系
+          const newRelation = await ReviewProcessNodeRelation.create({
+            ...relation,
+            create_time: Date.now(),
+            update_time: Date.now()
+          });
+          savedRelations.push(newRelation);
+        }
       }
-    } else {
-      // 创建新关系
-      await ReviewProcessNodeRelation.create({
-        ...relation,
-        create_time: Date.now(),
-        update_time: Date.now()
-      });
     }
   }
 
@@ -347,10 +360,17 @@ exports.saveReviewProcess = async (processData) => {
   }
 
   // 删除不存在的关系
-  const relationIds = relations.map(relation => relation.id);
-  for (const existingRelation of existingRelations) {
-    if (!relationIds.includes(existingRelation.id)) {
-      await exports.deleteReviewProcessNodeRelations([existingRelation.id]);
+  if (relations.length > 0) {
+    const relationIds = relations.map(relation => relation.id);
+    for (const existingRelation of existingRelations) {
+      if (!relationIds.includes(existingRelation.id)) {
+        await exports.deleteReviewProcessNodeRelations([existingRelation.id]);
+      }
     }
   }
+
+  return {
+    nodes: savedNodes,
+    relations: savedRelations
+  };
 };
