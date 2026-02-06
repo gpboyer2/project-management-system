@@ -331,13 +331,17 @@ const availableUsers = computed(() => {
 const initLogicFlow = async () => {
   if (!lfContainer.value) return;
 
+  // 确保容器尺寸有效
+  const containerWidth = lfContainer.value.clientWidth || 800;
+  const containerHeight = lfContainer.value.clientHeight || 600;
+
   // LogicFlow 1.x 版本使用静态方法注册插件
   LogicFlow.use(BpmnElement);
 
   lf.value = new LogicFlow({
     container: lfContainer.value,
-    width: lfContainer.value.clientWidth,
-    height: lfContainer.value.clientHeight,
+    width: containerWidth,
+    height: containerHeight,
     grid: true,
     snapline: true,
     keyboard: true,
@@ -411,8 +415,8 @@ const loadProcessData = async () => {
         nodes: nodes.map(node => ({
           id: node.id.toString(),
           type: getNodeType(node.node_type_id),
-          x: node.x || Math.random() * 400 + 100,
-          y: node.y || Math.random() * 300 + 100,
+          x: typeof node.x === 'number' && !isNaN(node.x) ? node.x : Math.random() * 400 + 100,
+          y: typeof node.y === 'number' && !isNaN(node.y) ? node.y : Math.random() * 300 + 100,
           text: node.name,
           width: 120, // 设置节点宽度
           height: 60, // 设置节点高度
@@ -796,9 +800,138 @@ const handleZoomOut = () => {
 
 const handleFitView = () => {
   // 适配视图
-  lf.value.fitView({
-    padding: 20
-  });
+  try {
+    // 检查 lf 和 graphData 是否有效
+    if (!lf.value || !lf.value.getGraphData) {
+      ElMessage.warning('LogicFlow 实例未初始化');
+      return;
+    }
+
+    const graphData = lf.value.getGraphData();
+
+    // 检查是否有节点
+    if (!graphData.nodes || graphData.nodes.length === 0) {
+      ElMessage.warning('画布上没有节点');
+      // 重置到默认状态
+      lf.value.zoomTo(1);
+      lf.value.translate(0, 0);
+      return;
+    }
+
+    // 检查节点位置是否有效
+    const validNodes = graphData.nodes.filter(node =>
+      typeof node.x === 'number' && !isNaN(node.x) &&
+      typeof node.y === 'number' && !isNaN(node.y) &&
+      typeof node.width === 'number' && !isNaN(node.width) &&
+      typeof node.height === 'number' && !isNaN(node.height)
+    );
+
+    if (validNodes.length !== graphData.nodes.length) {
+      ElMessage.warning('部分节点位置数据无效');
+    }
+
+    // 如果没有有效节点，重置到默认状态
+    if (validNodes.length === 0) {
+      lf.value.resetZoom();
+      lf.value.resetTranslate();
+      return;
+    }
+
+    // 计算节点边界
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    validNodes.forEach(node => {
+      // 计算节点的边界（考虑节点的宽高）
+      const nodeMinX = node.x - node.width / 2;
+      const nodeMinY = node.y - node.height / 2;
+      const nodeMaxX = node.x + node.width / 2;
+      const nodeMaxY = node.y + node.height / 2;
+
+      minX = Math.min(minX, nodeMinX);
+      minY = Math.min(minY, nodeMinY);
+      maxX = Math.max(maxX, nodeMaxX);
+      maxY = Math.max(maxY, nodeMaxY);
+    });
+
+    // 检查边界是否有效
+    if (minX === Infinity || minY === Infinity || maxX === -Infinity || maxY === -Infinity) {
+      ElMessage.warning('节点边界计算无效');
+      lf.value.zoomTo(1);
+      lf.value.translate(0, 0);
+      return;
+    }
+
+    // 计算节点总宽高
+    const totalWidth = maxX - minX;
+    const totalHeight = maxY - minY;
+
+    if (totalWidth <= 0 || totalHeight <= 0) {
+      ElMessage.warning('节点边界尺寸无效');
+      lf.value.resetZoom();
+      lf.value.resetTranslate();
+      return;
+    }
+
+    // 获取容器尺寸
+    const container = lf.value.container;
+    const containerWidth = container.clientWidth || 800;
+    const containerHeight = container.clientHeight || 600;
+
+    // 计算缩放比例（考虑边距）
+    const padding = 20;
+    const availableWidth = containerWidth - 2 * padding;
+    const availableHeight = containerHeight - 2 * padding;
+
+    const scaleX = availableWidth / totalWidth;
+    const scaleY = availableHeight / totalHeight;
+
+    let scale = Math.min(scaleX, scaleY);
+    // 限制最小和最大缩放比例
+    scale = Math.max(0.1, Math.min(scale, 5));
+
+    // 计算中心位置
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+
+    // 计算平移距离
+    const translateX = containerWidth / 2 - centerX * scale;
+    const translateY = containerHeight / 2 - centerY * scale;
+
+    // 确保缩放比例和坐标都是有效的
+    if (isNaN(scale) || isNaN(translateX) || isNaN(translateY)) {
+      ElMessage.warning('计算的缩放比例或坐标无效');
+      lf.value.resetZoom();
+      lf.value.resetTranslate();
+      return;
+    }
+
+    // 执行缩放和平移
+    // LogicFlow 1.x 没有 zoomTo 方法，使用 zoom 方法代替
+    // 首先重置到默认缩放，然后根据需要缩放
+    lf.value.resetZoom();
+    const currentTransform = lf.value.getTransform();
+    const currentScale = currentTransform.SCALE_X;
+    const scaleFactor = scale / currentScale;
+    lf.value.zoom(scaleFactor);
+
+    lf.value.translate(translateX, translateY);
+  } catch (error) {
+    console.error('适配视图失败:', error);
+    ElMessage.error('适配视图失败，请检查控制台错误信息');
+
+    // 尝试重置缩放
+    if (lf.value) {
+      try {
+        lf.value.resetZoom();
+        lf.value.resetTranslate();
+      } catch (resetError) {
+        console.error('重置缩放失败:', resetError);
+      }
+    }
+  }
 };
 
 // 获取用户真实姓名
@@ -871,13 +1004,14 @@ onMounted(async () => {
 .flowchart-canvas {
   flex: 1;
   min-height: 500px;
+  max-height: 700px; /* 限制最大高度，适应1080p屏幕 */
   background: #ffffff;
   margin: 20px;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
-  /* 确保画布内容完整显示 */
-  overflow: visible !important;
+  /* 添加滚动条支持 */
+  overflow: auto !important;
 }
 
 .node-props-panel {

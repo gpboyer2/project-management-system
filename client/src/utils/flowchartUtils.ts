@@ -52,7 +52,129 @@ export function handleZoomOut(lf: LogicFlow | null): void {
  */
 export function handleFitView(lf: LogicFlow | null): void {
   if (!lf) return;
-  lf.fitView();
+
+  try {
+    // 检查是否有节点
+    const graphData = getGraphData(lf);
+    if (!graphData.nodes || graphData.nodes.length === 0) {
+      console.warn('画布上没有节点，无法适配视图');
+      // 重置到默认状态
+      lf.resetZoom();
+      lf.resetTranslate();
+      return;
+    }
+
+    // 检查节点位置是否有效
+    const validNodes = graphData.nodes.filter(node =>
+      typeof node.x === 'number' && !isNaN(node.x) &&
+      typeof node.y === 'number' && !isNaN(node.y) &&
+      typeof node.width === 'number' && !isNaN(node.width) &&
+      typeof node.height === 'number' && !isNaN(node.height)
+    );
+
+    if (validNodes.length !== graphData.nodes.length) {
+      console.warn('部分节点位置数据无效');
+    }
+
+    // 如果没有有效节点，重置到默认状态
+    if (validNodes.length === 0) {
+      lf.resetZoom();
+      lf.resetTranslate();
+      return;
+    }
+
+    // 计算节点边界
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    validNodes.forEach(node => {
+      // 计算节点的边界（考虑节点的宽高）
+      const nodeMinX = node.x - node.width / 2;
+      const nodeMinY = node.y - node.height / 2;
+      const nodeMaxX = node.x + node.width / 2;
+      const nodeMaxY = node.y + node.height / 2;
+
+      minX = Math.min(minX, nodeMinX);
+      minY = Math.min(minY, nodeMinY);
+      maxX = Math.max(maxX, nodeMaxX);
+      maxY = Math.max(maxY, nodeMaxY);
+    });
+
+    // 检查边界是否有效
+    if (minX === Infinity || minY === Infinity || maxX === -Infinity || maxY === -Infinity) {
+      console.warn('节点边界计算无效');
+      lf.zoomTo(1);
+      lf.translate(0, 0);
+      return;
+    }
+
+    // 计算节点总宽高
+    const totalWidth = maxX - minX;
+    const totalHeight = maxY - minY;
+
+    if (totalWidth <= 0 || totalHeight <= 0) {
+      console.warn('节点边界尺寸无效');
+      lf.zoomTo(1);
+      lf.translate(0, 0);
+      return;
+    }
+
+    // 获取容器尺寸
+    const container = lf.container as HTMLElement;
+    const containerWidth = container.clientWidth || 800;
+    const containerHeight = container.clientHeight || 600;
+
+    // 计算缩放比例（考虑边距）
+    const padding = 20;
+    const availableWidth = containerWidth - 2 * padding;
+    const availableHeight = containerHeight - 2 * padding;
+
+    const scaleX = availableWidth / totalWidth;
+    const scaleY = availableHeight / totalHeight;
+
+    let scale = Math.min(scaleX, scaleY);
+    // 限制最小和最大缩放比例
+    scale = Math.max(0.1, Math.min(scale, 5));
+
+    // 计算中心位置
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+
+    // 计算平移距离
+    const translateX = containerWidth / 2 - centerX * scale;
+    const translateY = containerHeight / 2 - centerY * scale;
+
+    // 确保缩放比例和坐标都是有效的
+    if (isNaN(scale) || isNaN(translateX) || isNaN(translateY)) {
+      console.warn('计算的缩放比例或坐标无效');
+      lf.resetZoom();
+      lf.resetTranslate();
+      return;
+    }
+
+    // 执行缩放和平移
+    // LogicFlow 1.x 没有 zoomTo 方法，使用 zoom 方法代替
+    // 首先重置到默认缩放，然后根据需要缩放
+    lf.resetZoom();
+    const currentTransform = lf.getTransform();
+    const currentScale = currentTransform.SCALE_X;
+    const scaleFactor = scale / currentScale;
+    lf.zoom(scaleFactor);
+
+    lf.translate(translateX, translateY);
+  } catch (error) {
+    console.error('适配视图失败:', error);
+
+    // 尝试重置缩放
+    try {
+      lf.resetZoom();
+      lf.resetTranslate();
+    } catch (resetError) {
+      console.error('重置缩放失败:', resetError);
+    }
+  }
 }
 
 // ==================== 节点操作 ====================
