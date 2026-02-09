@@ -405,12 +405,9 @@ async function syncDatabase() {
         defaultLogger.info('测试环境：数据库表同步成功');
       }
 
-      // 测试环境保持外键检查禁用，开发环境重新启用
-      if (isDev) {
-        await sequelize.query('PRAGMA foreign_keys = ON;');
-      } else {
-        defaultLogger.info('测试环境：外键检查已禁用');
-      }
+      // 所有环境都禁用外键约束，符合项目数据库设计要求
+      await sequelize.query('PRAGMA foreign_keys = OFF;');
+      defaultLogger.info('外键约束已全局禁用');
     } else {
       // 生产环境：不自动修改表结构，有问题直接报错
       await ensurePacketMessagesVersioningSchema();

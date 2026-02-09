@@ -74,42 +74,28 @@ const Review = sequelize.define('reviews', {
 
 // 定义关联关系
 Review.associate = function(models) {
-  // 评审属于项目
+  // 评审发起人
+  Review.belongsTo(models.User, {
+    foreignKey: 'reporter_id',
+    as: 'reporter'
+  });
+
+  // 评审负责人
+  Review.belongsTo(models.User, {
+    foreignKey: 'reviewer_id',
+    as: 'reviewer'
+  });
+
+  // 所属项目
   Review.belongsTo(models.Project, {
     foreignKey: 'project_id',
     as: 'project'
   });
 
-  // 评审有发起人
-  Review.belongsTo(models.User, {
-    foreignKey: 'reporter_id',
-    targetKey: 'id',
-    as: 'reporter'
-  });
-
-  // 评审有负责人
-  Review.belongsTo(models.User, {
-    foreignKey: 'reviewer_id',
-    targetKey: 'id',
-    as: 'reviewer'
-  });
-
-  // 评审有多个流程节点
+  // 评审流程节点
   Review.hasMany(models.ReviewProcessNode, {
     foreignKey: 'review_id',
     as: 'process_nodes'
-  });
-
-  // 评审有多个流程节点关系
-  Review.hasMany(models.ReviewProcessNodeRelation, {
-    foreignKey: 'review_id',
-    as: 'process_node_relations'
-  });
-
-  // 评审有多个任务
-  Review.hasMany(models.Task, {
-    foreignKey: 'review_id',
-    as: 'tasks'
   });
 };
 

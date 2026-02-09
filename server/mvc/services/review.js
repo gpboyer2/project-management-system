@@ -109,6 +109,20 @@ exports.updateReview = async (id, updateData) => {
  * @returns {void}
  */
 exports.deleteReviews = async (ids) => {
+  // 先删除关联的流程节点用户
+  const nodes = await ReviewProcessNode.findAll({ where: { review_id: ids } });
+  const nodeIds = nodes.map(node => node.id);
+  if (nodeIds.length > 0) {
+    await ReviewProcessNodeUser.destroy({ where: { node_id: nodeIds } });
+  }
+
+  // 再删除关联的流程节点关系
+  await ReviewProcessNodeRelation.destroy({ where: { review_id: ids } });
+
+  // 然后删除关联的流程节点
+  await ReviewProcessNode.destroy({ where: { review_id: ids } });
+
+  // 最后删除评审
   await Review.destroy({ where: { id: ids } });
 };
 
@@ -306,17 +320,21 @@ exports.saveReviewProcess = async (processData) => {
     where: { review_id: reviewId }
   });
 
-  // 保存节点
+  // 保存节点，建立原始ID到新ID的映射
+  const nodeIdMap = new Map(); // 原始ID -> 新ID
   const savedNodes = [];
+
   for (const node of nodes) {
     if (node.id) {
       // 更新现有节点
       const updatedNode = await exports.updateReviewProcessNode(node.id, node);
       savedNodes.push(updatedNode);
+      nodeIdMap.set(node.original_id, updatedNode.id); // 使用 original_id 作为映射键
     } else {
       // 创建新节点
       const newNode = await exports.createReviewProcessNode(node);
       savedNodes.push(newNode);
+      nodeIdMap.set(node.original_id, newNode.id); // 使用 original_id 作为映射键
     }
   }
 
@@ -335,13 +353,17 @@ exports.saveReviewProcess = async (processData) => {
           savedRelations.push(updatedRelation);
         }
       } else {
-        // 检查源节点和目标节点是否存在
-        const sourceNodeExists = savedNodes.some(node => node.id === relation.source_node_id);
-        const targetNodeExists = savedNodes.some(node => node.id === relation.target_node_id);
-        if (sourceNodeExists && targetNodeExists) {
+        // 处理源节点和目标节点的临时ID
+        let sourceNodeId = nodeIdMap.get(relation.source_node_id);
+        let targetNodeId = nodeIdMap.get(relation.target_node_id);
+
+        // 检查源节点和目标节点是否有效
+        if (sourceNodeId && targetNodeId) {
           // 创建新关系
           const newRelation = await ReviewProcessNodeRelation.create({
             ...relation,
+            source_node_id: sourceNodeId,
+            target_node_id: targetNodeId,
             create_time: Date.now(),
             update_time: Date.now()
           });
