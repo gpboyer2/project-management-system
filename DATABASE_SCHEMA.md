@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     review_id INTEGER COMMENT '关联评审ID',
     requirement_node_id INTEGER COMMENT '需求管理流程节点ID，关联requirement_process_nodes表',
     review_node_id INTEGER COMMENT '评审管理流程节点ID，关联review_process_nodes表',
+    parent_task_id INTEGER COMMENT '父任务ID，支持子任务层级结构',
     priority INTEGER NOT NULL COMMENT '优先级：1-P0 2-P1 3-P2 4-P3',
     estimated_hours DECIMAL(10,2) COMMENT '预估工时(小时)',
     actual_hours DECIMAL(10,2) COMMENT '实际工时(小时)',
@@ -106,6 +107,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 | review_id | INTEGER | 是 | 关联评审ID |
 | requirement_node_id | INTEGER | 是 | 需求管理流程节点ID，关联requirement_process_nodes表 |
 | review_node_id | INTEGER | 是 | 评审管理流程节点ID，关联review_process_nodes表 |
+| parent_task_id | INTEGER | 是 | 父任务ID，支持子任务层级结构 |
 | priority | INTEGER | 否 | 优先级：1-P0 2-P1 3-P2 4-P3 |
 | estimated_hours | DECIMAL(10,2) | 是 | 预估工时(小时) |
 | actual_hours | DECIMAL(10,2) | 是 | 实际工时(小时) |
@@ -169,7 +171,12 @@ CREATE TABLE IF NOT EXISTS requirement_process_nodes (
     assignee_type INTEGER COMMENT '负责人类型：1-固定用户 2-角色 3-部门',
     assignee_id INTEGER COMMENT '负责人ID',
     duration_limit INTEGER COMMENT '处理时限(小时)',
+    x FLOAT COMMENT '节点X坐标',
+    y FLOAT COMMENT '节点Y坐标',
+    expected_start_time INTEGER COMMENT '预计开始时间，Unix时间戳',
+    expected_end_time INTEGER COMMENT '预计结束时间，Unix时间戳',
     status INTEGER DEFAULT 1 COMMENT '状态：1-启用 0-禁用',
+    completion_status INTEGER NOT NULL DEFAULT 0 COMMENT '完成状态：0-未开始 1-进行中 2-已完成',
     create_time INTEGER COMMENT '创建时间，Unix时间戳',
     update_time INTEGER COMMENT '更新时间，Unix时间戳'
 );
@@ -185,7 +192,13 @@ CREATE TABLE IF NOT EXISTS requirement_process_nodes (
 | node_order | INTEGER | 否 | 节点顺序 |
 | assignee_type | INTEGER | 是 | 负责人类型：1-固定用户 2-角色 3-部门 |
 | assignee_id | INTEGER | 是 | 负责人ID |
+| duration_limit | INTEGER | 是 | 处理时限(小时) |
+| x | FLOAT | 是 | 节点X坐标 |
+| y | FLOAT | 是 | 节点Y坐标 |
+| expected_start_time | INTEGER | 是 | 预计开始时间，Unix时间戳 |
+| expected_end_time | INTEGER | 是 | 预计结束时间，Unix时间戳 |
 | status | INTEGER | 否 | 状态：1-启用 0-禁用，默认1 |
+| completion_status | INTEGER | 否 | 完成状态：0-未开始 1-进行中 2-已完成，默认0 |
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 | update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
@@ -250,7 +263,10 @@ CREATE TABLE IF NOT EXISTS review_process_nodes (
     assignee_type INTEGER COMMENT '负责人类型：1-固定用户 2-角色 3-部门',
     assignee_id INTEGER COMMENT '负责人ID',
     duration_limit INTEGER COMMENT '处理时限(小时)',
+    x FLOAT COMMENT '节点X坐标',
+    y FLOAT COMMENT '节点Y坐标',
     status INTEGER DEFAULT 1 COMMENT '状态：1-启用 0-禁用',
+    completion_status INTEGER NOT NULL DEFAULT 0 COMMENT '完成状态：0-未开始 1-进行中 2-已完成',
     create_time INTEGER COMMENT '创建时间，Unix时间戳',
     update_time INTEGER COMMENT '更新时间，Unix时间戳'
 );
@@ -266,7 +282,11 @@ CREATE TABLE IF NOT EXISTS review_process_nodes (
 | node_order | INTEGER | 否 | 节点顺序 |
 | assignee_type | INTEGER | 是 | 负责人类型：1-固定用户 2-角色 3-部门 |
 | assignee_id | INTEGER | 是 | 负责人ID |
+| duration_limit | INTEGER | 是 | 处理时限(小时) |
+| x | FLOAT | 是 | 节点X坐标 |
+| y | FLOAT | 是 | 节点Y坐标 |
 | status | INTEGER | 否 | 状态：1-启用 0-禁用，默认1 |
+| completion_status | INTEGER | 否 | 完成状态：0-未开始 1-进行中 2-已完成，默认0 |
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 | update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
@@ -315,6 +335,66 @@ CREATE TABLE IF NOT EXISTS review_process_node_users (
 | user_id | INTEGER | 否 | 用户ID |
 | role_type | INTEGER | 否 | 用户角色类型：1-负责人 2-参与者 3-观察者，默认1 |
 | status | INTEGER | 否 | 状态：1-正常 0-已移除，默认1 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
+### 评审流程模板表 (review_templates)
+
+```sql
+CREATE TABLE IF NOT EXISTS review_templates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name STRING NOT NULL COMMENT '模板名称',
+    description TEXT COMMENT '模板描述',
+    template_type INTEGER NOT NULL DEFAULT 1 COMMENT '模板类型：1-技术评审 2-业务评审 3-产品评审',
+    is_default BOOLEAN NOT NULL DEFAULT false COMMENT '是否为默认模板',
+    status INTEGER NOT NULL DEFAULT 1 COMMENT '状态：1-启用 0-禁用',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳',
+    update_time INTEGER COMMENT '更新时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 评审模板ID，主键，自增 |
+| name | STRING | 否 | 模板名称 |
+| description | TEXT | 是 | 模板描述 |
+| template_type | INTEGER | 否 | 模板类型：1-技术评审 2-业务评审 3-产品评审，默认1 |
+| is_default | BOOLEAN | 否 | 是否为默认模板，默认false |
+| status | INTEGER | 否 | 状态：1-启用 0-禁用，默认1 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
+### 评审流程模板节点表 (review_template_nodes)
+
+```sql
+CREATE TABLE IF NOT EXISTS review_template_nodes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    template_id INTEGER NOT NULL COMMENT '关联模板ID',
+    name STRING NOT NULL COMMENT '节点名称',
+    node_type_id INTEGER NOT NULL COMMENT '流程节点类型ID，关联process_node_types表',
+    parent_node_id INTEGER COMMENT '父节点ID，支持树形结构',
+    node_order INTEGER NOT NULL DEFAULT 0 COMMENT '节点顺序',
+    assignee_type INTEGER COMMENT '负责人类型：1-固定用户 2-角色 3-部门',
+    assignee_id INTEGER COMMENT '负责人ID',
+    duration_limit INTEGER COMMENT '处理时限(小时)',
+    status INTEGER NOT NULL DEFAULT 1 COMMENT '状态：1-启用 0-禁用',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳',
+    update_time INTEGER COMMENT '更新时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 模板节点ID，主键，自增 |
+| template_id | INTEGER | 否 | 关联模板ID |
+| name | STRING | 否 | 节点名称 |
+| node_type_id | INTEGER | 否 | 流程节点类型ID，关联process_node_types表 |
+| parent_node_id | INTEGER | 是 | 父节点ID，支持树形结构 |
+| node_order | INTEGER | 否 | 节点顺序，默认0 |
+| assignee_type | INTEGER | 是 | 负责人类型：1-固定用户 2-角色 3-部门 |
+| assignee_id | INTEGER | 是 | 负责人ID |
+| duration_limit | INTEGER | 是 | 处理时限(小时) |
+| status | INTEGER | 否 | 状态：1-启用 0-禁用，默认1 |
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 | update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
@@ -765,6 +845,8 @@ CREATE TABLE IF NOT EXISTS review_dimensions (
 - 评审管理流程节点通过 `review_id` 关联到 `reviews` 表，通过 `node_type_id` 关联到 `process_node_types` 表，通过 `parent_node_id` 实现树形结构
 - 评审管理流程节点关系通过 `review_id` 关联到 `reviews` 表，通过 `source_node_id` 和 `target_node_id` 关联到 `review_process_nodes` 表
 - 评审管理流程节点用户关联通过 `node_id` 关联到 `review_process_nodes` 表，通过 `user_id` 关联到 `users` 表
+- 评审流程模板通过 `template_type` 区分不同类型的评审模板
+- 评审流程模板节点通过 `template_id` 关联到 `review_templates` 表，通过 `node_type_id` 关联到 `process_node_types` 表，通过 `parent_node_id` 实现树形结构
 - 流程执行记录通过 `requirement_id` 关联到 `requirements` 表，通过 `node_id` 关联到 `requirement_process_nodes` 表
 - 需求版本管理通过 `requirement_id` 关联到 `requirements` 表
 - 评审维度管理通过 `project_id` 关联到 `projects` 表
