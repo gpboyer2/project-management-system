@@ -432,10 +432,24 @@
           </el-select>
         </el-form-item>
         <el-form-item label="发起人" prop="reporter_id">
-          <el-input v-model="reviewForm.reporter_id" placeholder="请输入发起人ID" />
+          <el-select v-model="reviewForm.reporter_id" placeholder="请选择发起人" style="width: 100%">
+            <el-option
+              v-for="user in userList"
+              :key="user.user_id"
+              :label="user.real_name || user.user_name"
+              :value="user.user_id"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="负责人" prop="reviewer_id">
-          <el-input v-model="reviewForm.reviewer_id" placeholder="请输入负责人ID" />
+          <el-select v-model="reviewForm.reviewer_id" placeholder="请选择负责人" style="width: 100%">
+            <el-option
+              v-for="user in userList"
+              :key="user.user_id"
+              :label="user.real_name || user.user_name"
+              :value="user.user_id"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="所属项目" prop="project_id">
           <el-input v-model="reviewForm.project_id" placeholder="请输入项目ID" />
@@ -516,7 +530,7 @@ const reviewFormRules = reactive({
     { required: true, message: '请选择评审状态', trigger: 'change' },
   ],
   reporter_id: [
-    { required: true, message: '请输入发起人ID', trigger: 'blur' },
+    { required: true, message: '请选择发起人', trigger: 'change' },
   ],
   project_id: [
     { message: '请输入项目ID', trigger: 'blur' },

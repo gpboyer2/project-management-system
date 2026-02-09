@@ -65,6 +65,7 @@ class UserModel {
       return {
         list: rows.map(row => ({
           ...row,
+          user_id: row.id, // 前端使用 user_id，保持一致性
           role_name: roleMap[row.role_id]?.role_name,
           role_code: roleMap[row.role_id]?.role_code
         })),
@@ -90,6 +91,7 @@ class UserModel {
 
       return {
         ...user,
+        user_id: user.id, // 前端使用 user_id，保持一致性
         role_name: roleInfo?.role_name,
         role_code: roleInfo?.role_code
       };

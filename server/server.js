@@ -128,6 +128,18 @@ app.use(apiPrefix + "/ide", responseFormatMiddleware, accessHandler, dataImportE
 // 全局中间件（用于其他路由）
 app.use(bodyParser.json({ limit: '50mb', type: 'application/json' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb', parameterLimit: 1000000 }));
+// 设置字符编码为 UTF-8
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  // 确保响应数据使用 UTF-8 编码
+  const originalJson = res.json;
+  res.json = function(data) {
+    const jsonStr = JSON.stringify(data, null, 2);
+    res.setHeader('Content-Length', Buffer.byteLength(jsonStr, 'utf8'));
+    return res.send(Buffer.from(jsonStr, 'utf8'));
+  };
+  next();
+});
 app.use(responseFormatMiddleware);
 app.use(accessHandler);
 

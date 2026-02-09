@@ -45,6 +45,9 @@ const sequelizeConfig = {
   define: {
     timestamps: false,
     freezeTableName: true
+  },
+  dialectOptions: {
+    charset: 'utf8mb4'
   }
 };
 

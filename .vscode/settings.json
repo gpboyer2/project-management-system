@@ -67,4 +67,5 @@
   "Codegeex.Chat.fontSize": 12,
   "livePreview.defaultPreviewPath": "/cache/14/index.html",
   "cmake.ignoreCMakeListsMissing": true,
+  "commentTranslate.hover.enabled": true,
 }
