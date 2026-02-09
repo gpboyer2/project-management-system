@@ -50,17 +50,7 @@ const Project = sequelize.define('projects', {
 
 // 定义关联关系
 Project.associate = function(models) {
-  // 项目关联项目团队（一对多关系）
-  Project.hasMany(models.ProjectTeam, {
-    foreignKey: 'project_id',
-    as: 'team'
-  });
-
-  // 项目关联项目经理（一对一关系）
-  Project.belongsTo(models.User, {
-    foreignKey: 'manager_id',
-    as: 'manager'
-  });
+  // 移除所有关联关系，避免外键约束检查
 };
 
 module.exports = Project;

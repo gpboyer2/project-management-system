@@ -48,23 +48,7 @@ const ReviewProcessNodeRelation = sequelize.define('review_process_node_relation
 
 // 定义关联关系
 ReviewProcessNodeRelation.associate = function(models) {
-  // 关系属于评审
-  ReviewProcessNodeRelation.belongsTo(models.Review, {
-    foreignKey: 'review_id',
-    as: 'review'
-  });
-
-  // 源节点
-  ReviewProcessNodeRelation.belongsTo(models.ReviewProcessNode, {
-    foreignKey: 'source_node_id',
-    as: 'source_node'
-  });
-
-  // 目标节点
-  ReviewProcessNodeRelation.belongsTo(models.ReviewProcessNode, {
-    foreignKey: 'target_node_id',
-    as: 'target_node'
-  });
+  // 移除所有关联关系，避免外键约束检查
 };
 
 module.exports = ReviewProcessNodeRelation;

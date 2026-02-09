@@ -491,31 +491,42 @@ const handleSave = async () => {
   try {
     const graphData = lf.value.getGraphData();
 
-    // 保存节点
-    const nodes = graphData.nodes.map(node => ({
-      id: parseInt(node.id) > 0 ? parseInt(node.id) : null, // 只保留正整数 ID，新节点不设置 ID，让数据库自增
-      [props.requirementId ? 'requirement_id' : 'review_id']: props.requirementId || props.reviewId,
-      name: typeof node.text === 'string' ? node.text : (node.text?.value || '未命名节点'),
-      node_type_id: getNodeTypeId(node.type),
-      x: node.x,
-      y: node.y,
-      node_order: 0,
-      status: 1,
-      // 只保留需要的属性，避免覆盖新的位置信息
-      assignee_type: node.properties?.nodeData?.assignee_type,
-      assignee_id: node.properties?.nodeData?.assignee_id,
-      duration_limit: node.properties?.nodeData?.duration_limit
-    }));
+    // 保存节点（保留原始临时 ID 信息，便于后端匹配）
+    const nodes = graphData.nodes.map(node => {
+      const originalId = parseInt(node.id);
+      const dbId = originalId > 0 ? originalId : null; // 只保留正整数 ID，新节点不设置 ID，让数据库自增
 
-    // 保存节点关系
-    const relations = graphData.edges.map(edge => ({
-      id: edge.id && parseInt(edge.id) > 0 ? parseInt(edge.id) : null, // 只保留正整数 ID，新关系不设置 ID，让数据库自增
-      [props.requirementId ? 'requirement_id' : 'review_id']: props.requirementId || props.reviewId,
-      source_node_id: parseInt(edge.sourceNodeId), // 直接使用节点的 ID，不处理临时 ID
-      target_node_id: parseInt(edge.targetNodeId), // 直接使用节点的 ID，不处理临时 ID
-      relation_type: edge.properties?.relationType || 1,
-      condition: edge.properties?.condition
-    }));
+      return {
+        id: dbId,
+        original_id: originalId, // 保存原始节点 ID（包括临时 ID）
+        [props.requirementId ? 'requirement_id' : 'review_id']: props.requirementId || props.reviewId,
+        name: typeof node.text === 'string' ? node.text : (node.text?.value || '未命名节点'),
+        node_type_id: getNodeTypeId(node.type),
+        x: node.x,
+        y: node.y,
+        node_order: 0,
+        status: 1,
+        // 只保留需要的属性，避免覆盖新的位置信息
+        assignee_type: node.properties?.nodeData?.assignee_type,
+        assignee_id: node.properties?.nodeData?.assignee_id,
+        duration_limit: node.properties?.nodeData?.duration_limit
+      };
+    });
+
+    // 保存节点关系（保留原始临时 ID 信息）
+    const relations = graphData.edges.map(edge => {
+      const sourceNodeId = parseInt(edge.sourceNodeId);
+      const targetNodeId = parseInt(edge.targetNodeId);
+
+      return {
+        id: edge.id && parseInt(edge.id) > 0 ? parseInt(edge.id) : null, // 只保留正整数 ID，新关系不设置 ID，让数据库自增
+        [props.requirementId ? 'requirement_id' : 'review_id']: props.requirementId || props.reviewId,
+        source_node_id: sourceNodeId, // 保留原始源节点 ID（可能是临时 ID）
+        target_node_id: targetNodeId, // 保留原始目标节点 ID（可能是临时 ID）
+        relation_type: edge.properties?.relationType || 1,
+        condition: edge.properties?.condition
+      };
+    });
 
     // 保存流程
     if (props.requirementId) {
@@ -984,7 +995,8 @@ onMounted(async () => {
 .flowchart-container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 400px !important;
+  overflow: hidden;
   background: #f8fafc;
 }
 
@@ -1003,15 +1015,14 @@ onMounted(async () => {
 
 .flowchart-canvas {
   flex: 1;
-  min-height: 500px;
-  max-height: 700px; /* 限制最大高度，适应1080p屏幕 */
+  height: 100%;
+  margin: 0;
+  overflow: visible;
   background: #ffffff;
-  margin: 20px;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
-  /* 添加滚动条支持 */
-  overflow: auto !important;
+  position: relative;
 }
 
 .node-props-panel {
@@ -1104,6 +1115,10 @@ onMounted(async () => {
 
 :deep(.lf-graph) {
   background: #f8fafc;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 

@@ -50,11 +50,7 @@ const OperationRecord = sequelize.define('operation_records', {
 
 // 定义关联关系
 OperationRecord.associate = function(models) {
-  // 操作记录关联用户
-  OperationRecord.belongsTo(models.User, {
-    foreignKey: 'user_id',
-    as: 'user'
-  });
+  // 移除所有关联关系，避免外键约束检查
 };
 
 module.exports = OperationRecord;

@@ -48,29 +48,7 @@ const ProcessFlow = sequelize.define('process_flows', {
 
 // 定义关联关系
 ProcessFlow.associate = function(models) {
-  // 流程关联到需求
-  ProcessFlow.belongsTo(models.Requirement, {
-    foreignKey: 'requirement_id',
-    as: 'requirement'
-  });
-
-  // 流程包含多个节点
-  ProcessFlow.hasMany(models.ProcessNode, {
-    foreignKey: 'flow_id',
-    as: 'nodes'
-  });
-
-  // 流程包含多个节点关系
-  ProcessFlow.hasMany(models.ProcessNodeRelation, {
-    foreignKey: 'flow_id',
-    as: 'relations'
-  });
-
-  // 流程有多个执行记录
-  ProcessFlow.hasMany(models.ProcessExecution, {
-    foreignKey: 'flow_id',
-    as: 'executions'
-  });
+  // 移除所有关联关系，避免外键约束检查
 };
 
 module.exports = ProcessFlow;

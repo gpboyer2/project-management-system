@@ -48,23 +48,7 @@ const RequirementProcessNodeRelation = sequelize.define('requirement_process_nod
 
 // 定义关联关系
 RequirementProcessNodeRelation.associate = function(models) {
-  // 关系属于需求
-  RequirementProcessNodeRelation.belongsTo(models.Requirement, {
-    foreignKey: 'requirement_id',
-    as: 'requirement'
-  });
-
-  // 源节点
-  RequirementProcessNodeRelation.belongsTo(models.RequirementProcessNode, {
-    foreignKey: 'source_node_id',
-    as: 'source_node'
-  });
-
-  // 目标节点
-  RequirementProcessNodeRelation.belongsTo(models.RequirementProcessNode, {
-    foreignKey: 'target_node_id',
-    as: 'target_node'
-  });
+  // 移除所有关联关系，避免外键约束检查
 };
 
 module.exports = RequirementProcessNodeRelation;

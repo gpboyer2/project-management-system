@@ -56,19 +56,7 @@ const User = sequelize.define('users', {
 
 // 定义关联关系
 User.associate = function(models) {
-  // 用户参与多个流程节点（多对多关系）
-  User.belongsToMany(models.ProcessNode, {
-    through: models.ProcessNodeUser,
-    foreignKey: 'user_id',
-    otherKey: 'node_id',
-    as: 'process_nodes'
-  });
-
-  // 用户参与多个项目团队（一对多关系）
-  User.hasMany(models.ProjectTeam, {
-    foreignKey: 'user_id',
-    as: 'project_teams'
-  });
+  // 移除所有关联关系，避免外键约束检查
 };
 
 module.exports = User;

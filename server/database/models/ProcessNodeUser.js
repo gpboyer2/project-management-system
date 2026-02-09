@@ -49,17 +49,7 @@ const ProcessNodeUser = sequelize.define('process_node_users', {
 
 // 定义关联关系
 ProcessNodeUser.associate = function(models) {
-  // 关联到流程节点
-  ProcessNodeUser.belongsTo(models.ProcessNode, {
-    foreignKey: 'node_id',
-    as: 'node'
-  });
-
-  // 关联到用户
-  ProcessNodeUser.belongsTo(models.User, {
-    foreignKey: 'user_id',
-    as: 'user'
-  });
+  // 移除所有关联关系，避免外键约束检查
 };
 
 module.exports = ProcessNodeUser;

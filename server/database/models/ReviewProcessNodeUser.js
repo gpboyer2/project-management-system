@@ -49,17 +49,7 @@ const ReviewProcessNodeUser = sequelize.define('review_process_node_users', {
 
 // 定义关联关系
 ReviewProcessNodeUser.associate = function(models) {
-  // 关联到流程节点
-  ReviewProcessNodeUser.belongsTo(models.ReviewProcessNode, {
-    foreignKey: 'node_id',
-    as: 'node'
-  });
-
-  // 关联到用户
-  ReviewProcessNodeUser.belongsTo(models.User, {
-    foreignKey: 'user_id',
-    as: 'user'
-  });
+  // 移除所有关联关系，避免外键约束检查
 };
 
 module.exports = ReviewProcessNodeUser;

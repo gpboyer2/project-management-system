@@ -49,17 +49,7 @@ const RequirementProcessNodeUser = sequelize.define('requirement_process_node_us
 
 // 定义关联关系
 RequirementProcessNodeUser.associate = function(models) {
-  // 关联到流程节点
-  RequirementProcessNodeUser.belongsTo(models.RequirementProcessNode, {
-    foreignKey: 'node_id',
-    as: 'node'
-  });
-
-  // 关联到用户
-  RequirementProcessNodeUser.belongsTo(models.User, {
-    foreignKey: 'user_id',
-    as: 'user'
-  });
+  // 移除所有关联关系，避免外键约束检查
 };
 
 module.exports = RequirementProcessNodeUser;

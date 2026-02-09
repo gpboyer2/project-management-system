@@ -53,23 +53,7 @@ const ProjectTeam = sequelize.define('project_teams', {
 
 // 定义关联关系
 ProjectTeam.associate = function(models) {
-  // 项目团队关联项目
-  ProjectTeam.belongsTo(models.Project, {
-    foreignKey: 'project_id',
-    as: 'project'
-  });
-
-  // 项目团队关联用户
-  ProjectTeam.belongsTo(models.User, {
-    foreignKey: 'user_id',
-    as: 'user'
-  });
-
-  // 项目团队关联角色
-  ProjectTeam.belongsTo(models.Role, {
-    foreignKey: 'role_id',
-    as: 'role'
-  });
+  // 移除所有关联关系，避免外键约束检查
 };
 
 module.exports = ProjectTeam;
