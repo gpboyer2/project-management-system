@@ -238,3 +238,18 @@ exports.saveReviewProcess = async (req, res) => {
     res.apiError(null, error.message);
   }
 };
+
+/**
+ * 更新评审流程节点完成状态
+ * @param {Object} req Express请求对象
+ * @param {Object} res Express响应对象
+ */
+exports.updateReviewProcessNodeCompletionStatus = async (req, res) => {
+  try {
+    const { nodeId, completionStatus } = req.body;
+    const result = await reviewService.updateReviewProcessNodeCompletionStatus(nodeId, completionStatus);
+    res.apiSuccess(result);
+  } catch (error) {
+    res.apiError(null, error.message);
+  }
+};

@@ -186,6 +186,24 @@ exports.getRequirementProcessNodeDetail = async (id) => {
 };
 
 /**
+ * 更新需求流程节点完成状态
+ * @param {number} nodeId 节点ID
+ * @param {number} completionStatus 完成状态：0-未开始 1-进行中 2-已完成
+ * @returns {Object} 更新后的节点
+ */
+exports.updateRequirementProcessNodeCompletionStatus = async (nodeId, completionStatus) => {
+  const node = await RequirementProcessNode.findByPk(nodeId);
+  if (!node) {
+    throw new Error('节点不存在');
+  }
+
+  return await node.update({
+    completion_status: completionStatus,
+    update_time: Date.now()
+  });
+};
+
+/**
  * 获取需求流程节点用户列表
  * @param {number} nodeId 节点ID
  * @returns {Array} 节点用户列表

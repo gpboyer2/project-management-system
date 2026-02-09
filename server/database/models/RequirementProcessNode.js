@@ -76,6 +76,12 @@ const RequirementProcessNode = sequelize.define('requirement_process_nodes', {
     defaultValue: 1,
     comment: '状态：1-启用 0-禁用'
   },
+  completion_status: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+    comment: '完成状态：0-未开始 1-进行中 2-已完成'
+  },
   create_time: {
     type: DataTypes.INTEGER,
     allowNull: true,

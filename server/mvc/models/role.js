@@ -99,7 +99,7 @@ class RoleModel {
   // 删除角色
   static async delete(roleId) {
     try {
-      await RolePermission.destroy({ where: { id: roleId } });
+      await RolePermission.destroy({ where: { role_id: roleId } });
       return await Role.destroy({ where: { id: roleId } });
     } catch (error) {
       logger.error("删除角色失败:", error);
@@ -111,23 +111,23 @@ class RoleModel {
   static async getPermissions(roleId) {
     try {
       // 通过关联表查询权限ID列表
-      const rolePermissionList = await RolePermission.findAll({ 
-        where: { id: roleId }, 
-        raw: true 
+      const rolePermissionList = await RolePermission.findAll({
+        where: { role_id: roleId },
+        raw: true
       });
-      
+
       if (rolePermissionList.length === 0) return [];
-      
+
       // 查询权限详情
       const permissionIdList = rolePermissionList.map(rp => rp.permission_id);
       const permissionList = await Permission.findAll({
-        where: { 
-          permission_id: permissionIdList,
-          status: 1 
+        where: {
+          id: permissionIdList,
+          status: 1
         },
         raw: true
       });
-      
+
       return permissionList;
     } catch (error) {
       logger.error("获取角色权限失败:", error);
@@ -138,17 +138,17 @@ class RoleModel {
   // 设置角色权限
   static async setPermissions(roleId, permissionIdList) {
     try {
-      await RolePermission.destroy({ where: { id: roleId } });
-      
+      await RolePermission.destroy({ where: { role_id: roleId } });
+
       const insertData = permissionIdList.map(permissionId => ({
-        id: roleId,
+        role_id: roleId,
         permission_id: permissionId
       }));
-      
+
       if (insertData.length > 0) {
         await RolePermission.bulkCreate(insertData);
       }
-      
+
       return true;
     } catch (error) {
       logger.error("设置角色权限失败:", error);
@@ -159,7 +159,7 @@ class RoleModel {
   // 检查角色是否有用户关联
   static async hasUsers(roleId) {
     try {
-      const count = await User.count({ where: { id: roleId } });
+      const count = await User.count({ where: { role_id: roleId } });
       return count > 0;
     } catch (error) {
       logger.error("检查角色用户关联失败:", error);

@@ -2,7 +2,7 @@
  * 评审管理服务
  * 处理评审管理的业务逻辑
  */
-const { Review, ReviewProcessNode, ReviewProcessNodeRelation, ReviewProcessNodeUser, User, Project } = require('../../database/models');
+const { Review, ReviewProcessNode, ReviewProcessNodeRelation, ReviewProcessNodeUser, User, Project, ReviewTemplate, ReviewTemplateNode } = require('../../database/models');
 
 /**
  * 获取评审列表
@@ -62,7 +62,7 @@ exports.getReviewList = async (params) => {
  * @returns {Object} 新创建的评审
  */
 exports.createReview = async (reviewData) => {
-  const { name, description, review_type = 1, status = 1, reporter_id, reviewer_id, project_id, start_time, end_time } = reviewData;
+  const { name, description, review_type = 1, status = 1, reporter_id, reviewer_id, project_id, start_time, end_time, template_id } = reviewData;
 
   // 检查项目是否存在
   if (project_id) {
@@ -72,7 +72,8 @@ exports.createReview = async (reviewData) => {
     }
   }
 
-  return await Review.create({
+  // 创建评审
+  const review = await Review.create({
     name,
     description,
     review_type,
@@ -85,6 +86,63 @@ exports.createReview = async (reviewData) => {
     create_time: Date.now(),
     update_time: Date.now()
   });
+
+  // 如果有模板ID，从模板中复制节点
+  if (template_id) {
+    const template = await ReviewTemplate.findByPk(template_id, {
+      include: [{ model: ReviewTemplateNode, as: 'nodes' }]
+    });
+
+    if (template && template.nodes.length > 0) {
+      // 复制模板节点到评审流程节点
+      const reviewNodes = template.nodes.map(node => ({
+        review_id: review.id,
+        name: node.name,
+        node_type_id: node.node_type_id,
+        parent_node_id: node.parent_node_id,
+        node_order: node.node_order,
+        assignee_type: node.assignee_type,
+        assignee_id: node.assignee_id,
+        duration_limit: node.duration_limit,
+        status: node.status,
+        create_time: Date.now(),
+        update_time: Date.now()
+      }));
+
+      await ReviewProcessNode.bulkCreate(reviewNodes);
+    }
+  } else {
+    // 如果没有模板，检查是否有默认模板
+    const defaultTemplate = await ReviewTemplate.findOne({
+      where: {
+        template_type: review_type,
+        is_default: true,
+        status: 1
+      },
+      include: [{ model: ReviewTemplateNode, as: 'nodes' }]
+    });
+
+    if (defaultTemplate && defaultTemplate.nodes.length > 0) {
+      // 复制默认模板节点到评审流程节点
+      const reviewNodes = defaultTemplate.nodes.map(node => ({
+        review_id: review.id,
+        name: node.name,
+        node_type_id: node.node_type_id,
+        parent_node_id: node.parent_node_id,
+        node_order: node.node_order,
+        assignee_type: node.assignee_type,
+        assignee_id: node.assignee_id,
+        duration_limit: node.duration_limit,
+        status: node.status,
+        create_time: Date.now(),
+        update_time: Date.now()
+      }));
+
+      await ReviewProcessNode.bulkCreate(reviewNodes);
+    }
+  }
+
+  return review;
 };
 
 /**
@@ -246,6 +304,24 @@ exports.getReviewProcessNodeDetail = async (nodeId) => {
     throw new Error('节点不存在');
   }
   return node;
+};
+
+/**
+ * 更新评审流程节点完成状态
+ * @param {number} nodeId 节点ID
+ * @param {number} completionStatus 完成状态：0-未开始 1-进行中 2-已完成
+ * @returns {Object} 更新后的节点
+ */
+exports.updateReviewProcessNodeCompletionStatus = async (nodeId, completionStatus) => {
+  const node = await ReviewProcessNode.findByPk(nodeId);
+  if (!node) {
+    throw new Error('节点不存在');
+  }
+
+  return await node.update({
+    completion_status: completionStatus,
+    update_time: Date.now()
+  });
 };
 
 /**

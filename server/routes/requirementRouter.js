@@ -425,6 +425,45 @@ router.post('/process-nodes/update', authenticateToken, requirementController.up
 
 /**
  * @swagger
+ * /api/requirements/process-nodes/update-completion-status:
+ *   post:
+ *     summary: 更新需求流程节点完成状态
+ *     tags: [需求管理]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nodeId:
+ *                 type: integer
+ *                 description: 节点ID
+ *               completionStatus:
+ *                 type: integer
+ *                 description: 完成状态：0-未开始 1-进行中 2-已完成
+ *             required:
+ *               - nodeId
+ *               - completionStatus
+ *     responses:
+ *       200:
+ *         description: 完成状态更新成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                 datum:
+ *                   $ref: '#/components/schemas/RequirementProcessNode'
+ */
+router.post('/process-nodes/update-completion-status', authenticateToken, requirementController.updateRequirementProcessNodeCompletionStatus);
+
+/**
+ * @swagger
  * /api/requirements/process-nodes/delete:
  *   post:
  *     summary: 删除需求流程节点

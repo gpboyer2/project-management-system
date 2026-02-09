@@ -1,19 +1,21 @@
 /**
- * 评审管理流程节点数据模型
+ * 评审流程模板节点模型
+ * 存储评审流程模板的节点信息
  */
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../sequelize');
 
-const ReviewProcessNode = sequelize.define('review_process_nodes', {
+const ReviewTemplateNode = sequelize.define('review_template_nodes', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
-    autoIncrement: true
+    autoIncrement: true,
+    comment: '模板节点ID'
   },
-  review_id: {
+  template_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    comment: '关联评审ID'
+    comment: '关联模板ID'
   },
   name: {
     type: DataTypes.STRING,
@@ -33,6 +35,7 @@ const ReviewProcessNode = sequelize.define('review_process_nodes', {
   node_order: {
     type: DataTypes.INTEGER,
     allowNull: false,
+    defaultValue: 0,
     comment: '节点顺序'
   },
   assignee_type: {
@@ -50,27 +53,11 @@ const ReviewProcessNode = sequelize.define('review_process_nodes', {
     allowNull: true,
     comment: '处理时限(小时)'
   },
-  x: {
-    type: DataTypes.FLOAT,
-    allowNull: true,
-    comment: '节点X坐标'
-  },
-  y: {
-    type: DataTypes.FLOAT,
-    allowNull: true,
-    comment: '节点Y坐标'
-  },
   status: {
     type: DataTypes.INTEGER,
     allowNull: false,
     defaultValue: 1,
     comment: '状态：1-启用 0-禁用'
-  },
-  completion_status: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 0,
-    comment: '完成状态：0-未开始 1-进行中 2-已完成'
   },
   create_time: {
     type: DataTypes.INTEGER,
@@ -84,12 +71,28 @@ const ReviewProcessNode = sequelize.define('review_process_nodes', {
   }
 }, {
   timestamps: false,
-  tableName: 'review_process_nodes'
+  tableName: 'review_template_nodes'
 });
 
 // 定义关联关系
-ReviewProcessNode.associate = function(models) {
-  // 移除所有关联关系，避免外键约束检查
+ReviewTemplateNode.associate = function(models) {
+  // 模板节点与模板的关联
+  ReviewTemplateNode.belongsTo(models.ReviewTemplate, {
+    foreignKey: 'template_id',
+    as: 'template'
+  });
+
+  // 模板节点与节点类型的关联
+  ReviewTemplateNode.belongsTo(models.ProcessNodeType, {
+    foreignKey: 'node_type_id',
+    as: 'nodeType'
+  });
+
+  // 模板节点与用户的关联（负责人）
+  ReviewTemplateNode.belongsTo(models.User, {
+    foreignKey: 'assignee_id',
+    as: 'assignee'
+  });
 };
 
-module.exports = ReviewProcessNode;
+module.exports = ReviewTemplateNode;

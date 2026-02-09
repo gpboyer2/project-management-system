@@ -15,18 +15,20 @@ const dataTracker = getDataTracker();
  * @returns {Promise<string|undefined>} 返回登录成功后的 access token，如果已登录则返回 undefined
  */
 async function ensureLoggedIn() {
-  try {
-    await apiClient.get('/communication-nodes', {}, { expect: 'error' });
-  } catch (error) {
-    const loginResponse = await apiClient.post('/auth/login', {
-      username: 'admin',
-      password: 'admin123'
-    }, { expect: 'success' });
-    const token = loginResponse.datum.accessToken;
-    apiClient.setToken(token);
-    setAdminToken(token);
-    return token;
+  // 检查是否已经有 token
+  if (apiClient.getToken()) {
+    return;
   }
+
+  // 执行登录操作
+  const loginResponse = await apiClient.post('/auth/login', {
+    username: 'admin',
+    password: 'admin123'
+  }, { expect: 'success' });
+  const token = loginResponse.datum.accessToken;
+  apiClient.setToken(token);
+  setAdminToken(token);
+  return token;
 }
 
 describe('通信节点模块', () => {

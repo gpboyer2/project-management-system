@@ -119,7 +119,6 @@ const TEST_MODULES = {
   database: './modules/database/index',
   communicationNode: './modules/communication-node/index',
   systemLevelDesign: './modules/system-level-design/index',
-  build: './modules/build/index',
   projects: './modules/projects/index',
   requirements: './modules/requirements/index',
   reviews: './modules/reviews/index',

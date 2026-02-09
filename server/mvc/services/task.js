@@ -2,7 +2,7 @@
  * 任务管理服务
  * 处理任务管理的业务逻辑
  */
-const { Task, User, Requirement, Review, RequirementProcessNode, ReviewProcessNode } = require('../../database/models');
+const { Task, Requirement, Review, RequirementProcessNode, ReviewProcessNode } = require('../../database/models');
 
 /**
  * 获取任务列表
@@ -30,19 +30,11 @@ exports.getTaskList = async (params) => {
     where.status_id = status;
   }
 
-  const { count, rows } = await Task.findAndCountAll({
+const { count, rows } = await Task.findAndCountAll({
     where,
     offset: (current_page - 1) * page_size,
     limit: parseInt(page_size),
-    order: [['create_time', 'DESC']],
-    include: [
-      { model: User, as: 'assignee' },
-      { model: User, as: 'reporter' },
-      { model: Requirement, as: 'requirement' },
-      { model: Review, as: 'review' },
-      { model: RequirementProcessNode, as: 'requirement_node' },
-      { model: ReviewProcessNode, as: 'review_node' }
-    ]
+    order: [['create_time', 'DESC']]
   });
 
   return {
@@ -160,20 +152,159 @@ exports.deleteTasks = async (ids) => {
  * @returns {Object} 任务详情
  */
 exports.getTaskDetail = async (id) => {
-  const task = await Task.findByPk(id, {
-    include: [
-      { model: User, as: 'assignee' },
-      { model: User, as: 'reporter' },
-      { model: Requirement, as: 'requirement' },
-      { model: Review, as: 'review' },
-      { model: RequirementProcessNode, as: 'requirement_node' },
-      { model: ReviewProcessNode, as: 'review_node' }
-    ]
-  });
+  const task = await Task.findByPk(id);
 
   if (!task) {
     throw new Error('任务不存在');
   }
 
   return task;
+};
+
+/**
+ * 获取节点任务列表
+ * @param {number} nodeId 节点ID
+ * @param {string} nodeType 节点类型：requirement 或 review
+ * @returns {Object} 任务列表和分页信息
+ */
+exports.getNodeTaskList = async (nodeId, nodeType) => {
+  const where = {};
+
+  if (nodeType === 'requirement') {
+    where.requirement_node_id = nodeId;
+  } else if (nodeType === 'review') {
+    where.review_node_id = nodeId;
+  }
+
+const tasks = await Task.findAll({
+    where,
+    order: [['create_time', 'DESC']]
+  });
+
+  return {
+    list: tasks,
+    pagination: {
+      current_page: 1,
+      page_size: tasks.length,
+      total: tasks.length
+    }
+  };
+};
+
+/**
+ * 绑定任务到节点
+ * @param {number} taskId 任务ID
+ * @param {number} nodeId 节点ID
+ * @param {string} nodeType 节点类型：requirement 或 review
+ * @returns {Object} 更新后的任务
+ */
+exports.bindTaskToNode = async (taskId, nodeId, nodeType) => {
+  const task = await Task.findByPk(taskId);
+  if (!task) {
+    throw new Error('任务不存在');
+  }
+
+  const updateData = {
+    update_time: Date.now()
+  };
+
+  if (nodeType === 'requirement') {
+    const requirementNode = await RequirementProcessNode.findByPk(nodeId);
+    if (!requirementNode) {
+      throw new Error('需求管理流程节点不存在');
+    }
+    updateData.requirement_node_id = nodeId;
+  } else if (nodeType === 'review') {
+    const reviewNode = await ReviewProcessNode.findByPk(nodeId);
+    if (!reviewNode) {
+      throw new Error('评审管理流程节点不存在');
+    }
+    updateData.review_node_id = nodeId;
+  }
+
+  return await task.update(updateData);
+};
+
+/**
+ * 解绑任务与节点
+ * @param {number} taskId 任务ID
+ * @param {string} nodeType 节点类型：requirement 或 review
+ * @returns {Object} 更新后的任务
+ */
+exports.unbindTaskFromNode = async (taskId, nodeType) => {
+  const task = await Task.findByPk(taskId);
+  if (!task) {
+    throw new Error('任务不存在');
+  }
+
+  const updateData = {
+    update_time: Date.now()
+  };
+
+  if (nodeType === 'requirement') {
+    updateData.requirement_node_id = null;
+  } else if (nodeType === 'review') {
+    updateData.review_node_id = null;
+  }
+
+  return await task.update(updateData);
+};
+
+/**
+ * 获取子任务列表
+ * @param {number} parentTaskId 父任务ID
+ * @returns {Object} 子任务列表和分页信息
+ */
+exports.getSubTaskList = async (parentTaskId) => {
+const tasks = await Task.findAll({
+    where: { parent_task_id: parentTaskId },
+    order: [['create_time', 'DESC']]
+  });
+
+  return {
+    list: tasks,
+    pagination: {
+      current_page: 1,
+      page_size: tasks.length,
+      total: tasks.length
+    }
+  };
+};
+
+/**
+ * 创建子任务
+ * @param {Object} taskData 任务数据
+ * @param {number} parentTaskId 父任务ID
+ * @returns {Object} 新创建的子任务
+ */
+exports.createSubTask = async (taskData, parentTaskId) => {
+  // 检查父任务是否存在
+  const parentTask = await Task.findByPk(parentTaskId);
+  if (!parentTask) {
+    throw new Error('父任务不存在');
+  }
+
+  // 继承父任务的一些属性
+  taskData.parent_task_id = parentTaskId;
+  taskData.requirement_id = taskData.requirement_id || parentTask.requirement_id;
+  taskData.review_id = taskData.review_id || parentTask.review_id;
+  taskData.requirement_node_id = taskData.requirement_node_id || parentTask.requirement_node_id;
+  taskData.review_node_id = taskData.review_node_id || parentTask.review_node_id;
+
+  return await exports.createTask(taskData);
+};
+
+/**
+ * 获取任务树（包含子任务）
+ * @param {number} taskId 任务ID
+ * @returns {Object} 任务树
+ */
+exports.getTaskTree = async (taskId) => {
+  const task = await exports.getTaskDetail(taskId);
+  const subTasks = await exports.getSubTaskList(taskId);
+
+  return {
+    ...task.toJSON(),
+    sub_tasks: subTasks.list
+  };
 };

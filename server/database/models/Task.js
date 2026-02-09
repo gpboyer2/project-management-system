@@ -44,6 +44,10 @@ const Task = sequelize.define('tasks', {
   review_node_id: {
     type: DataTypes.INTEGER
   },
+  parent_task_id: {
+    type: DataTypes.INTEGER,
+    comment: '父任务ID，支持子任务层级结构'
+  },
   estimated_hours: {
     type: DataTypes.DECIMAL(10, 2)
   },

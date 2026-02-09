@@ -118,6 +118,7 @@ const routeConfigList = [
     { prefix: "/process-node-types", router: require("./routes/processNodeTypeRouter"), desc: "流程节点类型管理接口" },
     { prefix: "/requirement-types", router: require("./routes/requirementTypeRouter"), desc: "需求类型管理接口" },
     { prefix: "/requirement-statuses", router: require("./routes/requirementStatusRouter"), desc: "需求状态管理接口" },
+    { prefix: "/review-templates", router: require("./routes/reviewTemplateRouter"), desc: "评审流程模板管理接口" },
 ];
 
 // 提前注册需要处理文件上传的路由（在 bodyParser 之前，避免 FormData 被错误解析）
