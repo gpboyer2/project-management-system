@@ -17,6 +17,17 @@ const ReviewTemplateNode = sequelize.define('review_template_nodes', {
     allowNull: false,
     comment: '关联模板ID'
   },
+  has_tasks: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+    comment: '是否包含任务配置：true-是 false-否'
+  },
+  task_config: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: '任务配置（JSON格式，包含任务列表、类型、要求等）'
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,

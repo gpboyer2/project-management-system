@@ -15,6 +15,11 @@ const Review = sequelize.define('reviews', {
     allowNull: true,
     comment: '所属项目ID'
   },
+  template_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    comment: '关联评审模板ID'
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -74,6 +79,12 @@ const Review = sequelize.define('reviews', {
 
 // 定义关联关系
 Review.associate = function(models) {
+  // 关联评审模板
+  Review.belongsTo(models.ReviewTemplate, {
+    foreignKey: 'template_id',
+    as: 'template'
+  });
+
   // 评审发起人
   Review.belongsTo(models.User, {
     foreignKey: 'reporter_id',

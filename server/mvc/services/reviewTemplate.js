@@ -2,7 +2,7 @@
  * 评审流程模板管理服务
  * 处理评审流程模板的业务逻辑
  */
-const { ReviewTemplate, ReviewTemplateNode, ProcessNodeType, User } = require('../../database/models');
+const { ReviewTemplate, ReviewTemplateNode, ProcessNodeType, User, ProcessNodeTask } = require('../../database/models');
 
 /**
  * 获取评审模板列表
@@ -239,6 +239,107 @@ exports.updateReviewTemplateStatus = async (id, status) => {
     status,
     update_time: Date.now()
   });
+};
+
+/**
+ * 深拷贝评审模板
+ * @param {number} sourceTemplateId 源模板ID
+ * @param {Object} options 拷贝选项
+ * @param {string} options.newName 新模板名称
+ * @param {string} options.newDescription 新模板描述
+ * @param {boolean} options.isDefault 是否设置为默认模板
+ * @returns {Object} 新创建的模板
+ */
+exports.copyReviewTemplate = async (sourceTemplateId, options = {}) => {
+  const sourceTemplate = await exports.getReviewTemplateById(sourceTemplateId);
+  if (!sourceTemplate) {
+    throw new Error('源模板不存在');
+  }
+
+  // 设置新模板属性
+  const newTemplateData = {
+    name: options.newName || `${sourceTemplate.name}（副本）`,
+    description: options.newDescription || sourceTemplate.description,
+    template_type: sourceTemplate.template_type,
+    is_default: options.isDefault || false,
+    nodes: []
+  };
+
+  // 如果设置为默认模板，需要将其他同类型的默认模板取消
+  if (newTemplateData.is_default) {
+    await ReviewTemplate.update(
+      { is_default: false },
+      { where: { template_type: newTemplateData.template_type, is_default: true } }
+    );
+  }
+
+  // 创建新模板
+  const newTemplate = await ReviewTemplate.create({
+    ...newTemplateData,
+    status: 1,
+    create_time: Date.now(),
+    update_time: Date.now()
+  });
+
+  // 复制模板节点
+  if (sourceTemplate.nodes && sourceTemplate.nodes.length > 0) {
+    const templateNodes = sourceTemplate.nodes.map((node, index) => ({
+      template_id: newTemplate.id,
+      name: node.name,
+      node_type_id: node.node_type_id,
+      parent_node_id: node.parent_node_id,
+      node_order: node.node_order || index,
+      assignee_type: node.assignee_type,
+      assignee_id: node.assignee_id,
+      duration_limit: node.duration_limit,
+      has_tasks: node.has_tasks,
+      task_config: node.task_config,
+      status: 1,
+      create_time: Date.now(),
+      update_time: Date.now()
+    }));
+
+    const createdNodes = await ReviewTemplateNode.bulkCreate(templateNodes);
+
+    // 复制流程节点任务关联
+    // 创建源节点ID到新节点ID的映射
+    const nodeIdMap = new Map();
+    sourceTemplate.nodes.forEach((sourceNode, index) => {
+      nodeIdMap.set(sourceNode.id, createdNodes[index].id);
+    });
+
+    // 复制流程节点任务关联
+    for (const sourceNode of sourceTemplate.nodes) {
+      const sourceTasks = await ProcessNodeTask.findAll({
+        where: {
+          node_id: sourceNode.id,
+          node_type: 2, // 2-评审模板节点
+          status: 1
+        }
+      });
+
+      if (sourceTasks.length > 0) {
+        const targetNodeId = nodeIdMap.get(sourceNode.id);
+        const targetTasks = sourceTasks.map(task => ({
+          node_id: targetNodeId,
+          node_type: 2, // 2-评审模板节点
+          is_placeholder: task.is_placeholder,
+          task_name: task.task_name,
+          task_description: task.task_description,
+          task_type: task.task_type,
+          sort_order: task.sort_order,
+          status: 1,
+          create_time: Date.now(),
+          update_time: Date.now()
+        }));
+
+        await ProcessNodeTask.bulkCreate(targetTasks);
+      }
+    }
+  }
+
+  // 返回包含节点的新模板详情
+  return await exports.getReviewTemplateById(newTemplate.id);
 };
 
 /**

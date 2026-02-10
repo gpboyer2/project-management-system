@@ -194,6 +194,243 @@ async function ensurePacketMessagesVersioningSchema() {
  * - 不定义外键，保持与当前项目一致的“无外键约束”风格
  */
 /**
+ * 文件表 schema 补齐（启动时增量 DDL）
+ * - 创建 files 表（若不存在）
+ * - 通过 PRAGMA table_info 检测并补齐缺失列（仅新增列，避免破坏存量）
+ * - 创建必要索引
+ *
+ * 说明：
+ * - 采用 SQLite 兼容的方式：CREATE TABLE IF NOT EXISTS + ALTER TABLE ADD COLUMN
+ * - 不定义外键，保持与当前项目一致的"无外键约束"风格
+ * @returns {Promise<void>}
+ */
+async function ensureFilesSchema() {
+  try {
+    // 1) 创建表（首次启动）
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS files (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        file_name TEXT NOT NULL,
+        file_path TEXT NOT NULL,
+        file_type INTEGER NOT NULL DEFAULT 5,
+        file_size INTEGER NOT NULL DEFAULT 0,
+        file_hash TEXT,
+        uploader_id INTEGER,
+        status INTEGER NOT NULL DEFAULT 1,
+        create_time INTEGER NOT NULL,
+        update_time INTEGER NOT NULL
+      );
+    `);
+
+    // 2) 补齐缺失列（兼容历史库结构演进）
+    const [columnList] = await sequelize.query("PRAGMA table_info('files');");
+    const columnNameSet = new Set((Array.isArray(columnList) ? columnList : []).map((c) => c.name));
+
+    const addColumnIfMissing = async (columnName, columnDefSql) => {
+      if (columnNameSet.has(columnName)) return;
+      await sequelize.query(`ALTER TABLE files ADD COLUMN ${columnDefSql};`);
+      columnNameSet.add(columnName);
+      defaultLogger.info(`[DB] files 新增列: ${columnName}`);
+    };
+
+    // 允许后续逐步扩展：新增列时优先允许 NULL，避免旧库阻塞
+    await addColumnIfMissing('file_name', "file_name TEXT NOT NULL");
+    await addColumnIfMissing('file_path', "file_path TEXT NOT NULL");
+    await addColumnIfMissing('file_type', "file_type INTEGER NOT NULL DEFAULT 5");
+    await addColumnIfMissing('file_size', "file_size INTEGER NOT NULL DEFAULT 0");
+    await addColumnIfMissing('file_hash', "file_hash TEXT");
+    await addColumnIfMissing('uploader_id', "uploader_id INTEGER");
+    await addColumnIfMissing('status', "status INTEGER NOT NULL DEFAULT 1");
+    await addColumnIfMissing('create_time', "create_time INTEGER NOT NULL");
+    await addColumnIfMissing('update_time', "update_time INTEGER NOT NULL");
+
+  } catch (error) {
+    defaultLogger.error('[DB] ensureFilesSchema 失败:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * 流程节点任务关联表 schema 补齐（启动时增量 DDL）
+ * - 创建 process_node_tasks 表（若不存在）
+ * - 通过 PRAGMA table_info 检测并补齐缺失列（仅新增列，避免破坏存量）
+ * - 创建必要索引
+ *
+ * 说明：
+ * - 采用 SQLite 兼容的方式：CREATE TABLE IF NOT EXISTS + ALTER TABLE ADD COLUMN
+ * - 不定义外键，保持与当前项目一致的"无外键约束"风格
+ * @returns {Promise<void>}
+ */
+async function ensureProcessNodeTasksSchema() {
+  try {
+    // 1) 创建表（首次启动）
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS process_node_tasks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        node_id INTEGER NOT NULL,
+        task_id INTEGER,
+        node_type INTEGER NOT NULL DEFAULT 1,
+        is_placeholder BOOLEAN NOT NULL DEFAULT 0,
+        task_name TEXT,
+        task_description TEXT,
+        task_type INTEGER NOT NULL DEFAULT 1,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        status INTEGER NOT NULL DEFAULT 1,
+        create_time INTEGER NOT NULL,
+        update_time INTEGER NOT NULL
+      );
+    `);
+
+    // 2) 补齐缺失列（兼容历史库结构演进）
+    const [columnList] = await sequelize.query("PRAGMA table_info('process_node_tasks');");
+    const columnNameSet = new Set((Array.isArray(columnList) ? columnList : []).map((c) => c.name));
+
+    const addColumnIfMissing = async (columnName, columnDefSql) => {
+      if (columnNameSet.has(columnName)) return;
+      await sequelize.query(`ALTER TABLE process_node_tasks ADD COLUMN ${columnDefSql};`);
+      columnNameSet.add(columnName);
+      defaultLogger.info(`[DB] process_node_tasks 新增列: ${columnName}`);
+    };
+
+    // 允许后续逐步扩展：新增列时优先允许 NULL，避免旧库阻塞
+    await addColumnIfMissing('node_id', "node_id INTEGER NOT NULL");
+    await addColumnIfMissing('task_id', "task_id INTEGER");
+    await addColumnIfMissing('node_type', "node_type INTEGER NOT NULL DEFAULT 1");
+    await addColumnIfMissing('is_placeholder', "is_placeholder BOOLEAN NOT NULL DEFAULT 0");
+    await addColumnIfMissing('task_name', "task_name TEXT");
+    await addColumnIfMissing('task_description', "task_description TEXT");
+    await addColumnIfMissing('task_type', "task_type INTEGER NOT NULL DEFAULT 1");
+    await addColumnIfMissing('sort_order', "sort_order INTEGER NOT NULL DEFAULT 0");
+    await addColumnIfMissing('status', "status INTEGER NOT NULL DEFAULT 1");
+    await addColumnIfMissing('create_time', "create_time INTEGER NOT NULL");
+    await addColumnIfMissing('update_time', "update_time INTEGER NOT NULL");
+
+  } catch (error) {
+    defaultLogger.error('[DB] ensureProcessNodeTasksSchema 失败:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * 任务文件关联表 schema 补齐（启动时增量 DDL）
+ * - 创建 task_files 表（若不存在）
+ * - 通过 PRAGMA table_info 检测并补齐缺失列（仅新增列，避免破坏存量）
+ * - 创建必要索引
+ *
+ * 说明：
+ * - 采用 SQLite 兼容的方式：CREATE TABLE IF NOT EXISTS + ALTER TABLE ADD COLUMN
+ * - 不定义外键，保持与当前项目一致的"无外键约束"风格
+ * @returns {Promise<void>}
+ */
+async function ensureTaskFilesSchema() {
+  try {
+    // 1) 创建表（首次启动）
+    await sequelize.query(`
+      CREATE TABLE IF NOT EXISTS task_files (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        task_id INTEGER NOT NULL,
+        file_id INTEGER NOT NULL,
+        file_type INTEGER NOT NULL DEFAULT 5,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        status INTEGER NOT NULL DEFAULT 1,
+        create_time INTEGER NOT NULL,
+        update_time INTEGER NOT NULL
+      );
+    `);
+
+    // 2) 补齐缺失列（兼容历史库结构演进）
+    const [columnList] = await sequelize.query("PRAGMA table_info('task_files');");
+    const columnNameSet = new Set((Array.isArray(columnList) ? columnList : []).map((c) => c.name));
+
+    const addColumnIfMissing = async (columnName, columnDefSql) => {
+      if (columnNameSet.has(columnName)) return;
+      await sequelize.query(`ALTER TABLE task_files ADD COLUMN ${columnDefSql};`);
+      columnNameSet.add(columnName);
+      defaultLogger.info(`[DB] task_files 新增列: ${columnName}`);
+    };
+
+    // 允许后续逐步扩展：新增列时优先允许 NULL，避免旧库阻塞
+    await addColumnIfMissing('task_id', "task_id INTEGER NOT NULL");
+    await addColumnIfMissing('file_id', "file_id INTEGER NOT NULL");
+    await addColumnIfMissing('file_type', "file_type INTEGER NOT NULL DEFAULT 5");
+    await addColumnIfMissing('sort_order', "sort_order INTEGER NOT NULL DEFAULT 0");
+    await addColumnIfMissing('status', "status INTEGER NOT NULL DEFAULT 1");
+    await addColumnIfMissing('create_time', "create_time INTEGER NOT NULL");
+    await addColumnIfMissing('update_time', "update_time INTEGER NOT NULL");
+
+  } catch (error) {
+    defaultLogger.error('[DB] ensureTaskFilesSchema 失败:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * 评审表字段补齐（启动时增量 DDL）
+ * - 给 reviews 表添加 template_id 字段
+ * - 给 review_process_nodes 表添加 source_template_node_id 字段
+ * - 给 review_template_nodes 表添加 has_tasks 和 task_config 字段
+ *
+ * 说明：
+ * - 采用 SQLite 兼容的方式：ALTER TABLE ADD COLUMN
+ * - 不定义外键，保持与当前项目一致的"无外键约束"风格
+ * @returns {Promise<void>}
+ */
+async function ensureReviewSchemaUpdates() {
+  try {
+    // 1) 给 reviews 表添加 template_id 字段
+    const [reviewsTableList] = await sequelize.query(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='reviews';"
+    );
+    if (Array.isArray(reviewsTableList) && reviewsTableList.length > 0) {
+      const [reviewsColumnList] = await sequelize.query("PRAGMA table_info('reviews');");
+      const reviewsColumnNameSet = new Set((Array.isArray(reviewsColumnList) ? reviewsColumnList : []).map((c) => c.name));
+
+      if (!reviewsColumnNameSet.has('template_id')) {
+        await sequelize.query(`ALTER TABLE reviews ADD COLUMN template_id INTEGER;`);
+        defaultLogger.info(`[DB] reviews 新增列: template_id`);
+      }
+    }
+
+    // 2) 给 review_process_nodes 表添加 source_template_node_id 字段
+    const [reviewProcessNodesTableList] = await sequelize.query(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='review_process_nodes';"
+    );
+    if (Array.isArray(reviewProcessNodesTableList) && reviewProcessNodesTableList.length > 0) {
+      const [reviewProcessNodesColumnList] = await sequelize.query("PRAGMA table_info('review_process_nodes');");
+      const reviewProcessNodesColumnNameSet = new Set((Array.isArray(reviewProcessNodesColumnList) ? reviewProcessNodesColumnList : []).map((c) => c.name));
+
+      if (!reviewProcessNodesColumnNameSet.has('source_template_node_id')) {
+        await sequelize.query(`ALTER TABLE review_process_nodes ADD COLUMN source_template_node_id INTEGER;`);
+        defaultLogger.info(`[DB] review_process_nodes 新增列: source_template_node_id`);
+      }
+    }
+
+    // 3) 给 review_template_nodes 表添加 has_tasks 和 task_config 字段
+    const [reviewTemplateNodesTableList] = await sequelize.query(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name='review_template_nodes';"
+    );
+    if (Array.isArray(reviewTemplateNodesTableList) && reviewTemplateNodesTableList.length > 0) {
+      const [reviewTemplateNodesColumnList] = await sequelize.query("PRAGMA table_info('review_template_nodes');");
+      const reviewTemplateNodesColumnNameSet = new Set((Array.isArray(reviewTemplateNodesColumnList) ? reviewTemplateNodesColumnList : []).map((c) => c.name));
+
+      if (!reviewTemplateNodesColumnNameSet.has('has_tasks')) {
+        await sequelize.query(`ALTER TABLE review_template_nodes ADD COLUMN has_tasks BOOLEAN NOT NULL DEFAULT 0;`);
+        defaultLogger.info(`[DB] review_template_nodes 新增列: has_tasks`);
+      }
+
+      if (!reviewTemplateNodesColumnNameSet.has('task_config')) {
+        await sequelize.query(`ALTER TABLE review_template_nodes ADD COLUMN task_config TEXT;`);
+        defaultLogger.info(`[DB] review_template_nodes 新增列: task_config`);
+      }
+    }
+
+  } catch (error) {
+    defaultLogger.error('[DB] ensureReviewSchemaUpdates 失败:', error.message);
+    throw error;
+  }
+}
+
+/**
  * 构建任务 schema 补齐（启动时增量 DDL）
  * - 创建 build_tasks 表（若不存在）
  * - 通过 PRAGMA table_info 检测并补齐缺失列（仅新增列，避免破坏存量）
@@ -350,6 +587,18 @@ async function syncDatabase() {
         // 2.1 构建任务 schema 补齐（增量 DDL）
         await ensureBuildTasksSchema();
 
+        // 2.2 文件表 schema 补齐（增量 DDL）
+        await ensureFilesSchema();
+
+        // 2.3 流程节点任务关联表 schema 补齐（增量 DDL）
+        await ensureProcessNodeTasksSchema();
+
+        // 2.4 任务文件关联表 schema 补齐（增量 DDL）
+        await ensureTaskFilesSchema();
+
+        // 2.5 评审表字段补齐（增量 DDL）
+        await ensureReviewSchemaUpdates();
+
         /**
          * 3. 同步表结构
          *
@@ -404,6 +653,10 @@ async function syncDatabase() {
         // 测试环境：直接同步表结构
         await ensurePacketMessagesVersioningSchema();
         await ensureBuildTasksSchema();
+        await ensureFilesSchema();
+        await ensureProcessNodeTasksSchema();
+        await ensureTaskFilesSchema();
+        await ensureReviewSchemaUpdates();
         await sequelize.sync();
         defaultLogger.info('测试环境：数据库表同步成功');
       }
@@ -415,6 +668,10 @@ async function syncDatabase() {
       // 生产环境：不自动修改表结构，有问题直接报错
       await ensurePacketMessagesVersioningSchema();
       await ensureBuildTasksSchema();
+      await ensureFilesSchema();
+      await ensureProcessNodeTasksSchema();
+      await ensureTaskFilesSchema();
+      await ensureReviewSchemaUpdates();
       await sequelize.sync();
       defaultLogger.info('生产环境：数据库表同步成功');
     }

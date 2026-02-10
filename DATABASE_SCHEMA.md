@@ -398,6 +398,100 @@ CREATE TABLE IF NOT EXISTS review_template_nodes (
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 | update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
+### 文件表 (files)
+
+```sql
+CREATE TABLE IF NOT EXISTS files (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    file_name STRING NOT NULL COMMENT '文件名',
+    file_path STRING NOT NULL COMMENT '文件存储路径',
+    file_size INTEGER NOT NULL COMMENT '文件大小(字节)',
+    file_type STRING COMMENT '文件类型(如: image/png, application/pdf)',
+    business_type INTEGER COMMENT '业务类型：1-需求 2-任务 3-评审 4-项目',
+    business_id INTEGER COMMENT '关联业务ID',
+    uploader_id INTEGER NOT NULL COMMENT '上传用户ID',
+    is_temp BOOLEAN NOT NULL DEFAULT false COMMENT '是否临时文件：true-临时 false-永久',
+    status INTEGER NOT NULL DEFAULT 1 COMMENT '状态：1-正常 0-已删除',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳',
+    update_time INTEGER COMMENT '更新时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| file_name | STRING | 否 | 文件名 |
+| file_path | STRING | 否 | 文件存储路径 |
+| file_size | INTEGER | 否 | 文件大小(字节) |
+| file_type | STRING | 是 | 文件类型(如: image/png, application/pdf) |
+| business_type | INTEGER | 是 | 业务类型：1-需求 2-任务 3-评审 4-项目 |
+| business_id | INTEGER | 是 | 关联业务ID |
+| uploader_id | INTEGER | 否 | 上传用户ID |
+| is_temp | BOOLEAN | 否 | 是否临时文件：true-临时 false-永久，默认false |
+| status | INTEGER | 否 | 状态：1-正常 0-已删除，默认1 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
+### 流程节点任务关联表 (process_node_tasks)
+
+```sql
+CREATE TABLE IF NOT EXISTS process_node_tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    node_id INTEGER NOT NULL COMMENT '流程节点ID',
+    task_id INTEGER COMMENT '任务ID（占位任务时为null）',
+    node_type INTEGER NOT NULL DEFAULT 1 COMMENT '节点类型：1-评审流程节点 2-评审模板节点',
+    is_placeholder BOOLEAN NOT NULL DEFAULT false COMMENT '是否占位任务：true-占位任务 false-实际任务',
+    task_name STRING COMMENT '任务名称（占位任务时必填）',
+    task_description TEXT COMMENT '任务描述（占位任务时可选）',
+    task_type INTEGER COMMENT '任务类型：1-必填 2-可选',
+    sort_order INTEGER NOT NULL DEFAULT 0 COMMENT '排序顺序',
+    status INTEGER NOT NULL DEFAULT 1 COMMENT '状态：1-正常 0-已删除',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳',
+    update_time INTEGER COMMENT '更新时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| node_id | INTEGER | 否 | 流程节点ID |
+| task_id | INTEGER | 是 | 任务ID（占位任务时为null） |
+| node_type | INTEGER | 否 | 节点类型：1-评审流程节点 2-评审模板节点，默认1 |
+| is_placeholder | BOOLEAN | 否 | 是否占位任务：true-占位任务 false-实际任务，默认false |
+| task_name | STRING | 是 | 任务名称（占位任务时必填） |
+| task_description | TEXT | 是 | 任务描述（占位任务时可选） |
+| task_type | INTEGER | 是 | 任务类型：1-必填 2-可选 |
+| sort_order | INTEGER | 否 | 排序顺序，默认0 |
+| status | INTEGER | 否 | 状态：1-正常 0-已删除，默认1 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
+### 任务文件关联表 (task_files)
+
+```sql
+CREATE TABLE IF NOT EXISTS task_files (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    task_id INTEGER NOT NULL COMMENT '任务ID',
+    file_id INTEGER NOT NULL COMMENT '文件ID',
+    file_type INTEGER COMMENT '文件类型：1-需求文档 2-设计文档 3-测试报告 4-代码文件 5-其他',
+    sort_order INTEGER NOT NULL DEFAULT 0 COMMENT '排序顺序',
+    status INTEGER NOT NULL DEFAULT 1 COMMENT '状态：1-正常 0-已删除',
+    create_time INTEGER COMMENT '创建时间，Unix时间戳',
+    update_time INTEGER COMMENT '更新时间，Unix时间戳'
+);
+```
+
+| 字段名 | 类型 | 是否允许为空 | 注释 |
+|--------|------|-------------|------|
+| id | INTEGER | 否 | 主键，自增 |
+| task_id | INTEGER | 否 | 任务ID |
+| file_id | INTEGER | 否 | 文件ID |
+| file_type | INTEGER | 是 | 文件类型：1-需求文档 2-设计文档 3-测试报告 4-代码文件 5-其他 |
+| sort_order | INTEGER | 否 | 排序顺序，默认0 |
+| status | INTEGER | 否 | 状态：1-正常 0-已删除，默认1 |
+| create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
+| update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
+
 ### 需求类型表 (requirement_types)
 
 ```sql

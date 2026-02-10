@@ -231,9 +231,16 @@ class RoleController {
 
             const resultList = [];
             for (const roleId of data) {
+                // 验证 roleId 类型
+                if (typeof roleId !== 'number' || isNaN(roleId) || !Number.isInteger(roleId) || roleId <= 0) {
+                    resultList.push({ success: false, role_id: roleId, message: '角色ID必须是正整数' });
+                    continue;
+                }
+
                 const role = await RoleModel.findByRoleId(roleId);
                 if (!role) {
-                    resultList.push({ success: false, role_id: roleId, message: '角色不存在' });
+                    // 角色不存在时，视为成功删除（忽略）
+                    resultList.push({ success: true, role_id: roleId });
                     continue;
                 }
                 // 防止删除超级管理员角色

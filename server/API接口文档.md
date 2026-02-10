@@ -1765,6 +1765,886 @@
 
 ---
 
+## 14. 文件管理模块 (fileRouter.js)
+
+### 14.1 获取文件列表
+- **接口描述**：获取文件列表，支持分页和业务类型、业务ID、上传用户ID筛选。
+- **请求方法**：GET
+- **请求URL**：`/api/files/query?current_page=1&page_size=20&business_type=1&business_id=1&uploader_id=1`
+- **请求参数**：
+  - current_page：页码，默认1
+  - page_size：每页数量，默认20
+  - business_type：业务类型：1-需求 2-任务 3-评审 4-项目
+  - business_id：业务ID
+  - uploader_id：上传用户ID
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "操作成功",
+    "datum": {
+      "list": [
+        {
+          "id": 1,
+          "file_name": "需求文档.docx",
+          "file_path": "/uploads/2024/01/01/1.docx",
+          "file_size": 102400,
+          "file_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "business_type": 1,
+          "business_id": 1,
+          "uploader_id": 1,
+          "is_temp": false,
+          "status": 1,
+          "create_time": 1704067200,
+          "update_time": 1704067200
+        }
+      ],
+      "pagination": {
+        "current_page": 1,
+        "page_size": 20,
+        "total": 1
+      }
+    }
+  }
+  ```
+
+### 14.2 创建文件记录
+- **接口描述**：创建新的文件记录。
+- **请求方法**：POST
+- **请求URL**：`/api/files/create`
+- **请求参数**：
+  ```json
+  {
+    "file_name": "需求文档.docx",
+    "file_path": "/uploads/2024/01/01/1.docx",
+    "file_size": 102400,
+    "file_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "business_type": 1,
+    "business_id": 1,
+    "uploader_id": 1,
+    "is_temp": false
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "文件记录创建成功",
+    "datum": {
+      "id": 1,
+      "file_name": "需求文档.docx",
+      "file_path": "/uploads/2024/01/01/1.docx",
+      "file_size": 102400,
+      "file_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "business_type": 1,
+      "business_id": 1,
+      "uploader_id": 1,
+      "is_temp": false,
+      "status": 1,
+      "create_time": 1704067200,
+      "update_time": 1704067200
+    }
+  }
+  ```
+
+### 14.3 更新文件记录
+- **接口描述**：更新文件记录信息。
+- **请求方法**：POST
+- **请求URL**：`/api/files/update`
+- **请求参数**：
+  ```json
+  {
+    "id": 1,
+    "file_name": "更新后的需求文档.docx",
+    "file_path": "/uploads/2024/01/01/1.docx",
+    "file_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "business_type": 1,
+    "business_id": 1,
+    "is_temp": false
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "文件记录更新成功",
+    "datum": {
+      "id": 1,
+      "file_name": "更新后的需求文档.docx",
+      "file_path": "/uploads/2024/01/01/1.docx",
+      "file_size": 102400,
+      "file_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "business_type": 1,
+      "business_id": 1,
+      "uploader_id": 1,
+      "is_temp": false,
+      "status": 1,
+      "create_time": 1704067200,
+      "update_time": 1704067200
+    }
+  }
+  ```
+
+### 14.4 删除文件记录
+- **接口描述**：删除文件记录，支持批量删除。
+- **请求方法**：POST
+- **请求URL**：`/api/files/delete`
+- **请求参数**：
+  ```json
+  {
+    "data": [1, 2]
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "文件删除成功"
+  }
+  ```
+
+### 14.5 获取文件详情
+- **接口描述**：获取文件详情。
+- **请求方法**：GET
+- **请求URL**：`/api/files/detail?id=1`
+- **请求参数**：
+  - id：文件ID（必填）
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "成功获取文件详情",
+    "datum": {
+      "id": 1,
+      "file_name": "需求文档.docx",
+      "file_path": "/uploads/2024/01/01/1.docx",
+      "file_size": 102400,
+      "file_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "business_type": 1,
+      "business_id": 1,
+      "uploader_id": 1,
+      "is_temp": false,
+      "status": 1,
+      "create_time": 1704067200,
+      "update_time": 1704067200
+    }
+  }
+  ```
+
+### 14.6 获取任务关联的文件列表
+- **接口描述**：获取任务关联的文件列表。
+- **请求方法**：GET
+- **请求URL**：`/api/files/task-files/query?taskId=1`
+- **请求参数**：
+  - taskId：任务ID（必填）
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "成功获取任务关联的文件列表",
+    "datum": {
+      "list": [
+        {
+          "id": 1,
+          "task_id": 1,
+          "file_id": 1,
+          "file_type": 1,
+          "sort_order": 0,
+          "status": 1,
+          "create_time": 1704067200,
+          "update_time": 1704067200,
+          "file": {
+            "id": 1,
+            "file_name": "需求文档.docx",
+            "file_path": "/uploads/2024/01/01/1.docx",
+            "file_size": 102400,
+            "file_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "business_type": 1,
+            "business_id": 1,
+            "uploader_id": 1,
+            "is_temp": false,
+            "status": 1,
+            "create_time": 1704067200,
+            "update_time": 1704067200
+          }
+        }
+      ],
+      "pagination": {
+        "current_page": 1,
+        "page_size": 20,
+        "total": 1
+      }
+    }
+  }
+  ```
+
+### 14.7 为任务添加文件
+- **接口描述**：为任务添加文件。
+- **请求方法**：POST
+- **请求URL**：`/api/files/task-files/add`
+- **请求参数**：
+  ```json
+  {
+    "taskId": 1,
+    "fileIds": [1, 2]
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "文件添加成功"
+  }
+  ```
+
+### 14.8 从任务中移除文件
+- **接口描述**：从任务中移除文件。
+- **请求方法**：POST
+- **请求URL**：`/api/files/task-files/remove`
+- **请求参数**：
+  ```json
+  {
+    "taskId": 1,
+    "fileIds": [1, 2]
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "文件移除成功"
+  }
+  ```
+
+### 14.9 获取临时文件列表
+- **接口描述**：获取临时文件列表。
+- **请求方法**：GET
+- **请求URL**：`/api/files/temp/query?uploaderId=1`
+- **请求参数**：
+  - uploaderId：上传用户ID（必填）
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "成功获取临时文件列表",
+    "datum": {
+      "list": [
+        {
+          "id": 1,
+          "file_name": "临时文件.docx",
+          "file_path": "/uploads/temp/2024/01/01/1.docx",
+          "file_size": 51200,
+          "file_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "business_type": null,
+          "business_id": null,
+          "uploader_id": 1,
+          "is_temp": true,
+          "status": 1,
+          "create_time": 1704067200,
+          "update_time": 1704067200
+        }
+      ],
+      "pagination": {
+        "current_page": 1,
+        "page_size": 20,
+        "total": 1
+      }
+    }
+  }
+  ```
+
+### 14.10 清理临时文件
+- **接口描述**：清理临时文件。
+- **请求方法**：GET
+- **请求URL**：`/api/files/temp/cleanup?hours=24`
+- **请求参数**：
+  - hours：保留小时数，默认24小时
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "临时文件清理成功"
+  }
+  ```
+
+---
+
+## 15. 流程节点任务管理模块 (processNodeTaskRouter.js)
+
+### 15.1 获取流程节点任务列表
+- **接口描述**：获取流程节点任务列表，支持节点ID、节点类型、是否占位任务筛选。
+- **请求方法**：GET
+- **请求URL**：`/api/process-node-tasks/query?node_id=1&node_type=1&is_placeholder=false`
+- **请求参数**：
+  - node_id：流程节点ID
+  - node_type：节点类型：1-评审流程节点 2-评审模板节点
+  - is_placeholder：是否占位任务
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "操作成功",
+    "datum": {
+      "list": [
+        {
+          "id": 1,
+          "node_id": 1,
+          "task_id": 1,
+          "node_type": 1,
+          "is_placeholder": false,
+          "task_name": null,
+          "task_description": null,
+          "task_type": 1,
+          "sort_order": 0,
+          "status": 1,
+          "create_time": 1704067200,
+          "update_time": 1704067200,
+          "task": {
+            "id": 1,
+            "name": "任务1",
+            "description": "任务描述",
+            "priority": 1,
+            "status_id": 1,
+            "assignee_id": 1,
+            "reporter_id": 1,
+            "requirement_id": 1,
+            "review_id": 2,
+            "requirement_node_id": 1,
+            "review_node_id": 2,
+            "estimated_hours": 8,
+            "actual_hours": 0,
+            "start_time": 1704067200,
+            "end_time": 1704153600,
+            "create_time": 1704067200,
+            "update_time": 1704067200
+          }
+        }
+      ],
+      "pagination": {
+        "current_page": 1,
+        "page_size": 20,
+        "total": 1
+      }
+    }
+  }
+  ```
+
+### 15.2 创建流程节点任务关联
+- **接口描述**：创建流程节点任务关联，支持实际任务和占位任务。
+- **请求方法**：POST
+- **请求URL**：`/api/process-node-tasks/create`
+- **请求参数**：
+  ```json
+  {
+    "node_id": 1,
+    "task_id": 1,
+    "node_type": 1,
+    "is_placeholder": false,
+    "task_name": null,
+    "task_description": null,
+    "task_type": 1,
+    "sort_order": 0
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "流程节点任务关联创建成功",
+    "datum": {
+      "id": 1,
+      "node_id": 1,
+      "task_id": 1,
+      "node_type": 1,
+      "is_placeholder": false,
+      "task_name": null,
+      "task_description": null,
+      "task_type": 1,
+      "sort_order": 0,
+      "status": 1,
+      "create_time": 1704067200,
+      "update_time": 1704067200
+    }
+  }
+  ```
+
+### 15.3 更新流程节点任务关联
+- **接口描述**：更新流程节点任务关联信息。
+- **请求方法**：POST
+- **请求URL**：`/api/process-node-tasks/update`
+- **请求参数**：
+  ```json
+  {
+    "id": 1,
+    "task_id": 2,
+    "is_placeholder": false,
+    "task_name": null,
+    "task_description": null,
+    "task_type": 1,
+    "sort_order": 1
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "流程节点任务关联更新成功",
+    "datum": {
+      "id": 1,
+      "node_id": 1,
+      "task_id": 2,
+      "node_type": 1,
+      "is_placeholder": false,
+      "task_name": null,
+      "task_description": null,
+      "task_type": 1,
+      "sort_order": 1,
+      "status": 1,
+      "create_time": 1704067200,
+      "update_time": 1704067200
+    }
+  }
+  ```
+
+### 15.4 删除流程节点任务关联
+- **接口描述**：删除流程节点任务关联，支持批量删除。
+- **请求方法**：POST
+- **请求URL**：`/api/process-node-tasks/delete`
+- **请求参数**：
+  ```json
+  {
+    "data": [1, 2]
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "流程节点任务关联删除成功"
+  }
+  ```
+
+### 15.5 获取流程节点任务关联详情
+- **接口描述**：获取流程节点任务关联详情。
+- **请求方法**：GET
+- **请求URL**：`/api/process-node-tasks/detail?id=1`
+- **请求参数**：
+  - id：关联ID（必填）
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "成功获取流程节点任务关联详情",
+    "datum": {
+      "id": 1,
+      "node_id": 1,
+      "task_id": 1,
+      "node_type": 1,
+      "is_placeholder": false,
+      "task_name": null,
+      "task_description": null,
+      "task_type": 1,
+      "sort_order": 0,
+      "status": 1,
+      "create_time": 1704067200,
+      "update_time": 1704067200,
+      "task": {
+        "id": 1,
+        "name": "任务1",
+        "description": "任务描述",
+        "priority": 1,
+        "status_id": 1,
+        "assignee_id": 1,
+        "reporter_id": 1,
+        "requirement_id": 1,
+        "review_id": 2,
+        "requirement_node_id": 1,
+        "review_node_id": 2,
+        "estimated_hours": 8,
+        "actual_hours": 0,
+        "start_time": 1704067200,
+        "end_time": 1704153600,
+        "create_time": 1704067200,
+        "update_time": 1704067200
+      }
+    }
+  }
+  ```
+
+### 15.6 为流程节点添加任务
+- **接口描述**：为流程节点添加任务。
+- **请求方法**：POST
+- **请求URL**：`/api/process-node-tasks/add-tasks`
+- **请求参数**：
+  ```json
+  {
+    "nodeId": 1,
+    "nodeType": 1,
+    "taskIds": [1, 2]
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "任务添加成功"
+  }
+  ```
+
+### 15.7 从流程节点中移除任务
+- **接口描述**：从流程节点中移除任务。
+- **请求方法**：POST
+- **请求URL**：`/api/process-node-tasks/remove-tasks`
+- **请求参数**：
+  ```json
+  {
+    "nodeId": 1,
+    "nodeType": 1,
+    "taskIds": [1, 2]
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "任务移除成功"
+  }
+  ```
+
+### 15.8 为流程节点添加占位任务
+- **接口描述**：为流程节点添加占位任务。
+- **请求方法**：POST
+- **请求URL**：`/api/process-node-tasks/add-placeholder-tasks`
+- **请求参数**：
+  ```json
+  {
+    "nodeId": 1,
+    "nodeType": 1,
+    "placeholderTasks": [
+      {
+        "task_name": "需求分析",
+        "task_description": "完成需求分析报告",
+        "task_type": 1,
+        "sort_order": 0
+      },
+      {
+        "task_name": "设计文档",
+        "task_description": "完成设计文档",
+        "task_type": 1,
+        "sort_order": 1
+      }
+    ]
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "占位任务添加成功"
+  }
+  ```
+
+### 15.9 复制流程节点任务关联
+- **接口描述**：复制流程节点任务关联（用于模板深拷贝）。
+- **请求方法**：POST
+- **请求URL**：`/api/process-node-tasks/copy`
+- **请求参数**：
+  ```json
+  {
+    "sourceNodeId": 1,
+    "sourceNodeType": 1,
+    "targetNodeId": 2,
+    "targetNodeType": 1
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "任务关联复制成功"
+  }
+  ```
+
+---
+
+## 16. 任务文件管理模块 (taskFileRouter.js)
+
+### 16.1 获取任务文件列表
+- **接口描述**：获取任务文件列表，支持任务ID、文件类型筛选。
+- **请求方法**：GET
+- **请求URL**：`/api/task-files/query?task_id=1&file_type=1`
+- **请求参数**：
+  - task_id：任务ID
+  - file_type：文件类型：1-需求文档 2-设计文档 3-测试报告 4-代码文件 5-其他
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "操作成功",
+    "datum": {
+      "list": [
+        {
+          "id": 1,
+          "task_id": 1,
+          "file_id": 1,
+          "file_type": 1,
+          "sort_order": 0,
+          "status": 1,
+          "create_time": 1704067200,
+          "update_time": 1704067200,
+          "file": {
+            "id": 1,
+            "file_name": "需求文档.docx",
+            "file_path": "/uploads/2024/01/01/1.docx",
+            "file_size": 102400,
+            "file_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "business_type": 1,
+            "business_id": 1,
+            "uploader_id": 1,
+            "is_temp": false,
+            "status": 1,
+            "create_time": 1704067200,
+            "update_time": 1704067200
+          }
+        }
+      ],
+      "pagination": {
+        "current_page": 1,
+        "page_size": 20,
+        "total": 1
+      }
+    }
+  }
+  ```
+
+### 16.2 创建任务文件关联
+- **接口描述**：创建任务文件关联。
+- **请求方法**：POST
+- **请求URL**：`/api/task-files/create`
+- **请求参数**：
+  ```json
+  {
+    "task_id": 1,
+    "file_id": 1,
+    "file_type": 1,
+    "sort_order": 0
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "任务文件关联创建成功",
+    "datum": {
+      "id": 1,
+      "task_id": 1,
+      "file_id": 1,
+      "file_type": 1,
+      "sort_order": 0,
+      "status": 1,
+      "create_time": 1704067200,
+      "update_time": 1704067200
+    }
+  }
+  ```
+
+### 16.3 更新任务文件关联
+- **接口描述**：更新任务文件关联信息。
+- **请求方法**：POST
+- **请求URL**：`/api/task-files/update`
+- **请求参数**：
+  ```json
+  {
+    "id": 1,
+    "file_type": 2,
+    "sort_order": 1
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "任务文件关联更新成功",
+    "datum": {
+      "id": 1,
+      "task_id": 1,
+      "file_id": 1,
+      "file_type": 2,
+      "sort_order": 1,
+      "status": 1,
+      "create_time": 1704067200,
+      "update_time": 1704067200
+    }
+  }
+  ```
+
+### 16.4 删除任务文件关联
+- **接口描述**：删除任务文件关联，支持批量删除。
+- **请求方法**：POST
+- **请求URL**：`/api/task-files/delete`
+- **请求参数**：
+  ```json
+  {
+    "data": [1, 2]
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "任务文件关联删除成功"
+  }
+  ```
+
+### 16.5 获取任务文件关联详情
+- **接口描述**：获取任务文件关联详情。
+- **请求方法**：GET
+- **请求URL**：`/api/task-files/detail?id=1`
+- **请求参数**：
+  - id：关联ID（必填）
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "成功获取任务文件关联详情",
+    "datum": {
+      "id": 1,
+      "task_id": 1,
+      "file_id": 1,
+      "file_type": 1,
+      "sort_order": 0,
+      "status": 1,
+      "create_time": 1704067200,
+      "update_time": 1704067200,
+      "file": {
+        "id": 1,
+        "file_name": "需求文档.docx",
+        "file_path": "/uploads/2024/01/01/1.docx",
+        "file_size": 102400,
+        "file_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "business_type": 1,
+        "business_id": 1,
+        "uploader_id": 1,
+        "is_temp": false,
+        "status": 1,
+        "create_time": 1704067200,
+        "update_time": 1704067200
+      }
+    }
+  }
+  ```
+
+### 16.6 为任务添加文件
+- **接口描述**：为任务添加文件。
+- **请求方法**：POST
+- **请求URL**：`/api/task-files/add-files`
+- **请求参数**：
+  ```json
+  {
+    "taskId": 1,
+    "fileIds": [1, 2],
+    "fileType": 1
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "文件添加成功"
+  }
+  ```
+
+### 16.7 从任务中移除文件
+- **接口描述**：从任务中移除文件。
+- **请求方法**：POST
+- **请求URL**：`/api/task-files/remove-files`
+- **请求参数**：
+  ```json
+  {
+    "taskId": 1,
+    "fileIds": [1, 2]
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "文件移除成功"
+  }
+  ```
+
+### 16.8 为任务设置文件（替换所有关联）
+- **接口描述**：为任务设置文件（替换所有关联）。
+- **请求方法**：POST
+- **请求URL**：`/api/task-files/set-files`
+- **请求参数**：
+  ```json
+  {
+    "taskId": 1,
+    "fileIds": [1, 2],
+    "fileType": 1
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "任务文件设置成功"
+  }
+  ```
+
+### 16.9 批量创建任务文件关联
+- **接口描述**：批量创建任务文件关联。
+- **请求方法**：POST
+- **请求URL**：`/api/task-files/bulk-create`
+- **请求参数**：
+  ```json
+  {
+    "taskFilesData": [
+      {
+        "task_id": 1,
+        "file_id": 1,
+        "file_type": 1,
+        "sort_order": 0
+      },
+      {
+        "task_id": 1,
+        "file_id": 2,
+        "file_type": 2,
+        "sort_order": 1
+      }
+    ]
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "任务文件关联批量创建成功"
+  }
+  ```
+
+### 16.10 复制任务文件关联
+- **接口描述**：复制任务文件关联（用于任务复制）。
+- **请求方法**：POST
+- **请求URL**：`/api/task-files/copy`
+- **请求参数**：
+  ```json
+  {
+    "sourceTaskId": 1,
+    "targetTaskId": 2
+  }
+  ```
+- **响应示例**：
+  ```json
+  {
+    "status": "success",
+    "message": "任务文件关联复制成功"
+  }
+  ```
+
+---
+
 ## 响应格式说明
 
 ### 成功响应

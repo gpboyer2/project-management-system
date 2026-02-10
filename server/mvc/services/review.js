@@ -2,7 +2,7 @@
  * 评审管理服务
  * 处理评审管理的业务逻辑
  */
-const { Review, ReviewProcessNode, ReviewProcessNodeRelation, ReviewProcessNodeUser, User, Project, ReviewTemplate, ReviewTemplateNode } = require('../../database/models');
+const { Review, ReviewProcessNode, ReviewProcessNodeRelation, ReviewProcessNodeUser, User, Project, ReviewTemplate, ReviewTemplateNode, ProcessNodeTask } = require('../../database/models');
 
 /**
  * 获取评审列表
@@ -81,20 +81,21 @@ exports.createReview = async (reviewData) => {
     reporter_id,
     reviewer_id,
     project_id,
+    template_id, // 添加模板ID
     start_time,
     end_time,
     create_time: Date.now(),
     update_time: Date.now()
   });
 
-  // 如果有模板ID，从模板中复制节点
+  // 如果有模板ID，从模板中复制节点和任务配置
   if (template_id) {
     const template = await ReviewTemplate.findByPk(template_id, {
       include: [{ model: ReviewTemplateNode, as: 'nodes' }]
     });
 
     if (template && template.nodes.length > 0) {
-      // 复制模板节点到评审流程节点
+      // 复制模板节点到评审流程节点，添加来源模板节点ID
       const reviewNodes = template.nodes.map(node => ({
         review_id: review.id,
         name: node.name,
@@ -104,12 +105,48 @@ exports.createReview = async (reviewData) => {
         assignee_type: node.assignee_type,
         assignee_id: node.assignee_id,
         duration_limit: node.duration_limit,
+        source_template_node_id: node.id, // 记录来源模板节点ID
         status: node.status,
         create_time: Date.now(),
         update_time: Date.now()
       }));
 
-      await ReviewProcessNode.bulkCreate(reviewNodes);
+      const createdNodes = await ReviewProcessNode.bulkCreate(reviewNodes);
+
+      // 创建模板节点到评审流程节点的ID映射
+      const templateNodeIdMap = new Map();
+      template.nodes.forEach((templateNode, index) => {
+        templateNodeIdMap.set(templateNode.id, createdNodes[index].id);
+      });
+
+      // 复制流程节点任务关联（占位任务）
+      for (const templateNode of template.nodes) {
+        const templateNodeTasks = await ProcessNodeTask.findAll({
+          where: {
+            node_id: templateNode.id,
+            node_type: 2, // 2-评审模板节点
+            status: 1
+          }
+        });
+
+        if (templateNodeTasks.length > 0) {
+          const reviewNodeId = templateNodeIdMap.get(templateNode.id);
+          const reviewNodeTasks = templateNodeTasks.map(task => ({
+            node_id: reviewNodeId,
+            node_type: 1, // 1-评审流程节点
+            is_placeholder: task.is_placeholder,
+            task_name: task.task_name,
+            task_description: task.task_description,
+            task_type: task.task_type,
+            sort_order: task.sort_order,
+            status: 1,
+            create_time: Date.now(),
+            update_time: Date.now()
+          }));
+
+          await ProcessNodeTask.bulkCreate(reviewNodeTasks);
+        }
+      }
     }
   } else {
     // 如果没有模板，检查是否有默认模板
@@ -123,7 +160,7 @@ exports.createReview = async (reviewData) => {
     });
 
     if (defaultTemplate && defaultTemplate.nodes.length > 0) {
-      // 复制默认模板节点到评审流程节点
+      // 复制默认模板节点到评审流程节点，添加来源模板节点ID
       const reviewNodes = defaultTemplate.nodes.map(node => ({
         review_id: review.id,
         name: node.name,
@@ -133,12 +170,48 @@ exports.createReview = async (reviewData) => {
         assignee_type: node.assignee_type,
         assignee_id: node.assignee_id,
         duration_limit: node.duration_limit,
+        source_template_node_id: node.id, // 记录来源模板节点ID
         status: node.status,
         create_time: Date.now(),
         update_time: Date.now()
       }));
 
-      await ReviewProcessNode.bulkCreate(reviewNodes);
+      const createdNodes = await ReviewProcessNode.bulkCreate(reviewNodes);
+
+      // 创建模板节点到评审流程节点的ID映射
+      const templateNodeIdMap = new Map();
+      defaultTemplate.nodes.forEach((templateNode, index) => {
+        templateNodeIdMap.set(templateNode.id, createdNodes[index].id);
+      });
+
+      // 复制流程节点任务关联（占位任务）
+      for (const templateNode of defaultTemplate.nodes) {
+        const templateNodeTasks = await ProcessNodeTask.findAll({
+          where: {
+            node_id: templateNode.id,
+            node_type: 2, // 2-评审模板节点
+            status: 1
+          }
+        });
+
+        if (templateNodeTasks.length > 0) {
+          const reviewNodeId = templateNodeIdMap.get(templateNode.id);
+          const reviewNodeTasks = templateNodeTasks.map(task => ({
+            node_id: reviewNodeId,
+            node_type: 1, // 1-评审流程节点
+            is_placeholder: task.is_placeholder,
+            task_name: task.task_name,
+            task_description: task.task_description,
+            task_type: task.task_type,
+            sort_order: task.sort_order,
+            status: 1,
+            create_time: Date.now(),
+            update_time: Date.now()
+          }));
+
+          await ProcessNodeTask.bulkCreate(reviewNodeTasks);
+        }
+      }
     }
   }
 

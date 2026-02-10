@@ -119,6 +119,9 @@ const routeConfigList = [
     { prefix: "/requirement-types", router: require("./routes/requirementTypeRouter"), desc: "需求类型管理接口" },
     { prefix: "/requirement-statuses", router: require("./routes/requirementStatusRouter"), desc: "需求状态管理接口" },
     { prefix: "/review-templates", router: require("./routes/reviewTemplateRouter"), desc: "评审流程模板管理接口" },
+    { prefix: "/files", router: require("./routes/fileRouter"), desc: "文件管理接口" },
+    { prefix: "/process-node-tasks", router: require("./routes/processNodeTaskRouter"), desc: "流程节点任务关联接口" },
+    { prefix: "/task-files", router: require("./routes/taskFileRouter"), desc: "任务文件关联接口" },
 ];
 
 // 提前注册需要处理文件上传的路由（在 bodyParser 之前，避免 FormData 被错误解析）

@@ -108,6 +108,9 @@ router.get('/query', authenticateToken, reviewController.getReviewList);
  *               project_id:
  *                 type: integer
  *                 description: 所属项目ID
+ *               template_id:
+ *                 type: integer
+ *                 description: 关联评审模板ID（使用模板创建评审时必填）
  *               start_time:
  *                 type: integer
  *                 description: 开始时间（Unix时间戳）
@@ -727,6 +730,9 @@ module.exports = router;
  *         project_id:
  *           type: integer
  *           description: 所属项目ID
+ *         template_id:
+ *           type: integer
+ *           description: 关联评审模板ID
  *         name:
  *           type: string
  *           description: 评审名称
@@ -794,6 +800,9 @@ module.exports = router;
  *         duration_limit:
  *           type: integer
  *           description: 处理时限(小时)
+ *         source_template_node_id:
+ *           type: integer
+ *           description: 来源模板节点ID
  *         status:
  *           type: integer
  *           description: 状态（1-启用 0-禁用）

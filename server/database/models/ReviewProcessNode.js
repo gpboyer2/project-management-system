@@ -15,6 +15,11 @@ const ReviewProcessNode = sequelize.define('review_process_nodes', {
     allowNull: false,
     comment: '关联评审ID'
   },
+  source_template_node_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    comment: '来源模板节点ID'
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
