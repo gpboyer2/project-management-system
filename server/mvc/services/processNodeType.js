@@ -3,6 +3,7 @@
  * 处理流程节点类型的业务逻辑
  */
 const { ProcessNodeType } = require('../../database/models');
+const { Op } = require('sequelize');
 
 /**
  * 获取流程节点类型列表
@@ -32,8 +33,17 @@ exports.getProcessNodeTypeList = async (params) => {
     order: [['sort_order', 'ASC'], ['create_time', 'DESC']]
   });
 
+  // 处理返回数据，将 config.tasks 提取为 tasks 字段
+  const processedList = rows.map(nodeType => {
+    const nodeTypeData = nodeType.toJSON();
+    return {
+      ...nodeTypeData,
+      tasks: nodeTypeData.config?.tasks || []
+    };
+  });
+
   return {
-    list: rows,
+    list: processedList,
     pagination: {
       current_page: parseInt(page),
       page_size: parseInt(pageSize),
@@ -69,7 +79,12 @@ exports.createProcessNodeType = async (processNodeTypeData) => {
     update_time: Date.now()
   });
 
-  return processNodeType;
+  // 处理返回数据，将 config.tasks 提取为 tasks 字段
+  const processNodeTypeDataResult = processNodeType.toJSON();
+  return {
+    ...processNodeTypeDataResult,
+    tasks: processNodeTypeDataResult.config?.tasks || []
+  };
 };
 
 /**
@@ -84,8 +99,24 @@ exports.updateProcessNodeType = async (id, updateData) => {
     throw new Error('流程节点类型不存在');
   }
 
+  // 处理 tasks 字段，保存到 config 中
+  if (updateData.tasks !== undefined) {
+    processNodeType.config = {
+      ...processNodeType.config,
+      tasks: updateData.tasks
+    };
+    delete updateData.tasks; // 删除直接的 tasks 字段，避免重复保存
+  }
+
   updateData.update_time = Date.now();
-  return await processNodeType.update(updateData);
+  const updatedNodeType = await processNodeType.update(updateData);
+
+  // 处理返回数据，将 config.tasks 提取为 tasks 字段
+  const updatedNodeTypeData = updatedNodeType.toJSON();
+  return {
+    ...updatedNodeTypeData,
+    tasks: updatedNodeTypeData.config?.tasks || []
+  };
 };
 
 /**
@@ -108,5 +139,10 @@ exports.getProcessNodeTypeDetail = async (id) => {
     throw new Error('流程节点类型不存在');
   }
 
-  return processNodeType;
+  // 处理返回数据，将 config.tasks 提取为 tasks 字段
+  const processNodeTypeData = processNodeType.toJSON();
+  return {
+    ...processNodeTypeData,
+    tasks: processNodeTypeData.config?.tasks || []
+  };
 };
