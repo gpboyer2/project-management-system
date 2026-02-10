@@ -123,6 +123,7 @@ const TEST_MODULES = {
   requirements: './modules/requirements/index',
   reviews: './modules/reviews/index',
   tasks: './modules/tasks/index',
+  processNodeTasks: './modules/process-node-tasks/index',
 
   // 跨模块边界测试
   businessBoundary: './modules/business-boundary',

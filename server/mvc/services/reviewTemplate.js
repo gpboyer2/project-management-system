@@ -3,6 +3,7 @@
  * 处理评审流程模板的业务逻辑
  */
 const { ReviewTemplate, ReviewTemplateNode, ProcessNodeType, User, ProcessNodeTask } = require('../../database/models');
+const processNodeTaskService = require('./processNodeTask');
 
 /**
  * 获取评审模板列表
@@ -145,7 +146,30 @@ exports.createReviewTemplate = async (templateData) => {
       update_time: Date.now()
     }));
 
-    await ReviewTemplateNode.bulkCreate(templateNodes);
+    const createdNodes = await ReviewTemplateNode.bulkCreate(templateNodes);
+
+    // 为每个模板节点添加任务占位
+    for (let i = 0; i < createdNodes.length; i++) {
+      const createdNode = createdNodes[i];
+      const nodeData = nodes[i];
+
+      // 获取节点类型配置
+      const processNodeType = await ProcessNodeType.findByPk(nodeData.node_type_id);
+      if (processNodeType && processNodeType.config && processNodeType.config.tasks) {
+        // 添加任务占位
+        const placeholderTasks = processNodeType.config.tasks.map((task, taskIndex) => ({
+          task_name: task.name,
+          task_description: task.description,
+          task_type: task.task_type || 1
+        }));
+
+        await processNodeTaskService.addPlaceholderTasksToNode(
+          createdNode.id,
+          2, // 2-评审模板节点
+          placeholderTasks
+        );
+      }
+    }
   }
 
   // 返回包含节点的模板详情
@@ -200,7 +224,30 @@ exports.updateReviewTemplate = async (id, updateData) => {
       update_time: Date.now()
     }));
 
-    await ReviewTemplateNode.bulkCreate(templateNodes);
+    const createdNodes = await ReviewTemplateNode.bulkCreate(templateNodes);
+
+    // 为每个模板节点添加任务占位
+    for (let i = 0; i < createdNodes.length; i++) {
+      const createdNode = createdNodes[i];
+      const nodeData = nodes[i];
+
+      // 获取节点类型配置
+      const processNodeType = await ProcessNodeType.findByPk(nodeData.node_type_id);
+      if (processNodeType && processNodeType.config && processNodeType.config.tasks) {
+        // 添加任务占位
+        const placeholderTasks = processNodeType.config.tasks.map((task, taskIndex) => ({
+          task_name: task.name,
+          task_description: task.description,
+          task_type: task.task_type || 1
+        }));
+
+        await processNodeTaskService.addPlaceholderTasksToNode(
+          createdNode.id,
+          2, // 2-评审模板节点
+          placeholderTasks
+        );
+      }
+    }
   }
 
   // 返回包含节点的模板详情

@@ -10,7 +10,7 @@ const { ProcessNodeTask, Task, ReviewProcessNode, ReviewTemplateNode } = require
  * @param {number} params.node_id 流程节点ID
  * @param {number} params.node_type 节点类型：1-评审流程节点 2-评审模板节点
  * @param {boolean} params.is_placeholder 是否占位任务
- * @returns {Object} 任务列表
+ * @returns {Object} 节点任务列表（按节点分组，每个节点包含任务数组）
  */
 exports.getProcessNodeTasks = async (params) => {
   const { node_id, node_type, is_placeholder } = params;
@@ -30,18 +30,66 @@ exports.getProcessNodeTasks = async (params) => {
 
   where.status = 1; // 只返回正常状态的关联
 
-  const tasks = await ProcessNodeTask.findAll({
+  const nodeTasks = await ProcessNodeTask.findAll({
     where,
     include: is_placeholder ? [] : [{ model: Task, as: 'task' }],
     order: [['sort_order', 'ASC']]
   });
 
+  // 按节点分组，将任务关联转换为节点-任务数组的映射
+  const nodeMap = new Map();
+
+  for (const nodeTask of nodeTasks) {
+    const { node_id: currentNodeId, node_type: currentNodeType } = nodeTask;
+    const nodeKey = `${currentNodeId}-${currentNodeType}`;
+
+    if (!nodeMap.has(nodeKey)) {
+      nodeMap.set(nodeKey, {
+        node_id: currentNodeId,
+        node_type: currentNodeType,
+        tasks: []
+      });
+    }
+
+    // 处理任务数据
+    let taskData;
+    if (nodeTask.is_placeholder) {
+      // 占位任务
+      taskData = {
+        id: null,
+        name: nodeTask.task_name,
+        description: nodeTask.task_description,
+        is_placeholder: true,
+        task_type: nodeTask.task_type,
+        sort_order: nodeTask.sort_order,
+        status: nodeTask.status,
+        create_time: nodeTask.create_time,
+        update_time: nodeTask.update_time
+      };
+    } else {
+      // 实际任务
+      taskData = nodeTask.task ? {
+        ...nodeTask.task.toJSON(),
+        is_placeholder: false,
+        task_type: nodeTask.task_type,
+        sort_order: nodeTask.sort_order
+      } : null;
+    }
+
+    if (taskData) {
+      nodeMap.get(nodeKey).tasks.push(taskData);
+    }
+  }
+
+  // 转换为数组格式
+  const nodesWithTasks = Array.from(nodeMap.values());
+
   return {
-    list: tasks,
+    list: nodesWithTasks,
     pagination: {
       current_page: 1,
-      page_size: tasks.length,
-      total: tasks.length
+      page_size: nodesWithTasks.length,
+      total: nodesWithTasks.length
     }
   };
 };
@@ -190,6 +238,14 @@ exports.addTasksToNode = async (nodeId, nodeType, taskIds) => {
     const node = await ReviewTemplateNode.findByPk(nodeId);
     if (!node) {
       throw new Error('评审模板节点不存在');
+    }
+  }
+
+  // 验证任务是否存在
+  for (const taskId of taskIds) {
+    const task = await Task.findByPk(taskId);
+    if (!task) {
+      throw new Error(`任务不存在: ${taskId}`);
     }
   }
 

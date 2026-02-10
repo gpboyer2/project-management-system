@@ -53,17 +53,23 @@ exports.getProcessNodeTypeList = async (params) => {
  * @returns {Object} 新创建的节点类型
  */
 exports.createProcessNodeType = async (processNodeTypeData) => {
-  const { name, type = 99, description, sort_order = 0, config = {} } = processNodeTypeData;
+  const { name, type = 99, description, sort_order = 0, config = {}, tasks = [] } = processNodeTypeData;
 
-  return await ProcessNodeType.create({
+  // 将任务占位配置保存到 config 字段中
+  const processNodeType = await ProcessNodeType.create({
     name,
     type,
     description,
     sort_order,
-    config,
+    config: {
+      ...config,
+      tasks: tasks
+    },
     create_time: Date.now(),
     update_time: Date.now()
   });
+
+  return processNodeType;
 };
 
 /**

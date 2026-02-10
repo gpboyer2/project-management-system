@@ -363,6 +363,49 @@ router.post('/set-default', authenticateToken, reviewTemplateController.setDefau
 
 /**
  * @swagger
+ * /api/review-templates/copy:
+ *   post:
+ *     summary: 深拷贝评审模板
+ *     tags: [评审流程模板管理]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 required: true
+ *                 description: 源模板ID
+ *               new_name:
+ *                 type: string
+ *                 description: 新模板名称
+ *               new_description:
+ *                 type: string
+ *                 description: 新模板描述
+ *               is_default:
+ *                 type: boolean
+ *                 description: 是否设置为默认模板
+ *     responses:
+ *       200:
+ *         description: 成功深拷贝评审模板
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                 message:
+ *                   type: string
+ *                 datum:
+ *                   $ref: '#/components/schemas/ReviewTemplate'
+ */
+router.post('/copy', authenticateToken, reviewTemplateController.copyReviewTemplate);
+
+/**
+ * @swagger
  * components:
  *   schemas:
  *     ReviewTemplate:

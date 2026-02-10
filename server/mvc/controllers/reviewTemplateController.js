@@ -171,3 +171,34 @@ exports.setDefaultReviewTemplate = async (req, res) => {
     res.apiError(null, error.message);
   }
 };
+
+/**
+ * 深拷贝评审模板
+ * @param {Object} req 请求对象
+ * @param {Object} res 响应对象
+ */
+exports.copyReviewTemplate = async (req, res) => {
+  try {
+    const { id } = req.body;
+    const { new_name, new_description, is_default } = req.body;
+    if (!id) {
+      return res.apiError(null, '模板ID不能为空');
+    }
+
+    const options = {};
+    if (new_name) {
+      options.newName = new_name;
+    }
+    if (new_description) {
+      options.newDescription = new_description;
+    }
+    if (is_default !== undefined) {
+      options.isDefault = is_default;
+    }
+
+    const copiedTemplate = await reviewTemplateService.copyReviewTemplate(parseInt(id), options);
+    res.apiSuccess(copiedTemplate);
+  } catch (error) {
+    res.apiError(null, error.message);
+  }
+};

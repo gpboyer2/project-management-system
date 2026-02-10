@@ -466,6 +466,11 @@ CREATE TABLE IF NOT EXISTS process_node_tasks (
 | create_time | INTEGER | 是 | 创建时间，Unix时间戳 |
 | update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
+**关系说明**：
+- 一个节点（node_id）可以关联多个任务（task_id），通过多条记录实现一对多关系
+- 支持占位任务（is_placeholder=true），占位任务没有实际的task_id，但有任务名称和描述
+- 任务类型（task_type）区分必填任务和可选任务
+
 ### 任务文件关联表 (task_files)
 
 ```sql
@@ -928,6 +933,14 @@ CREATE TABLE IF NOT EXISTS review_dimensions (
 | update_time | INTEGER | 是 | 更新时间，Unix时间戳 |
 
 ### 关联关系
+
+#### 核心业务实体关系
+- **一个评审（Review）多个节点（Process Node）**：评审管理流程节点（review_process_nodes）通过 review_id 关联到评审表（reviews）
+- **一个节点（Process Node）多个任务（Task）**：流程节点任务关联表（process_node_tasks）通过 node_id 关联到流程节点，支持一个节点对应多个任务的一对多关系
+- **一个节点（Process Node）多个用户（User）**：流程节点用户关联表（review_process_node_users/requirement_process_node_users）通过 node_id 关联到流程节点，支持一个节点对应多个用户的一对多关系
+- **一个任务（Task）多个文件（File）**：任务文件关联表（task_files）通过 task_id 关联到任务表（tasks），支持一个任务对应多个文件的一对多关系
+
+#### 详细关联关系
 - 所有业务表通过 `user_id` 字段关联到 `users` 表
 - 项目团队表通过 `project_id` 关联到 `projects` 表
 - 需求通过 `project_id` 关联到 `projects` 表，通过 `type_id` 关联到 `requirement_types` 表，通过 `status_id` 关联到 `requirement_statuses` 表

@@ -41,6 +41,9 @@ const ReviewProcessNodeUser = require('./ReviewProcessNodeUser');
 const ReviewDimension = require('./ReviewDimension');
 const ReviewTemplate = require('./ReviewTemplate');
 const ReviewTemplateNode = require('./ReviewTemplateNode');
+const ProcessNodeTask = require('./ProcessNodeTask');
+const TaskFile = require('./TaskFile');
+const File = require('./File');
 
 // 建立模型关联关系
 const models = {
@@ -82,7 +85,10 @@ const models = {
   ReviewProcessNodeUser,
   ReviewDimension,
   ReviewTemplate,
-  ReviewTemplateNode
+  ReviewTemplateNode,
+  ProcessNodeTask,
+  TaskFile,
+  File
 };
 
 // 初始化所有模型的关联关系
