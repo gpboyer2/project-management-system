@@ -128,11 +128,34 @@ const routeConfigList = [
 const dataImportExportRouter = require("./routes/dataImportExportRouter");
 app.use(apiPrefix + "/ide", responseFormatMiddleware, accessHandler, dataImportExportRouter);
 
+// 动态过滤 Swagger 文档 - 必须在全局 JSON 中间件之前注册
+const swaggerDocument = swaggerJsDoc(require('./swagger'));
+
+/**
+ * 动态过滤 Swagger 文档，根据查询参数返回指定模块的文档
+ * @param {object} req - Express 请求对象
+ * @returns {object} 过滤后的 Swagger 文档对象
+ */
+const getDoc = (req) => {
+    const k = req.query.module || req.query.model;
+    if (!k) return swaggerDocument;
+    const doc = { ...swaggerDocument };
+    doc.paths = Object.entries(doc.paths).reduce((a, [p, c]) => (p.includes(k) ? { ...a, [p]: c } : a), {});
+    return doc;
+};
+
+app.get('/api-json', (req, res) => res.json(getDoc(req)));
+app.use('/api-docs', swaggerUi.serve, (req, res, n) => swaggerUi.setup(getDoc(req))(req, res, n));
+
 // 全局中间件（用于其他路由）
 app.use(bodyParser.json({ limit: '50mb', type: 'application/json' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb', parameterLimit: 1000000 }));
 // 设置字符编码为 UTF-8
 app.use((req, res, next) => {
+  // 对 Swagger 相关的请求不设置 Content-Type，让 swagger-ui-express 自行处理
+  if (req.originalUrl.startsWith('/api-docs') || req.originalUrl.startsWith('/api-json')) {
+    return next();
+  }
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   // 确保响应数据使用 UTF-8 编码
   const originalJson = res.json;
@@ -154,25 +177,6 @@ otherRoutes.forEach(({ prefix, router }) => {
 
 // 错误处理中间件（放在最后，捕获所有路由的错误）
 app.use(errorHandler);
-
-// 动态过滤 Swagger 文档
-const swaggerDocument = swaggerJsDoc(require('./swagger'));
-
-/**
- * 动态过滤 Swagger 文档，根据查询参数返回指定模块的文档
- * @param {object} req - Express 请求对象
- * @returns {object} 过滤后的 Swagger 文档对象
- */
-const getDoc = (req) => {
-    const k = req.query.module || req.query.model;
-    if (!k) return swaggerDocument;
-    const doc = { ...swaggerDocument };
-    doc.paths = Object.entries(doc.paths).reduce((a, [p, c]) => (p.includes(k) ? { ...a, [p]: c } : a), {});
-    return doc;
-};
-
-app.get('/api-json', (req, res) => res.json(getDoc(req)));
-app.use('/api-docs', swaggerUi.serve, (req, res, n) => swaggerUi.setup(getDoc(req))(req, res, n));
 
 // 初始化 Sequelize 并启动服务器
 (async () => {

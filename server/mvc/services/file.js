@@ -3,6 +3,7 @@
  * 处理文件上传、下载、删除、查询等业务逻辑
  */
 const { File, TaskFile, Task } = require('../../database/models');
+const { Op } = require('sequelize');
 
 /**
  * 获取文件列表

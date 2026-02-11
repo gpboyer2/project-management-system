@@ -94,7 +94,7 @@ router.get('/query', authenticateToken, fileController.getFileList);
  *                 description: 文件大小(字节)
  *               file_type:
  *                 type: string
- *                 description: 文件类型(如: image/png, application/pdf)
+ *                 description: "文件类型(image/png, application/pdf)"
  *               business_type:
  *                 type: integer
  *                 description: 业务类型：1-需求 2-任务 3-评审 4-项目
@@ -153,7 +153,7 @@ router.post('/create', authenticateToken, fileController.createFile);
  *                 description: 文件存储路径
  *               file_type:
  *                 type: string
- *                 description: 文件类型(如: image/png, application/pdf)
+ *                 description: "文件类型(如: image/png, application/pdf)"
  *               business_type:
  *                 type: integer
  *                 description: 业务类型：1-需求 2-任务 3-评审 4-项目
@@ -426,8 +426,6 @@ router.get('/temp/query', authenticateToken, fileController.getTempFiles);
  */
 router.get('/temp/cleanup', authenticateToken, fileController.cleanupTempFiles);
 
-module.exports = router;
-
 /**
  * @swagger
  * components:
@@ -449,7 +447,7 @@ module.exports = router;
  *           description: 文件大小(字节)
  *         file_type:
  *           type: string
- *           description: 文件类型(如: image/png, application/pdf)
+ *           description: "文件类型(如: image/png, application/pdf)"
  *         business_type:
  *           type: integer
  *           description: 业务类型：1-需求 2-任务 3-评审 4-项目
@@ -502,3 +500,5 @@ module.exports = router;
  *         file:
  *           $ref: '#/components/schemas/File'
  */
+
+module.exports = router;

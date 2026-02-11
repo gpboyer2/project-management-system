@@ -102,6 +102,21 @@ router.get('/query', authenticateToken, processNodeTypeController.getProcessNode
  *               config:
  *                 type: object
  *                 description: 配置信息（JSON格式）
+ *               tasks:
+ *                 type: array
+ *                 description: 任务占位配置列表
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       description: 任务名称
+ *                     description:
+ *                       type: string
+ *                       description: 任务描述
+ *                     task_type:
+ *                       type: integer
+ *                       description: 任务类型：1-必填 2-可选
  *             required:
  *               - name
  *               - type
@@ -153,6 +168,21 @@ router.post('/create', authenticateToken, processNodeTypeController.createProces
  *               config:
  *                 type: object
  *                 description: 配置信息（JSON格式）
+ *               tasks:
+ *                 type: array
+ *                 description: 任务占位配置列表
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                       description: 任务名称
+ *                     description:
+ *                       type: string
+ *                       description: 任务描述
+ *                     task_type:
+ *                       type: integer
+ *                       description: 任务类型：1-必填 2-可选
  *             required:
  *               - id
  *     responses:
@@ -264,6 +294,21 @@ module.exports = router;
  *         config:
  *           type: object
  *           description: 配置信息（JSON格式）
+ *         tasks:
+ *           type: array
+ *           description: 任务占位配置列表
+ *           items:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: 任务名称
+ *               description:
+ *                 type: string
+ *                 description: 任务描述
+ *               task_type:
+ *                 type: integer
+ *                 description: 任务类型：1-必填 2-可选
  *         status:
  *           type: integer
  *           description: 状态（1-正常 0-已禁用）

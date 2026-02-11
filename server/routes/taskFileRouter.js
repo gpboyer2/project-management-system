@@ -414,8 +414,6 @@ router.post('/bulk-create', authenticateToken, taskFileController.bulkCreateTask
  */
 router.post('/copy', authenticateToken, taskFileController.copyTaskFiles);
 
-module.exports = router;
-
 /**
  * @swagger
  * components:
@@ -450,3 +448,5 @@ module.exports = router;
  *         file:
  *           $ref: '#/components/schemas/File'
  */
+
+module.exports = router;

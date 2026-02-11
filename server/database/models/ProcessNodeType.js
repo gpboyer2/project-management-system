@@ -28,6 +28,9 @@ const ProcessNodeType = sequelize.define('process_node_types', {
   config: {
     type: DataTypes.JSON
   },
+  tasks: {
+    type: DataTypes.JSON
+  },
   status: {
     type: DataTypes.INTEGER,
     defaultValue: 1

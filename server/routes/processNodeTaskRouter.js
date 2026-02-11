@@ -422,8 +422,6 @@ router.post('/add-placeholder-tasks', authenticateToken, processNodeTaskControll
  */
 router.post('/copy', authenticateToken, processNodeTaskController.copyProcessNodeTasks);
 
-module.exports = router;
-
 /**
  * @swagger
  * components:
@@ -470,3 +468,5 @@ module.exports = router;
  *         task:
  *           $ref: '#/components/schemas/Task'
  */
+
+module.exports = router;

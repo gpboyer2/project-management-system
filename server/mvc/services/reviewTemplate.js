@@ -155,9 +155,9 @@ exports.createReviewTemplate = async (templateData) => {
 
       // 获取节点类型配置
       const processNodeType = await ProcessNodeType.findByPk(nodeData.node_type_id);
-      if (processNodeType && processNodeType.config && processNodeType.config.tasks) {
+      if (processNodeType && processNodeType.tasks) {
         // 添加任务占位
-        const placeholderTasks = processNodeType.config.tasks.map((task, taskIndex) => ({
+        const placeholderTasks = processNodeType.tasks.map(task => ({
           task_name: task.name,
           task_description: task.description,
           task_type: task.task_type || 1
@@ -233,9 +233,9 @@ exports.updateReviewTemplate = async (id, updateData) => {
 
       // 获取节点类型配置
       const processNodeType = await ProcessNodeType.findByPk(nodeData.node_type_id);
-      if (processNodeType && processNodeType.config && processNodeType.config.tasks) {
+      if (processNodeType && processNodeType.tasks) {
         // 添加任务占位
-        const placeholderTasks = processNodeType.config.tasks.map((task, taskIndex) => ({
+        const placeholderTasks = processNodeType.tasks.map(task => ({
           task_name: task.name,
           task_description: task.description,
           task_type: task.task_type || 1
